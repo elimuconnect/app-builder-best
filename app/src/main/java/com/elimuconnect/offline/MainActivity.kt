@@ -5,13 +5,11 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.view.View
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
@@ -24,7 +22,6 @@ import androidx.webkit.WebViewAssetLoader
 class MainActivity : ComponentActivity() {
 
     private lateinit var webView: WebView
-    private lateinit var progress: ProgressBar
     private lateinit var assetLoader: WebViewAssetLoader
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -44,14 +41,6 @@ class MainActivity : ComponentActivity() {
         val root = FrameLayout(this).apply {
             setBackgroundColor(Color.WHITE)
         }
-
-        progress = ProgressBar(
-            this,
-            null,
-            android.R.attr.progressBarStyleHorizontal
-        )
-        progress.isIndeterminate = true
-        progress.visibility = View.VISIBLE
 
         webView = WebView(this).apply {
             setBackgroundColor(Color.WHITE)
@@ -98,13 +87,6 @@ class MainActivity : ComponentActivity() {
                         true
                     }
                 }
-
-                override fun onPageFinished(
-                    view: WebView,
-                    url: String?
-                ) {
-                    progress.visibility = View.GONE
-                }
             }
         }
 
@@ -113,14 +95,6 @@ class MainActivity : ComponentActivity() {
             FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT
-            )
-        )
-
-        root.addView(
-            progress,
-            FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                8
             )
         )
 
