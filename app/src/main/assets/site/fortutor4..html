@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Custom Lesson Tutor</title>
+
+  <script defer src="https://unpkg.com/mathlive"></script>
+  <script defer src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f0f4f8;
+    }
+    textarea, .ML__textarea {
+      width: 100%;
+      height: 150px;
+      margin: 10px 0;
+      font-size: 16px;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      background-color: #0077cc;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover { background-color: #005fa3; }
+
+    #editor {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      border-radius: 8px;
+      min-height: 150px;
+    }
+
+    #status { margin-top: 15px; font-weight: bold; color: green; }
+
+    .math {
+      font-family: 'Courier New', monospace;
+      background-color: #eef;
+      padding: 3px 6px;
+      border-radius: 4px;
+      color: #004080;
+      display: inline-block;
+    }
+
+    .highlight-note {
+      background-color: #fff8dc;
+      border-left: 5px solid #f0ad4e;
+      padding: 6px 10px;
+      margin: 5px 0;
+      border-radius: 4px;
+      font-weight: bold;
+      color: #5a4500;
+    }
+
+    img { max-width: 100%; margin: 10px 0; }
+
+    label { font-weight: bold; }
+
+    select {
+      margin: 0 10px 15px 5px;
+      padding: 6px 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>📘Classroom Voice Teacher</h2>
+<p><strong>Note:</strong>
+Use a laptop with a projector for reading aloud.  
+For Kenyan female, Swahili, German, French, or Arabic voices, open this page in Microsoft Edge.</p>
+
+  <label for="lessonText">Paste your custom lesson content here:</label>
+  <textarea id="lessonText" placeholder="Lesson 1: Intro to Math..."></textarea>
+  <button onclick="parsePastedLessons()">📖 Parse Pasted Lessons</button>
+
+  <br><br>
+
+  <input type="file" id="lessonFile" accept=".docx" />
+  <button onclick="loadCustomLesson()">📥 Load Word Lesson (.docx)</button>
+
+  <div id="editor" contenteditable="true"></div>
+
+  <math-field id="mathInput" virtual-keyboard-mode="onfocus" style="margin-top: 10px;"></math-field>
+
+  <div id="status"></div>
+
+  <br>
+
+  <input type="file" id="imageUpload" accept="image/*">
+
+ <label for="voiceLang">Select voice language:</label>
+<select id="voiceLang" onchange="loadVoices()">
+  <option value="en" selected>English</option>
+  <option value="sw">Swahili</option>
+  <option value="de">German</option>
+  <option value="fr">French</option>
+  <option value="ar">Arabic</option>
+</select>
+
+
+  <br>
+
+  <button onclick="prevLesson()">⬅️ Previous Lesson</button>
+  <button onclick="nextLesson()">➡️ Next Lesson</button>
+  <button onclick="readLessonAloud()">🔊 Read Aloud</button>
+  <button onclick="pauseSpeech()">⏸️ Pause</button>
+  <button onclick="resumeSpeech()">▶️ Resume</button>
+  <button onclick="printLesson()">🖨️ Print</button>
+  <button onclick="downloadLesson()">📥 Download</button>
+
+<script>
+
+const MAIN_LINK = "https://elimuconnect.github.io/ELIMU-CONNECT-/schooladmin2";
+
+// Helper: get base URL without query string
+function getBaseURL(url){
+    return url.split('?')[0];
+}
+
+// Check if this is main link access (ignore query parameters)
+const isMainLink = getBaseURL(window.location.href) === MAIN_LINK;
+
+// Check if we came from main link redirect (ignore query)
+const fromMainLink = getBaseURL(document.referrer) === MAIN_LINK;
+
+if(isMainLink || fromMainLink){
+    // ✅ Access allowed – do nothing
+} else {
+    // ❌ Block access
+    document.body.innerHTML = `
+        <div style="text-align:center; padding:50px; font-family:sans-serif;">
+            <h2>Access Restricted</h2>
+            <p>You cannot open this tool directly.</p>
+            <p>Please open it from the main link(school Tools).</p>
+
+            <a href="${MAIN_LINK}"
+               style="font-size:1.2rem; color:#0078D7;">
+               Open from Main School Tools
+            </a>
+        </div>
+    `;
+    throw new Error("Access blocked until opened from main link.");
+}
+
+
+
+
+    
+
+
+
+
+
+
+
+
+	
+let lessonsArray = [];
+let currentLesson = 0;
+let tutorStarted = false;
+let ocrTexts = [];
+
+function parseLessonBlocks(text) {
+  const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
+  const parsed = [];
+  let block = "";
+
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].toLowerCase().startsWith("lesson")) {
+      if (block) parsed.push(block.trim());
+      block = lines[i];
+    } else block += "\n" + lines[i];
+  }
+  if (block) parsed.push(block.trim());
+  return parsed;
+}
+
+function showLesson(index) {
+  if (index >= 0 && index < lessonsArray.length) {
+    const editor = document.getElementById("editor");
+    const lines = lessonsArray[index].split(/\r?\n/).filter(line => line.trim() !== "");
+
+    const htmlList = lines.map(line => {
+      let html = line.trim();
+
+      if (/<img.+src=["'].*["'].*>/.test(html)) return `<li>${html}</li>`;
+
+      const mdImg = html.match(/!\[.*?\]\((.*?)\)/);
+      if (mdImg) {
+        html = `<img src="${mdImg[1]}" alt="Lesson Image">`;
+        return `<li>${html}</li>`;
+      }
+
+      if (/[=+\-^√*\/]/.test(html) && !/^lesson/i.test(html)) {
+        html = `<span class="math">${html}</span>`;
+      }
+
+      const keywords = ["Definition", "Example", "Note", "Theorem", "Important"];
+      const matched = keywords.find(k => html.toLowerCase().startsWith(k.toLowerCase()));
+      if (matched) {
+        html = `<div class="highlight-note"><strong>${html}</strong></div>`;
+        return `<li>${html}</li>`;
+      }
+
+      return `<li>${html}</li>`;
+    }).join("");
+
+    editor.innerHTML = `<ul>${htmlList}</ul>`;
+    document.getElementById("status").textContent =
+      `🟢 Showing Lesson ${index + 1} of ${lessonsArray.length}`;
+
+    currentLesson = index;
+    localStorage.setItem("currentLesson", currentLesson);
+  }
+}
+
+function parsePastedLessons() {
+  const text = document.getElementById("lessonText").value.trim();
+  if (!text) return alert("Please paste a lesson to parse.");
+  lessonsArray = parseLessonBlocks(text);
+  tutorStarted = true;
+  currentLesson = 0;
+  saveLessons();
+  showLesson(currentLesson);
+}
+
+function loadCustomLesson() {
+  const file = document.getElementById("lessonFile").files[0];
+  if (!file || !file.name.endsWith(".docx"))
+    return alert("Please select a .docx file.");
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    mammoth.convertToHtml({ arrayBuffer: e.target.result }, {
+      convertImage: mammoth.images.inline(element =>
+        element.read("base64").then(img => ({
+          src: "data:" + element.contentType + ";base64," + img
+        }))
+      )
+    }).then(result => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(result.value, "text/html");
+
+      doc.querySelectorAll("ul").forEach(ul => ul.remove());
+
+      const html = doc.body.innerHTML;
+      const editor = document.getElementById("editor");
+      editor.innerHTML = html;
+
+      lessonsArray = [editor.innerHTML];
+      tutorStarted = true;
+      currentLesson = 0;
+      saveLessons();
+
+      const images = editor.querySelectorAll("img");
+      ocrTexts = [];
+
+      images.forEach(img => {
+        Tesseract.recognize(img.src, 'eng', { logger: m => {} })
+        .then(({ data: { text } }) => {
+          if (text.trim()) ocrTexts.push(text.trim());
+        });
+      });
+
+    }).catch(() => alert("Failed to load .docx file."));
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function prevLesson() {
+  if (!tutorStarted) return alert("Start by loading or pasting lessons.");
+  if (currentLesson > 0) showLesson(currentLesson - 1);
+}
+
+function nextLesson() {
+  if (!tutorStarted) return alert("Start by loading or pasting lessons.");
+  if (currentLesson < lessonsArray.length - 1) showLesson(currentLesson + 1);
+}
+
+function saveLessons() {
+  localStorage.setItem("lessonsArray", JSON.stringify(lessonsArray));
+  localStorage.setItem("currentLesson", currentLesson);
+}
+
+/* ---------------- SPEECH: KENYAN + SWAHILI ---------------- */
+
+let speechUtterances = [];
+let currentUtteranceIndex = 0;
+let isPaused = false;
+let voices = [];
+
+function loadVoices() { voices = speechSynthesis.getVoices(); }
+if (speechSynthesis.onvoiceschanged !== undefined)
+  speechSynthesis.onvoiceschanged = loadVoices;
+
+
+
+function getPreferredVoice() {
+  const selectedLang = document.getElementById("voiceLang").value;
+
+  // --- Swahili (keep as is) ---
+  if (selectedLang === "sw") {
+    let sw =
+      voices.find(v => v.lang.toLowerCase().startsWith("sw-ke")) ||
+      voices.find(v => v.lang.toLowerCase().startsWith("sw"));
+    if (sw) return sw;
+  }
+
+  // --- German ---
+  if (selectedLang === "de") {
+    let de =
+      voices.find(v => v.lang.toLowerCase().startsWith("de-de")) ||
+      voices.find(v => v.lang.toLowerCase().startsWith("de"));
+    if (de) return de;
+  }
+
+  // --- French ---
+  if (selectedLang === "fr") {
+    let fr =
+      voices.find(v => v.lang.toLowerCase().startsWith("fr-fr")) ||
+      voices.find(v => v.lang.toLowerCase().startsWith("fr"));
+    if (fr) return fr;
+  }
+
+  // --- Arabic ---
+  if (selectedLang === "ar") {
+    let ar =
+      voices.find(v => v.lang.toLowerCase().startsWith("ar-sa")) ||
+      voices.find(v => v.lang.toLowerCase().startsWith("ar"));
+    if (ar) return ar;
+  }
+
+  // --- Kenyan English female (keep as is) ---
+  let kenyanFemale =
+    voices.find(
+      v =>
+        v.lang.toLowerCase().startsWith("en-ke") &&
+        v.name.toLowerCase().includes("female")
+    ) ||
+    voices.find(v => v.lang.toLowerCase().startsWith("en-ke"));
+
+  if (kenyanFemale) return kenyanFemale;
+
+  // --- Other English female fallback (keep as is) ---
+  let englishFemale =
+    voices.find(
+      v =>
+        v.lang.toLowerCase().startsWith("en") &&
+        v.name.toLowerCase().includes("female")
+    );
+
+  if (englishFemale) return englishFemale;
+
+  // final fallback
+  return voices[0] || null;
+}
+
+
+
+
+function splitText(text, maxLength = 200) {
+  const chunks = [];
+  let start = 0;
+  while (start < text.length) {
+    let end = start + maxLength;
+    if (end < text.length) {
+      let lastSpace = text.lastIndexOf(" ", end);
+      if (lastSpace > start) end = lastSpace;
+    }
+    chunks.push(text.slice(start, end));
+    start = end;
+  }
+  return chunks;
+}
+
+function readLessonAloud() {
+  if (!tutorStarted || lessonsArray.length === 0)
+    return alert("No lesson loaded.");
+
+  const editorText = document.getElementById("editor").innerText;
+  const mathInput = document.getElementById("mathInput");
+  const mathText = mathInput?.getValue?.() || "";
+
+  const combined = [
+    editorText,
+    mathText ? "Math expression: " + mathText : "",
+    ocrTexts.length ? "Text from images: " + ocrTexts.join(". ") : ""
+  ].filter(Boolean).join("\n");
+
+  speechSynthesis.cancel();
+
+  speechUtterances = splitText(combined).map(chunk => {
+    const u = new SpeechSynthesisUtterance(chunk);
+    u.voice = getPreferredVoice();
+    u.rate = 1;
+    u.pitch = 1;
+
+    u.onend = () => {
+      currentUtteranceIndex++;
+      if (!isPaused && currentUtteranceIndex < speechUtterances.length)
+        speechSynthesis.speak(speechUtterances[currentUtteranceIndex]);
+    };
+    return u;
+  });
+
+  currentUtteranceIndex = 0;
+  isPaused = false;
+
+  if (speechUtterances.length)
+    speechSynthesis.speak(speechUtterances[0]);
+}
+
+function pauseSpeech() {
+  if (speechSynthesis.speaking && !speechSynthesis.paused) {
+    speechSynthesis.pause();
+    isPaused = true;
+  }
+}
+
+function resumeSpeech() {
+  if (speechSynthesis.paused) {
+    isPaused = false;
+    speechSynthesis.resume();
+  }
+}
+
+function printLesson() {
+  if (!tutorStarted) return alert("Load a lesson first.");
+  const w = window.open("", "_blank");
+  w.document.write("<html><head><title>Print Lesson</title></head><body>");
+  w.document.write(document.getElementById("editor").innerHTML);
+  w.document.write("</body></html>");
+  w.document.close();
+  w.focus();
+  w.print();
+  w.close();
+}
+
+function downloadLesson() {
+  if (!tutorStarted) return alert("Load a lesson first.");
+  const content = document.getElementById("editor").innerHTML;
+  const blob = new Blob([content], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `lesson_${currentLesson + 1}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+window.onload = () => {
+  const savedLessons = localStorage.getItem("lessonsArray");
+  const savedCurrent = localStorage.getItem("currentLesson");
+  if (savedLessons) {
+    lessonsArray = JSON.parse(savedLessons);
+    tutorStarted = true;
+    currentLesson = savedCurrent ? parseInt(savedCurrent, 10) : 0;
+    showLesson(currentLesson);
+  }
+  loadVoices();
+};
+
+document.getElementById("imageUpload").addEventListener("change", e => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function () {
+    const img = new Image();
+    img.src = reader.result;
+    img.onload = () => {
+      Tesseract.recognize(img, 'eng', { logger: m => {} })
+        .then(({ data: { text } }) => {
+          alert("OCR Result:\n" + text.trim());
+          ocrTexts.push(text.trim());
+        });
+    };
+  };
+  reader.readAsDataURL(file);
+});
+</script>
+</body>
+</html>

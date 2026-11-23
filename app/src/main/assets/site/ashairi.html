@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Smart Poet – Mashairi ya Kiswahili</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #e0f7fa, #fce4ec);
+    }
+    #app { display: flex; flex-direction: column; height: 100%; }
+    #toolbar { padding: 15px; background: #1976d2; color: white; display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+    #toolbar button { background: white; color: #1976d2; padding: 12px 20px; border: none; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; }
+    #toolbar button:hover { background: #f0f0f0; }
+    #editor { flex: 1; padding: 40px 20px; display: flex; align-items: center; justify-content: center; }
+    .card { 
+      max-width: 90vw; 
+      margin: 20px auto; 
+      padding: 40px; 
+      background: white; 
+      border-radius: 25px; 
+      border: 2px solid #ccc; 
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15); 
+      font-size: 1.3em;
+      line-height: 1.6; 
+      font-weight: bold; 
+      animation: fadeIn 1s ease; 
+      color: #1a237e; 
+    }
+    .card h2 { font-size: 1.8em; font-weight: bold; margin-top: 0; }
+    #status { padding: 15px; background: #388e3c; color: white; font-weight: bold; text-align: center; font-size: 16px; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .subscribe-text { font-size: 20px; font-weight: bold; color: red; text-align: center; }
+  </style>
+</head>
+<body>
+
+<div id="app">
+ <div id="toolbar">
+    <button onclick="startPoems()">▶️ Anza Shairi</button>
+    <button onclick="prevPoem()">⬅️ Nyuma</button>
+    <button onclick="nextPoem()">➡️ Mbele</button>
+  </div>
+
+  <div id="editor">
+    <div class="card">
+      <h2>Karibu kwenye Mashairi ya Kiswahili</h2>
+      <p>Sikiliza mashairi yakikaririwa kwa sauti ya mashairi 🎶.</p>
+    </div>
+  </div>
+
+  <div id="status">⏳ Tayari kuanza!</div>
+</div>
+
+<script>
+/* ---------- Data: Mashairi ---------- */
+const poemsArray = [
+`🌙 Shairi 1: Safari ya Ndoto
+
+Usiku umetulia, nyota zinang'ara,
+Ndoto zangu zasafiri mbali sana,
+Mto wa matumaini unaniburudisha,
+Nikiota kesho itakuwa bora.
+
+Niliona taa zikimetameta angani,
+Kama vile malaika wakiimba pamoja,
+Sauti zao zikiwa za faraja,
+Zikituma upendo kwa dunia nzima.
+
+Safari ya ndoto ni mwalimu wa moyo,
+Ikifundisha imani, matumaini na upendo.`,
+
+`🌅 Shairi 2: Alfajiri Mpya
+
+Alfajiri inachomoza taratibu,
+Miale ya jua ikipenya mawingu,
+Dunia inafufuka kwa mwanga wa dhahabu,
+Na upepo mwanana ukinong’ona siri zake.
+
+Ndege wanaimba wimbo wa asubuhi,
+Mito inacheza midundo yake,
+Na moyo wangu unaamka kwa furaha,
+Kwa siku mpya yenye tumaini jipya.
+
+Alfajiri mpya ni zawadi ya Mungu,
+Kila saa mpya ni nafasi ya upendo.`
+];
+
+/* ---------- Global Vars ---------- */
+let currentPoem = 0;
+let started = false;
+let selectedVoice = null;
+
+/* ---------- Load Voices ---------- */
+function pickVoice() {
+  const voices = speechSynthesis.getVoices();
+  return voices.find(v => v.lang.toLowerCase().startsWith("sw"))
+      || voices.find(v => v.lang.toLowerCase().startsWith("en"))
+      || voices[0];
+}
+
+speechSynthesis.onvoiceschanged = () => {
+  if (!selectedVoice) {
+    selectedVoice = pickVoice();
+  }
+};
+
+/* ---------- Speak Poem Line by Line ---------- */
+function speakPoem(text, onEnd) {
+  const lines = text.split(/\n/).filter(l => l.trim().length > 0);
+  let i = 0;
+
+  function speakLine() {
+    if (i < lines.length) {
+      const utter = new SpeechSynthesisUtterance(lines[i].trim());
+      utter.voice = selectedVoice;
+      utter.rate = 0.9;
+      utter.pitch = (i % 2 === 0) ? 1.1 : 0.9;
+      utter.onend = () => {
+        i++;
+        setTimeout(speakLine, 800);
+      };
+      speechSynthesis.speak(utter);
+    } else if (onEnd) {
+      onEnd();
+    }
+  }
+  speakLine();
+}
+
+/* ---------- Show Poem ---------- */
+function showPoem(index) {
+  if (index >= poemsArray.length) {
+    document.getElementById("editor").innerHTML = `
+      <div class="card">
+        <h2>✅ Mashairi Yamekamilika</h2>
+        <p>Asante kwa kusikiliza 🎶.</p>
+      </div>`;
+    document.getElementById("status").textContent = "✅ Mwisho.";
+    return;
+  }
+
+  const poem = poemsArray[index];
+  document.getElementById("editor").innerHTML = `
+    <div class="card"><div id="poemContent">${poem.replace(/\n/g, "<br>")}</div></div>
+  `;
+  document.getElementById("status").textContent = `🎵 Shairi ${index + 1} linaimbwa...`;
+
+  const plainText = document.getElementById("poemContent").textContent;
+  speakPoem(plainText, () => {
+    document.getElementById("status").textContent = `✅ Shairi ${index + 1} limekamilika.`;
+    currentPoem = index + 1;
+  });
+}
+
+/* ---------- Controls ---------- */
+function startPoems() {
+  if (started) return;
+  started = true;
+  const check = setInterval(() => {
+    const voices = speechSynthesis.getVoices();
+    if (voices.length > 0) {
+      clearInterval(check);
+      selectedVoice = pickVoice();
+      showPoem(currentPoem);
+    }
+  }, 200);
+  document.getElementById("status").textContent = "🟢 Inapakia sauti...";
+}
+
+function nextPoem() {
+  if (currentPoem < poemsArray.length) {
+    showPoem(currentPoem);
+  }
+}
+function prevPoem() {
+  if (currentPoem > 0) {
+    currentPoem--;
+    showPoem(currentPoem);
+  }
+}
+</script>
+</body>
+</html>
+
+
+

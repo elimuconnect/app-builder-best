@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Referrer Dashboard - Elimu Connect</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6f9;
+      padding: 30px 15px;
+      margin: 0;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    input, button {
+      padding: 12px;
+      margin: 10px 0;
+      width: 100%;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      background-color: #28a745;
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+
+    #results {
+      margin-top: 30px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 15px;
+    }
+
+    .card h4 {
+      margin: 0 0 5px;
+      color: #007bff;
+    }
+
+    .card p {
+      margin: 4px 0;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .section {
+      margin-bottom: 40px;
+    }
+
+    .section h3 {
+      color: #444;
+      border-bottom: 2px solid #28a745;
+      padding-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>📊 Referrer Dashboard</h2>
+  <input type="text" id="refCode" placeholder="Enter your referral code (e.g. solo1)">
+  <button onclick="loadData()">Load My Referrals</button>
+
+  <div id="results"></div>
+
+  <script>
+    async function loadData() {
+      const code = document.getElementById("refCode").value.trim().toLowerCase();
+      if (!code) return alert("Please enter your referral code.");
+
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "<p>Loading data...</p>";
+
+      try {
+        const [visitsRes, paymentsRes] = await Promise.all([
+          fetch("https://tutor-students-mapping-default-rtdb.firebaseio.com/visits.json"),
+          fetch("https://tutor-students-mapping-default-rtdb.firebaseio.com/referrals.json")
+        ]);
+
+        const visitsData = await visitsRes.json();
+        const paymentsData = await paymentsRes.json();
+
+        const visits = Object.values(visitsData || {}).filter(v => (v.referral || "").toLowerCase() === code);
+        const payments = Object.values(paymentsData || {}).filter(p => (p.referral || "").toLowerCase() === code);
+
+        let html = `
+          <div class="section">
+            <h3>🧍 Visits: ${visits.length}</h3>
+            ${visits.length === 0 ? "<p>No visits yet.</p>" : ""}
+            ${visits.map(v => `
+              <div class="card">
+                <h4>Visitor</h4>
+                <p><strong>Time:</strong> ${new Date(v.timestamp).toLocaleString()}</p>
+              </div>
+            `).join("")}
+          </div>
+
+          <div class="section">
+            <h3>💵 Payments: ${payments.length}</h3>
+            ${payments.length === 0 ? "<p>No payments yet.</p>" : ""}
+            ${payments.map(p => `
+              <div class="card">
+                <h4>${p.name}</h4>
+                <p><strong>Phone:</strong> ${p.phone}</p>
+                <p><strong>MPesa Code:</strong> ${p.mpesaCode}</p>
+                <p><strong>Time:</strong> ${new Date(p.timestamp).toLocaleString()}</p>
+              </div>
+            `).join("")}
+          </div>
+        `;
+
+        resultsDiv.innerHTML = html;
+
+      } catch (err) {
+        console.error("Error loading data:", err);
+        resultsDiv.innerHTML = "<p style='color:red;'>❌ Failed to load data. Check your Firebase rules or internet connection.</p>";
+      }
+    }
+  </script>
+
+</body>
+</html>

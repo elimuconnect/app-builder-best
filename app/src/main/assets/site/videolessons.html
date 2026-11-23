@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CBC JSS Video Lessons – Elimu Connect</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #e1f5fe, #fce4ec);
+      padding: 0;
+    }
+
+    header {
+      background-color: #1976d2;
+      color: white;
+      text-align: center;
+      padding: 20px 10px;
+      font-size: 1.8em;
+      font-weight: bold;
+    }
+
+    .grade-selector {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 15px;
+    }
+
+    .grade-selector button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 30px;
+      background: #fff;
+      color: #1976d2;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: 0.3s ease;
+    }
+
+    .grade-selector button:hover {
+      background-color: #e3f2fd;
+    }
+
+    .video-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 10px;
+      gap: 20px;
+    }
+
+    .video-card {
+      flex: 1 1 350px;
+      max-width: 500px;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .video-card iframe {
+      width: 100%;
+      height: 230px;
+      border: none;
+    }
+
+    .video-title {
+      padding: 12px;
+      font-weight: bold;
+      font-size: 1.1em;
+      color: #1565c0;
+      text-align: center;
+    }
+
+    @media screen and (max-width: 768px) {
+      .video-card iframe {
+        height: 200px;
+      }
+    }
+
+    @media screen and (max-width: 480px) {
+      header {
+        font-size: 1.4em;
+        padding: 15px;
+      }
+      .video-card iframe {
+        height: 180px;
+      }
+
+.grade-selector select {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 1em;
+  margin: 5px;
+}
+@media screen and (max-width: 600px) {
+  .grade-selector {
+    flex-direction: column;
+    align-items: center;
+  }
+
+
+      
+    }
+  </style>
+</head>
+<body>
+
+ <header>📚 CBC JSS VIDEO LESSONS – Grade 7 to 10</header>
+
+<div class="grade-selector">
+  <select id="gradeSelect" onchange="populateSubjects()">
+    <option value="">Select Grade</option>
+    <option value="grade7">Grade 7</option>
+    <option value="grade8">Grade 8</option>
+    <option value="grade9">Grade 9</option>
+    <option value="grade10">Grade 10</option>
+  </select>
+
+  <select id="subjectSelect" onchange="populateTopics()" disabled>
+    <option value="">Select Subject</option>
+  </select>
+
+  <select id="topicSelect" onchange="filterVideos()" disabled>
+    <option value="">Select Topic</option>
+  </select>
+</div>
+
+  <div class="video-grid" id="videos">
+
+    <!-- GRADE 7 -->
+    <div class="video-card grade7">
+      <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID1" allowfullscreen></iframe>
+      <div class="video-title">Grade 7: Mathematics – Fractions</div>
+    </div>
+
+    <div class="video-card grade7">
+      <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID2" allowfullscreen></iframe>
+      <div class="video-title">Grade 7: English – Comprehension</div>
+    </div>
+
+    <!-- GRADE 8 -->
+    <div class="video-card grade8">
+      <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID3" allowfullscreen></iframe>
+      <div class="video-title">Grade 8: Science – Human Circulatory System</div>
+    </div>
+
+    <div class="video-card grade8">
+      <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID4" allowfullscreen></iframe>
+      <div class="video-title">Grade 8: Kiswahili – Vielezi</div>
+    </div>
+
+    
+
+
+
+<!-- MATHEMATICS -->
+<div class="video-card" data-grade="grade9" data-subject="math" data-topic="algebra">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID21" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: Mathematics – Algebraic Expressions</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="math" data-topic="geometry">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID22" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: Mathematics – Geometry of Triangles</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="math" data-topic="probability">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID23" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: Mathematics – Basic Probability</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="math" data-topic="linear-equations">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID24" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: Mathematics – Linear Equations</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="math" data-topic="ratios">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID25" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: Mathematics – Ratios and Proportions</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="math" data-topic="surface-area">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID26" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: Mathematics – Surface Area & Volume</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="math" data-topic="data-representation">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID27" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: Mathematics – Data Representation</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="math" data-topic="percentages">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID28" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: Mathematics – Percentages</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="math" data-topic="inequalities">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID29" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: Mathematics – Solving Inequalities</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="math" data-topic="coordinates">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID30" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: Mathematics – Coordinates & Graphs</div>
+</div>
+
+
+
+<!-- ENGLISH -->
+<div class="video-card" data-grade="grade9" data-subject="english" data-topic="comprehension">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID31" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: English – Reading Comprehension</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="english" data-topic="writing">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID32" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: English – Creative Writing</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="english" data-topic="grammar">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID33" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: English – Grammar Usage</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="english" data-topic="letter-writing">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID34" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: English – Letter Writing</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="english" data-topic="speech">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID35" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: English – Speech Writing</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="english" data-topic="listening">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID36" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: English – Listening & Note Taking</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="english" data-topic="oral-skills">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID37" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: English – Oral Skills</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="english" data-topic="summary">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID38" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: English – Summarizing Texts</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="english" data-topic="punctuation">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID39" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: English – Punctuation Rules</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="english" data-topic="literature">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID40" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: English – Introduction to Literature</div>
+</div>
+
+    
+
+<!-- INTEGRATED SCIENCE -->
+<div class="video-card" data-grade="grade9" data-subject="science" data-topic="atom">
+  <iframe src="https://www.youtube.com/embed/S3NaP1gu8Tw" allowfullscreen></iframe>
+
+  <div class="video-title">Grade 9: Integrated Science – Structure of the atom</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="science" data-topic="metals">
+  <iframe src="https://youtu.be/7HyjCOUK6CQ?si=Ru5ZclRasaKNovty" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: Science – Reproduction in Animals</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="science" data-topic="respiration">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID43" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: Science – Respiration & Breathing</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="science" data-topic="ecology">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID44" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: Science – Ecology & Environment</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="science" data-topic="energy">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID45" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: Science – Forms of Energy</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="science" data-topic="forces">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID46" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: Science – Forces and Motion</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="science" data-topic="states-of-matter">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID47" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: Science – States of Matter</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="science" data-topic="acids-bases">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID48" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: Science – Acids and Bases</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="science" data-topic="cells">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID49" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: Science – Cell Structure</div>
+</div>
+<div class="video-card" data-grade="grade9" data-subject="science" data-topic="simple-machines">
+  <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID50" allowfullscreen></iframe>
+  <div class="video-title">Grade 9: Science – Simple Machines</div>
+</div>
+
+
+
+    
+  <!-- SOCIAL STUDIES -->
+  <div class="video-card" data-grade="grade9" data-subject="social" data-topic="government">
+    <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID1" allowfullscreen></iframe>
+    <div class="video-title">Grade 9: Social Studies – Government Structure</div>
+  </div>
+  <div class="video-card" data-grade="grade9" data-subject="social" data-topic="citizenship">
+    <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID2" allowfullscreen></iframe>
+    <div class="video-title">Grade 9: Social Studies – Citizenship and Duties</div>
+  </div>
+  <div class="video-card" data-grade="grade9" data-subject="social" data-topic="democracy">
+    <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID3" allowfullscreen></iframe>
+    <div class="video-title">Grade 9: Social Studies – Democracy in Kenya</div>
+  </div>
+  <div class="video-card" data-grade="grade9" data-subject="social" data-topic="colonialism">
+    <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID4" allowfullscreen></iframe>
+    <div class="video-title">Grade 9: Social Studies – Effects of Colonialism</div>
+  </div>
+  <div class="video-card" data-grade="grade9" data-subject="social" data-topic="national-values">
+    <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID5" allowfullscreen></iframe>
+    <div class="video-title">Grade 9: Social Studies – National Values and Principles</div>
+  </div>
+  <div class="video-card" data-grade="grade9" data-subject="social" data-topic="conflict-resolution">
+    <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID6" allowfullscreen></iframe>
+    <div class="video-title">Grade 9: Social Studies – Conflict Resolution</div>
+  </div>
+  <div class="video-card" data-grade="grade9" data-subject="social" data-topic="rights-responsibilities">
+    <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID7" allowfullscreen></iframe>
+    <div class="video-title">Grade 9: Social Studies – Rights and Responsibilities</div>
+  </div>
+  <div class="video-card" data-grade="grade9" data-subject="social" data-topic="leadership">
+    <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID8" allowfullscreen></iframe>
+    <div class="video-title">Grade 9: Social Studies – Leadership in Society</div>
+  </div>
+  <div class="video-card" data-grade="grade9" data-subject="social" data-topic="development">
+    <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID9" allowfullscreen></iframe>
+    <div class="video-title">Grade 9: Social Studies – Development and Planning</div>
+  </div>
+  <div class="video-card" data-grade="grade9" data-subject="social" data-topic="civic-education">
+    <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID10" allowfullscreen></iframe>
+    <div class="video-title">Grade 9: Social Studies – Civic Education</div>
+  </div>
+
+  <!-- COMPUTER STUDIES -->
+  <div class="video-card" data-grade="grade9" data-subject="computer" data-topic="safety">
+    <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID11" allowfullscreen></iframe>
+    <div class="video-title">Grade 9: Computer Studies – Internet Safety</div>
+  </div>
+  <div class="video-card" data-grade="grade9" data-subject="computer" data-topic="coding">
+    <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID12" allowfullscreen></iframe>
+    <div class="video-title">Grade 9: Computer Studies – Introduction to Coding</div>
+  </div>
+  <div class="video-card" data-grade="grade9" data-subject="computer" data-topic="hardware">
+    <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID13" allowfullscreen></iframe>
+    <div class="video-title">Grade 9: Computer Studies – Computer Hardware</div>
+  </div>
+  <div class="video-card" data-grade="grade9" data-subject="computer" data-topic="software">
+    <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID14" allowfullscreen></iframe>
+    <div class="video-title">Grade 9: Computer Studies – Types of Software</div>
+  </div>
+  <div class="video-card" data-grade="grade9" data-subject="computer" data-topic="spreadsheets">
+    <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID15" allowfullscreen></iframe>
+    <div class="video-title">Grade 9: Computer Studies – Spreadsheets Basics</div>
+  </div>
+  <div class="video-card" data-grade="grade9" data-subject="computer" data-topic="word-processing">
+    <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID16" allowfullscreen></iframe>
+    <div class="video-title">Grade 9: Computer Studies – Word Processing</div>
+  </div>
+  <div class="video-card" data-grade="grade9" data-subject="computer" data-topic="presentation">
+    <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID17" allowfullscreen></iframe>
+    <div class="video-title">Grade 9: Computer Studies – Presentation Tools</div>
+  </div>
+  <div class="video-card" data-grade="grade9" data-subject="computer" data-topic="programming">
+    <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID18" allowfullscreen></iframe>
+    <div class="video-title">Grade 9: Computer Studies – Programming Basics</div>
+  </div>
+  <div class="video-card" data-grade="grade9" data-subject="computer" data-topic="internet">
+    <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID19" allowfullscreen></iframe>
+    <div class="video-title">Grade 9: Computer Studies – The Internet</div>
+  </div>
+  <div class="video-card" data-grade="grade9" data-subject="computer" data-topic="careers">
+    <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID20" allowfullscreen></iframe>
+    <div class="video-title">Grade 9: Computer Studies – Careers in ICT</div>
+  </div>
+
+  <!-- Repeat pattern for MATH, ENGLISH, SCIENCE, etc. -->
+
+
+
+
+
+
+
+
+
+
+    
+    <!-- GRADE 10 -->
+    <div class="video-card grade10">
+      <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID7" allowfullscreen></iframe>
+      <div class="video-title">Grade 10: Chemistry – Periodic Table</div>
+    </div>
+
+    <div class="video-card grade10">
+      <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID8" allowfullscreen></iframe>
+      <div class="video-title">Grade 10: Business – Entrepreneurship</div>
+    </div>
+
+  </div>
+
+ <script>
+  const subjectOptions = {
+    grade7: ["mathematics", "english", "science"],
+    grade8: ["mathematics", "english", "science"],
+    grade9: ["math", "english", "science", "computer", "social"],
+    grade10: ["mathematics", "business", "chemistry"]
+  };
+
+  const topicOptions = {
+    // Grade 9 Topics
+    grade9: {
+      math: [
+        "algebra", "geometry", "probability", "linear-equations", "ratios",
+        "surface-area", "data-representation", "percentages", "inequalities", "coordinates"
+      ],
+      english: [
+        "comprehension", "writing", "grammar", "letter-writing", "speech",
+        "listening", "oral-skills", "summary", "punctuation", "literature"
+      ],
+      science: [
+        "atom", "metals", "respiration", "ecology", "energy",
+        "forces", "states-of-matter", "acids-bases", "cells", "simple-machines"
+      ],
+      computer: [
+        "safety", "coding", "hardware", "software", "spreadsheets",
+        "word-processing", "presentation", "programming", "internet", "careers"
+      ],
+      social: [
+        "government", "citizenship", "democracy", "colonialism", "national-values",
+        "conflict-resolution", "rights-responsibilities", "leadership", "development", "civic-education"
+      ]
+    }
+    // Add other grades similarly if needed
+  };
+
+  function populateSubjects() {
+    const grade = document.getElementById("gradeSelect").value;
+    const subjectSelect = document.getElementById("subjectSelect");
+    const topicSelect = document.getElementById("topicSelect");
+
+    subjectSelect.innerHTML = `<option value="">Select Subject</option>`;
+    topicSelect.innerHTML = `<option value="">Select Topic</option>`;
+    topicSelect.disabled = true;
+
+    if (subjectOptions[grade]) {
+      subjectOptions[grade].forEach(subject => {
+        const option = document.createElement("option");
+        option.value = subject;
+        option.textContent = capitalize(subject.replace(/-/g, ' '));
+        subjectSelect.appendChild(option);
+      });
+      subjectSelect.disabled = false;
+    } else {
+      subjectSelect.disabled = true;
+    }
+
+    filterVideos(); // Reset filter
+  }
+
+  function populateTopics() {
+    const grade = document.getElementById("gradeSelect").value;
+    const subject = document.getElementById("subjectSelect").value;
+    const topicSelect = document.getElementById("topicSelect");
+
+    topicSelect.innerHTML = `<option value="">Select Topic</option>`;
+
+    if (topicOptions[grade] && topicOptions[grade][subject]) {
+      topicOptions[grade][subject].forEach(topic => {
+        const option = document.createElement("option");
+        option.value = topic;
+        option.textContent = capitalize(topic.replace(/-/g, ' '));
+        topicSelect.appendChild(option);
+      });
+      topicSelect.disabled = false;
+    } else {
+      topicSelect.disabled = true;
+    }
+
+    filterVideos(); // Reset filter
+  }
+
+  function filterVideos() {
+  const grade = document.getElementById("gradeSelect").value;
+  const subject = document.getElementById("subjectSelect").value;
+  const topic = document.getElementById("topicSelect").value;
+  const cards = document.querySelectorAll(".video-card");
+
+  cards.forEach(card => {
+    const matchesGrade = card.dataset.grade === grade;
+    const matchesSubject = card.dataset.subject === subject;
+    const matchesTopic = card.dataset.topic === topic;
+
+    // Show only if all match and topic is selected
+    card.style.display = (grade && subject && topic && matchesGrade && matchesSubject && matchesTopic)
+      ? "block"
+      : "none";
+  });
+}
+
+
+  function capitalize(text) {
+    return text.charAt(0).toUpperCase() + text.slice(1).replace(/-/g, ' ');
+  }
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".video-card").forEach(card => {
+    card.style.display = "none";
+  });
+});
+
+   
+</script>
+ 
+   
+
+</body>
+</html>

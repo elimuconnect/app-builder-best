@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Accessibility Tool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      padding: 20px;
+    }
+    .tab-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .tab-buttons button {
+      padding: 10px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .tab-content {
+      display: none;
+      background: #fff;
+      padding: 20px;
+      margin-top: 10px;
+      border-radius: 10px;
+    }
+    .active-tab {
+      display: block;
+    }
+    .high-contrast {
+      background: black !important;
+      color: yellow !important;
+    }
+    .large-text textarea {
+      font-size: 24px;
+    }
+    .flashing {
+      animation: flash 1s infinite;
+    }
+    @keyframes flash {
+      0% { background: yellow; }
+      50% { background: red; }
+      100% { background: yellow; }
+    }
+  </style>
+</head>
+<body>
+
+<h2 id="title">Accessibility Tool for Learners with Special Needs</h2>
+
+<select onchange="translatePage(this.value)">
+  <option value="en">English</option>
+  <option value="sw">Kiswahili</option>
+</select>
+
+<div class="tab-buttons">
+  <button onclick="showTab('visual')">For Visually Impaired</button>
+  <button onclick="showTab('hearing')">For Hearing Impaired</button>
+</div>
+
+<!-- Visual Impairment Tools -->
+<div id="visual" class="tab-content active-tab">
+  <h3 id="tts_label">Text-to-Speech</h3>
+  <textarea id="ttsText" rows="4" cols="50" placeholder="Type text here..."></textarea><br>
+  <select id="voiceSelect"></select>
+  <button onclick="readText()">🔊 Read</button>
+  <button onclick="startRecognition()">🎙️ Speak</button>
+  <div id="outputText"></div>
+  <button onclick="toggleLargeText()">Toggle Large Text</button>
+  <button onclick="toggleContrast()">Toggle High Contrast</button>
+</div>
+
+<!-- Hearing Impairment Tools -->
+<div id="hearing" class="tab-content">
+  <h3>Visual Alert</h3>
+  <button onclick="showAlert()">🚨 Flash Alert</button>
+  <div id="alertBox" style="width:100%;height:50px;margin-top:10px;"></div>
+  <h3>Predefined Phrases</h3>
+  <select onchange="sayPreset(this.value)">
+    <option value="">-- Choose a phrase --</option>
+    <option value="I need help.">I need help.</option>
+    <option value="Can you repeat that?">Can you repeat that?</option>
+    <option value="I am going to the bathroom.">I am going to the bathroom.</option>
+  </select>
+</div>
+
+<script>
+  // Tabs
+  function showTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(div => div.classList.remove('active-tab'));
+    document.getElementById(tabId).classList.add('active-tab');
+  }
+
+  // Populate TTS voices
+  function populateVoices() {
+    const voices = speechSynthesis.getVoices();
+    const select = document.getElementById('voiceSelect');
+    select.innerHTML = '';
+    voices.forEach((voice, index) => {
+      const option = document.createElement('option');
+      option.value = index;
+      option.textContent = `${voice.name} (${voice.lang})`;
+      select.appendChild(option);
+    });
+  }
+  speechSynthesis.onvoiceschanged = populateVoices;
+
+  // Text-to-Speech
+  function readText() {
+    const text = document.getElementById('ttsText').value;
+    const voiceIndex = document.getElementById('voiceSelect').value;
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voices = speechSynthesis.getVoices();
+    if (voices[voiceIndex]) utterance.voice = voices[voiceIndex];
+    speechSynthesis.speak(utterance);
+  }
+
+  // Speech-to-Text
+  function startRecognition() {
+    if (!('webkitSpeechRecognition' in window)) {
+      alert("Speech recognition not supported.");
+      return;
+    }
+    const recognition = new webkitSpeechRecognition();
+    recognition.lang = 'en-KE';
+    recognition.onresult = function(event) {
+      document.getElementById('outputText').innerText = event.results[0][0].transcript;
+    };
+    recognition.onerror = function(event) {
+      alert('Error: ' + event.error);
+    };
+    recognition.start();
+  }
+
+  // Contrast and large text
+  function toggleContrast() {
+    document.body.classList.toggle('high-contrast');
+  }
+
+  function toggleLargeText() {
+    document.getElementById('visual').classList.toggle('large-text');
+  }
+
+  // Flashing Alert
+  function showAlert() {
+    const alertBox = document.getElementById('alertBox');
+    alertBox.classList.add('flashing');
+    setTimeout(() => alertBox.classList.remove('flashing'), 4000);
+  }
+
+  // Predefined Phrases
+  function sayPreset(text) {
+    if (!text) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    speechSynthesis.speak(utterance);
+  }
+
+  // Translations
+  const translations = {
+    en: {
+      title: "Accessibility Tool for Learners with Special Needs",
+      tts_label: "Text-to-Speech"
+    },
+    sw: {
+      title: "Zana ya Usaidizi kwa Wanafunzi Wenye Mahitaji Maalum",
+      tts_label: "Kusoma Maandishi kwa Sauti"
+    }
+  };
+
+  function translatePage(lang) {
+    document.getElementById('title').textContent = translations[lang].title;
+    document.getElementById('tts_label').textContent = translations[lang].tts_label;
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Weekly Attendance & Behavior Tracker</title>
+<style>
+  body { font-family: Arial, sans-serif; margin:0; padding:0; }
+  header { background:#2c3e50; color:white; padding:10px; text-align:center; }
+  nav button { margin:5px; padding:8px 12px; cursor:pointer; }
+  .module { display:none; padding:20px; }
+  .module.active { display:block; }
+  table { border-collapse: collapse; width: 100%; max-width:1200px; margin-top:10px; }
+  table, th, td { border: 1px solid #ccc; }
+  th, td { padding:8px; text-align:center; }
+  input[type=text], input[type=date], select { padding:5px; margin:5px 0; width:100%; box-sizing:border-box; }
+  button { margin:5px; padding:8px 12px; cursor:pointer; }
+  #savingMessage { color:red; font-weight:bold; display:none; }
+  .controls { display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end; }
+  .controls .field { display:flex; flex-direction:column; min-width:140px; }
+  .legend { text-align:center; margin-top:10px; }
+  .footer-row td { font-weight:bold; background:#fafafa; }
+  .narrow { width: 80px; }
+  .center { text-align:center; }
+</style>
+
+<!-- Firebase compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<!-- Print / PDF helpers -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+<header>
+  <h1>Weekly Attendance & Behavior Tracker</h1>
+  <nav>
+    <button onclick="showModule('weekly')">Weekly View</button>
+    <button onclick="showModule('rewards')">Rewards</button>
+  </nav>
+</header>
+
+<main>
+  <div id="weekly" class="module active">
+    <h2>Weekly Attendance & Behavior</h2>
+
+    <!-- TOP CONTROLS -->
+    <div class="controls">
+      <div class="field">
+        <label for="weekStart">Start of Week</label>
+        <input type="date" id="weekStart" />
+      </div>
+
+      <!-- Add Student (persistent fields) -->
+      <div class="field">
+        <label for="newADM">ADM/UPI</label>
+        <input type="text" id="newADM" placeholder="ADM/UPI Number"/>
+      </div>
+      <div class="field">
+        <label for="newName">Student Name</label>
+        <input type="text" id="newName" placeholder="Student Name"/>
+      </div>
+      <div class="field">
+        <label for="newDOB">Date of Birth</label>
+        <input type="date" id="newDOB"/>
+      </div>
+      <div class="field">
+        <label for="newAgeY">Age (Y)</label>
+        <select id="newAgeY">
+          <option value="">Y</option>
+          <option>3</option><option>4</option><option>5</option><option>6</option>
+          <option>7</option><option>8</option><option>9</option><option>10</option>
+          <option>11</option><option>12</option><option>13</option><option>14</option>
+          <option>15</option><option>16</option><option>17</option><option>18</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="newAgeM">Age (M)</label>
+        <select id="newAgeM">
+          <option value="">M</option>
+          <option>0</option><option>1</option><option>2</option><option>3</option>
+          <option>4</option><option>5</option><option>6</option><option>7</option>
+          <option>8</option><option>9</option><option>10</option><option>11</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="newGrade">Grade</label>
+        <select id="newGrade">
+          <option value="">Select</option>
+          <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option>
+          <option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option>
+          <option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>&nbsp;</label>
+        <button onclick="addStudent()">Add Student</button>
+      </div>
+    </div>
+
+    <!-- Computed Week Header -->
+    <h3 id="computedWeekRange" class="center">Week:</h3>
+	
+	
+	 <h2>Attendance Register - <span id="weekDisplay">Week 1</span></h2>
+
+  <label for="week">Enter Week Number: </label>
+  <input type="number" id="week" min="1" value="1" />
+
+    <!-- REGISTER TABLE -->
+    <table id="weekTable">
+      <thead>
+        <!-- First header row with computed week -->
+        <tr>
+          <th colspan="7" id="weekHeader">Week:</th>
+          <th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th>
+          <th>Total</th>
+          <th>Behavior</th>
+          <th>Remove</th>
+        </tr>
+        <!-- Second header row (labels) -->
+        <tr>
+          <th>ADM/UPI</th>
+          <th>Date of Birth</th>
+          <th>Age (Y)</th>
+          <th>Age (M)</th>
+          <th>Grade</th>
+          <th>Student</th>
+          <th></th>
+          <th>Att</th><th>Att</th><th>Att</th><th>Att</th><th>Att</th>
+          <th></th>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- rows injected by renderTable() -->
+      </tbody>
+      <tfoot>
+        <tr class="footer-row">
+          <td colspan="7">Present: Morning</td>
+          <td colspan="7" id="footerAM">--</td>
+          <td colspan="2"></td>
+        </tr>
+        <tr class="footer-row">
+          <td colspan="7">Present: Afternoon</td>
+          <td colspan="7" id="footerPM">--</td>
+          <td colspan="2"></td>
+        </tr>
+        <tr class="footer-row">
+          <td colspan="7">Total</td>
+          <td colspan="7" id="footerTotal">--</td>
+          <td colspan="2"></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <p class="legend">
+      <b>KEY:</b> x = Present (AM & PM), /0 = AM Present, PM Absent, 0/ = AM Absent, PM Present, 00 = Absent Both
+    </p>
+
+    <div>
+      <button onclick="saveWeekData()">Save Week</button>
+      <button onclick="printTable()">Print</button>
+      <button onclick="downloadRegister()">Download PDF</button>
+      <span id="savingMessage">Saving... Please wait</span>
+    </div>
+  </div>
+
+  <div id="rewards" class="module">
+    <h2>Rewards</h2>
+    <div id="rewardList"></div>
+  </div>
+</main>
+
+<script>
+/* ===========================
+   Firebase setup
+=========================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyDR5lDNlf5yiP57BcgwlD8mZTyugD7SSng",
+  authDomain: "homework-2e4cf.firebaseapp.com",
+  databaseURL: "https://homework-2e4cf-default-rtdb.firebaseio.com",
+  projectId: "homework-2e4cf",
+  storageBucket: "homework-2e4cf.appspot.com",
+  messagingSenderId: "352776491020",
+  appId: "1:352776491020:web:65f9b37fbe5c1b0f96de29"
+};
+const app = firebase.initializeApp(firebaseConfig);
+const db  = firebase.database();
+
+/* ===========================
+   Helpers / State
+=========================== */
+function studentId(name){ return name.toLowerCase().trim().replace(/\s+/g,'_'); }
+function getWeekDates(startDate){
+  const start = new Date(startDate);
+  const dates = [];
+  for(let i=0;i<5;i++){
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    dates.push(d.toISOString().split('T')[0]); // YYYY-MM-DD
+  }
+  return dates;
+}
+function formatDatePretty(dateStr){
+  const opts = { day:'2-digit', month:'short', year:'numeric' };
+  return new Date(dateStr).toLocaleDateString('en-GB', opts);
+}
+// We'll use the Monday date YYYY-MM-DD as the week key to keep it simple.
+function getWeekKey(){
+  let weekStart = document.getElementById('weekStart').value;
+  if(!weekStart){
+    const now = new Date();
+    const day = now.getDay(); // 0=Sun..6=Sat
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+    weekStart = monday.toISOString().split('T')[0];
+    document.getElementById('weekStart').value = weekStart;
+  }
+  return weekStart; // e.g., "2025-08-25"
+}
+
+let students = []; // array of student objects {id, name, adm, dob, ageY, ageM, grade}
+
+/* ===========================
+   UI switching
+=========================== */
+function showModule(module){
+  document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));
+  document.getElementById(module).classList.add('active');
+  if(module==='rewards') loadRewards();
+}
+
+/* ===========================
+   Load Students (persistent)
+=========================== */
+async function loadStudents(){
+  const snap = await db.ref('students').get();
+  if(snap.exists()){
+    students = Object.values(snap.val()); // already objects with fields
+    // ensure id present
+    students.forEach(s => { if(!s.id) s.id = studentId(s.name || ''); });
+  } else {
+    students = [];
+  }
+  renderTable();
+}
+
+/* ===========================
+   Add / Remove student
+=========================== */
+async function addStudent(){
+  const adm   = document.getElementById('newADM').value.trim();
+  const name  = document.getElementById('newName').value.trim();
+  const dob   = document.getElementById('newDOB').value;
+  const ageY  = document.getElementById('newAgeY').value;
+  const ageM  = document.getElementById('newAgeM').value;
+  const grade = document.getElementById('newGrade').value;
+
+  if(!adm || !name) return alert('Please enter at least ADM/UPI and Student Name.');
+  const id = studentId(name);
+
+  const studentObj = {
+    id, adm, name, dob: dob || "", ageY: ageY || "", ageM: ageM || "", grade: grade || ""
+  };
+  await db.ref('students/' + id).set(studentObj);
+
+  // clear inputs
+  ['newADM','newName','newDOB','newAgeY','newAgeM','newGrade'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = '';
+  });
+
+  await loadStudents();
+}
+
+async function removeStudentById(id){
+  await db.ref('students/' + id).remove();
+  // also optionally remove their week entries for current week
+  const wk = getWeekKey();
+  await db.ref(`weeks/${wk}/attendance/${id}`).remove().catch(()=>{});
+  await db.ref(`weeks/${wk}/behavior/${id}`).remove().catch(()=>{});
+  await loadStudents();
+}
+
+/* ===========================
+   Render Table (merged layout)
+=========================== */
+async function renderTable(){
+  const weekKey = getWeekKey();
+  const dates = getWeekDates(weekKey); // Mon..Fri ISO
+  // update computed header
+  const weekHeader = `Week: ${formatDatePretty(dates[0])} – ${formatDatePretty(dates[4])}`;
+  document.getElementById('computedWeekRange').textContent = weekHeader;
+  document.getElementById('weekHeader').textContent = weekHeader;
+
+  const tbody = document.querySelector('#weekTable tbody');
+  tbody.innerHTML = "";
+
+  if(students.length === 0){
+    // nothing to draw
+    updateFooterTotals(); // reset footer
+    return;
+  }
+
+  // get weekly attendance & behavior
+  const attSnap = await db.ref(`weeks/${weekKey}/attendance`).get(); // { studentId: { '2025-08-25':'x', ... } }
+  const behSnap = await db.ref(`weeks/${weekKey}/behavior`).get();   // { studentId: 'Good' }
+
+  // Totals for footer
+  let footerAM = 0, footerPM = 0, footerTotal = 0;
+
+  students.forEach(st => {
+    const row = document.createElement('tr');
+    const sId = st.id;
+
+    const weekly = attSnap.exists() && attSnap.val()[sId] ? attSnap.val()[sId] : {};
+    const behVal = behSnap.exists() && behSnap.val()[sId] ? behSnap.val()[sId] : "";
+
+    // compute per student total (X=2, /0=1, 0/=1, 00=0) across Mon-Fri = max 10
+    let stuAM = 0, stuPM = 0; // to accumulate morning / afternoon presence
+    const options = `
+      <option value="">-</option>
+      <option value="x">x</option>
+      <option value="/0">/0</option>
+      <option value="0/">0/</option>
+      <option value="00">00</option>
+    `;
+
+    // Build cells
+    let html = `
+      <td><input type="text" value="${st.adm || ''}" data-id="${sId}" class="adm persist"/></td>
+      <td><input type="date" value="${st.dob || ''}" data-id="${sId}" class="dob persist"/></td>
+      <td>
+        <select data-id="${sId}" class="ageY persist">
+          <option value="">Y</option>
+          ${Array.from({length:16},(_,i)=>i+3).map(y=>`<option ${String(st.ageY)===String(y)?'selected':''}>${y}</option>`).join('')}
+        </select>
+      </td>
+      <td>
+        <select data-id="${sId}" class="ageM persist">
+          <option value="">M</option>
+          ${Array.from({length:12},(_,i)=>i).map(m=>`<option ${String(st.ageM)===String(m)?'selected':''}>${m}</option>`).join('')}
+        </select>
+      </td>
+      <td>
+        <select data-id="${sId}" class="grade persist">
+          ${(function(sel){
+            const grades = ["","Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"];
+            return grades.map(g=>`<option ${st.grade===g?'selected':''}>${g||'Select'}</option>`).join('');
+          })()}
+        </select>
+      </td>
+      <td><input type="text" value="${st.name || ''}" data-id="${sId}" class="name persist"/></td>
+      <td></td>
+    `;
+
+    // Daily selects
+    dates.forEach(d=>{
+      const val = weekly && weekly[d] ? weekly[d] : "";
+      html += `<td>
+        <select class="att" data-id="${sId}" data-date="${d}">
+          ${options.replace(`value="${val}"`, `value="${val}" selected`)}
+        </select>
+      </td>`;
+      // accumulate AM/PM for totals (live only when saved or rendered)
+      const code = val;
+      if(code === 'x'){ stuAM++; stuPM++; }
+      else if(code === '/0'){ stuAM++; }
+      else if(code === '0/'){ stuPM++; }
+    });
+
+    // Total cell (computed = AM + PM across 5 days; max 10)
+    const stuTotal = stuAM + stuPM;
+    footerAM += stuAM; footerPM += stuPM; footerTotal += stuTotal;
+
+    html += `<td><input type="text" class="narrow" value="${stuTotal || ''}" readonly/></td>`;
+
+    // Behavior
+    html += `<td>
+      <select class="beh" data-id="${sId}">
+        <option value="" ${behVal===''?'selected':''}>—</option>
+        <option value="Best" ${behVal==='Best'?'selected':''}>Best</option>
+        <option value="Good" ${behVal==='Good'?'selected':''}>Good</option>
+        <option value="Improving" ${behVal==='Improving'?'selected':''}>Improving</option>
+        <option value="Bad" ${behVal==='Bad'?'selected':''}>Bad</option>
+      </select>
+    </td>`;
+
+    // Remove button
+    html += `<td><button onclick="removeStudentById('${sId}')">Remove</button></td>`;
+
+    row.innerHTML = html;
+    tbody.appendChild(row);
+  });
+
+  // Update footer
+  updateFooterTotals(footerAM, footerPM, footerTotal);
+
+  // Attach change listeners to persist non-weekly fields inline
+  attachPersistListeners();
+}
+
+/* ===========================
+   Persist inline (non-weekly)
+=========================== */
+function attachPersistListeners(){
+  document.querySelectorAll('.persist').forEach(el=>{
+    el.addEventListener('change', async (e)=>{
+      const id = e.target.dataset.id;
+      const ref = db.ref('students/'+id);
+      const fieldClass = e.target.classList.contains('adm') ? 'adm' :
+                         e.target.classList.contains('dob') ? 'dob' :
+                         e.target.classList.contains('ageY') ? 'ageY' :
+                         e.target.classList.contains('ageM') ? 'ageM' :
+                         e.target.classList.contains('grade') ? 'grade' :
+                         e.target.classList.contains('name') ? 'name' : null;
+      if(!fieldClass) return;
+      const val = e.target.value;
+      await ref.update({ [fieldClass]: val });
+      // if name changed, also update id? safer to keep id stable to avoid data loss
+    });
+  });
+}
+
+/* ===========================
+   Save Week Data (Mon–Fri + Behavior)
+=========================== */
+async function saveWeekData(){
+  document.getElementById("savingMessage").style.display = "block";
+  const weekKey = getWeekKey();
+
+  try{
+    // Attendance per day
+    const attUpdates = {};
+    document.querySelectorAll('select.att').forEach(sel=>{
+      const sid  = sel.dataset.id;
+      const date = sel.dataset.date;
+      const val  = sel.value;
+      if(!attUpdates[sid]) attUpdates[sid] = {};
+      attUpdates[sid][date] = val || "";
+    });
+
+    // Behavior (weekly)
+    const behUpdates = {};
+    document.querySelectorAll('select.beh').forEach(sel=>{
+      const sid = sel.dataset.id;
+      behUpdates[sid] = sel.value || "";
+    });
+
+    // Commit updates
+    await Promise.all([
+      db.ref(`weeks/${weekKey}/attendance`).update(attUpdates),
+      db.ref(`weeks/${weekKey}/behavior`).update(behUpdates),
+    ]);
+
+    document.getElementById("savingMessage").style.display = "none";
+    alert("Week data saved!");
+    // Re-render to refresh totals
+    renderTable();
+    loadRewards();
+  }catch(e){
+    document.getElementById("savingMessage").style.display = "none";
+    alert("Error saving data: " + e);
+    console.error(e);
+  }
+}
+
+/* ===========================
+   Rewards (unchanged logic style)
+=========================== */
+async function loadRewards(){
+  // We'll count "Best" and "Good" for the CURRENT week
+  const weekKey = getWeekKey();
+  const listDiv = document.getElementById('rewardList');
+  try{
+    const snap = await db.ref(`weeks/${weekKey}/behavior`).get();
+    const points = {};
+    if(snap.exists()){
+      const data = snap.val();
+      Object.entries(data).forEach(([sid, val])=>{
+        if(val === "Best" || val === "Good"){
+          points[sid] = (points[sid] || 0) + 1;
+        }
+      });
+    }
+    // map student ids to names
+    const namesById = {};
+    students.forEach(s=>namesById[s.id] = s.name || s.adm || s.id);
+
+    listDiv.innerHTML = "<h3>Reward Points (This Week)</h3>";
+    if(Object.keys(points).length === 0){
+      listDiv.innerHTML += "<p>No points yet.</p>";
+    }else{
+      Object.entries(points).forEach(([sid, pts])=>{
+        listDiv.innerHTML += `<p>${namesById[sid] || sid}: ${pts} point(s)</p>`;
+      });
+    }
+  }catch(e){
+    console.error("Load rewards failed:", e);
+  }
+}
+
+/* ===========================
+   Footer totals
+=========================== */
+function updateFooterTotals(am=0, pm=0, total=0){
+  document.getElementById('footerAM').textContent = am || 0;
+  document.getElementById('footerPM').textContent = pm || 0;
+  document.getElementById('footerTotal').textContent = total || 0;
+}
+
+/* ===========================
+   Print (exact table snapshot)
+=========================== */
+
+
+function printTable() {
+  // Clone table and replace selects by their values
+  const orig = document.getElementById('weekTable');
+  const table = orig.cloneNode(true);
+
+  // Replace selects with plain text; remove Remove column
+  table.querySelectorAll('select').forEach(sel => {
+    const span = document.createElement('span');
+    span.textContent = sel.value || '-';
+    sel.parentNode.replaceChild(span, sel);
+  });
+  // Remove last column (Remove)
+  table.querySelectorAll('tr').forEach(row => {
+    if (row.cells.length > 1) row.deleteCell(row.cells.length - 1);
+  });
+
+  // Week number + computed week header
+  const weekNum = document.getElementById("weekDisplay").textContent;  // e.g. "Week 2"
+  const weekRange = document.getElementById('weekHeader').textContent; // e.g. "Week: Aug 26 – Aug 30"
+
+  const w = window.open("", "", "width=900,height=700");
+  w.document.write("<html><head><title>Print</title>");
+  w.document.write(`
+    <style>
+      body { font-family: Arial, sans-serif; }
+      h2,h3 { text-align:center; margin: 4px 0; }
+      table { border-collapse:collapse; width:100%; max-width:1200px; margin:10px auto; }
+      th,td { border:1px solid #000; padding:6px; text-align:center; }
+      .footer-row td { font-weight:bold; background:#fafafa; }
+    </style>
+  `);
+  w.document.write("</head><body>");
+  w.document.write(`<h2>Attendance Register - ${weekNum}</h2>`);  // ✅ shows Week Number
+  w.document.write(`<h3>${weekRange}</h3>`);                     // ✅ shows Week Range
+  w.document.body.appendChild(table);
+  w.document.write(`<p style="text-align:center;margin-top:8px;">
+    <b>Legend:</b> x = Present (AM & PM), /0 = AM Present, PM Absent, 0/ = AM Absent, PM Present, 00 = Absent Both
+  </p>`);
+  w.document.write("</body></html>");
+  w.document.close();
+  w.onload = () => { w.print(); w.close(); };
+}
+
+
+
+/* ===========================
+   Download PDF
+=========================== */
+async function downloadRegister() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF("p", "mm", "a4");
+
+  // Get week number + week range
+  const weekNum = document.getElementById("weekDisplay").textContent;   // e.g. "Week 2"
+  const weekRange = document.getElementById("weekHeader").textContent;  // e.g. "Week: Aug 26 – Aug 30"
+
+  // Prepare a cleaned DOM snapshot
+  const clone = document.getElementById("weekTable").cloneNode(true);
+
+  // Replace <select> with plain text
+  clone.querySelectorAll("select").forEach(sel => {
+    const span = document.createElement("span");
+    span.textContent = sel.value || "-";
+    sel.parentNode.replaceChild(span, sel);
+  });
+
+  // Remove "Remove" column
+  clone.querySelectorAll("tr").forEach(row => {
+    if (row.cells.length > 1) row.deleteCell(row.cells.length - 1);
+  });
+
+  // Temporary container for rendering
+  const temp = document.createElement("div");
+  temp.style.position = "fixed";
+  temp.style.left = "-9999px";
+  temp.innerHTML = `
+    <h2 style="text-align:center;">Attendance Register - ${weekNum}</h2>
+    <p style="text-align:center;"><b>${weekRange}</b></p>
+  `;
+  temp.appendChild(clone);
+  document.body.appendChild(temp);
+
+  // Render with html2canvas
+  const canvas = await html2canvas(temp, { scale: 2 });
+  document.body.removeChild(temp);
+
+  // Convert to PDF
+  const imgData = canvas.toDataURL("image/png");
+  const imgWidth = 190; // A4 width minus margins
+  const pageHeight = 297;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  let heightLeft = imgHeight;
+  let position = 10;
+
+  doc.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+  heightLeft -= pageHeight;
+
+  while (heightLeft > 0) {
+    position = heightLeft - imgHeight + 10;
+    doc.addPage();
+    doc.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+  }
+
+  doc.save("Weekly_Register.pdf");
+}
+
+/* ===========================
+   Init
+=========================== */
+document.getElementById('weekStart').addEventListener('change', renderTable);
+
+(async function init(){
+  // Set default Monday if empty
+  const wk = getWeekKey();
+  document.getElementById('weekStart').value = wk;
+  await loadStudents();
+})();
+
+
+document.getElementById("week").addEventListener("input", function() {
+    let weekNum = this.value.trim();
+    document.getElementById("weekDisplay").innerText = weekNum ? `Week ${weekNum}` : "Week 1";
+  });
+</script>
+</body>
+</html>

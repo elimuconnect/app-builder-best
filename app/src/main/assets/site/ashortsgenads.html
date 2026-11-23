@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Elimu Connect • ShortsGen v4 (9:16 Canvas) — Edited (Music Only)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #1976d2;
+    --math: #ef6c00;
+    --sci: #2e7d32;
+    --eng: #0d47a1;
+    --bubble-bg: #fff9e6;
+    --subtitle-bg: rgba(10, 25, 90, 0.85);
+  }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    font-family: 'Patrick Hand', ComicSans, Arial;
+    background: linear-gradient(#e6f7ff, #ffffff);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  .app {
+    width: 420px;
+    max-width: 100%;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  h1 {
+    font-size: 1rem;
+    margin: 0;
+    text-align: center;
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0;
+    justify-content: center;
+  }
+
+  select,
+  input[type="file"],
+  button {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-weight: bold;
+  }
+
+  button {
+    background: var(--accent);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+
+  button:hover {
+    transform: scale(1.04);
+  }
+
+  .small {
+    font-size: 0.8rem;
+    color: #444;
+    text-align: center;
+  }
+
+  #stageWrap {
+    width: 360px;
+    height: 640px;
+    margin: 12px auto;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.2);
+    position: relative;
+    background: #222;
+  }
+
+  /* Canvas fits inside stageWrap but actual pixels are 720x1280 (portrait) */
+  #canvasPreview {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: #000;
+  }
+
+  .controls .row {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+  }
+
+  .status {
+    font-size: 0.9rem;
+    margin-top: 8px;
+    text-align: center;
+  }
+
+  a.hidden {
+    display: none;
+  }
+
+  .hint {
+    font-size: 0.8rem;
+    color: #555;
+    margin-top: 6px;
+    text-align: center;
+  }
+
+  @keyframes flash {
+    0% { opacity: 0; filter: brightness(3); }
+    100% { opacity: 1; filter: brightness(1); }
+  }
+
+  header h1 {
+    background: linear-gradient(90deg, #ff9800, #2196f3);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  /* 📱 MOBILE RESPONSIVE ADJUSTMENTS */
+  @media (max-width: 480px) {
+    .app {
+      width: 100%;
+    }
+
+    #stageWrap {
+      width: 100%;
+      height: 80vh;
+      border-radius: 12px;
+    }
+
+    h1 {
+      font-size: 0.9rem;
+    }
+
+    button,
+    select,
+    input[type="file"] {
+      font-size: 0.85rem;
+      padding: 6px 8px;
+    }
+
+    .status,
+    .hint {
+      font-size: 0.8rem;
+    }
+  }
+  
+  
+  
+  .comment-bubble {
+  position: absolute; /* inside container */
+  bottom: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #fffa65, #ff6b6b);
+  color: #000;
+  font-size: 22px;
+  font-weight: bold;
+  padding: 18px 28px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  z-index: 999;
+  pointer-events: none;
+  white-space: pre-wrap;
+}
+
+/* Pulse animation */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.05); }
+}
+  
+</style>
+
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Elimu Connect • ShortsGen v4</h1>
+      <div class="small">9:16 Canvas • Cartoon bubble subtitles • Auto WebM</div>
+    </header>
+
+    <div class="controls">
+      <label>Duration:
+        <select id="duration"><option value="30">30s</option><option value="45">45s</option><option value="60" selected>60s</option></select>
+      </label>
+
+      <label>Voice method:
+        <select id="voiceMethod">
+          <option value="mic">Mic live (embed)</option>
+          <option value="upload">Upload voice file (embed)</option>
+          <option value="tts">SpeechSynthesis preview (not embedded)</option>
+        </select>
+      </label>
+
+      <label>Voice gender:
+        <select id="voiceGender"><option value="auto">Auto</option><option value="male">Male</option><option value="female">Female</option></select>
+      </label>
+    </div>
+
+    <div class="controls row">
+      <input type="file" id="voiceUpload" accept="audio/*" />
+      <button id="useUploadBtn">Use Upload</button>
+      <button id="genBtn">🎲 Generate Preview</button>
+      <button id="recordBtn">🔴 Start & Record (auto-stop)</button>
+    </div>
+
+    <div id="stageWrap" title="This box is the recorded 9:16 area">
+      <canvas id="canvasPreview" width="720" height="1280"></canvas>
+    </div>
+
+    <div class="controls">
+      <a id="downloadLink" class="hidden"></a>
+    </div>
+
+    <div class="status" id="status">Click Generate Preview to unlock audio, then press Start & Record.</div>
+    <div class="hint">Tip: if browser prompts to allow mic, allow it. For embedded narration use Upload or Mic. TTS is disabled (no narration).</div>
+  </div>
+
+<div id="short-container">
+  <div class="short-item" id="item1"></div>
+  <div class="short-item" id="item2"></div>
+  <div class="short-item" id="item3"></div>
+  <div class="short-item" id="item4"></div>
+</div>
+
+<script>
+/* ---------- Configuration & assets ---------- */
+const CANVAS_W = 720, CANVAS_H = 1280; // portrait 9:16
+
+
+let animRunning = false;
+let lastItemTime = 0;
+const ITEM_INTERVAL = 5000; // show new knowledge item every 5 seconds
+let currentItem = null;
+
+const BACKGROUNDS = [
+  { name: 'Background 1', url: 'https://cdn.pixabay.com/video/2022/09/04/130209-748134173_tiny.mp4' },
+  { name: 'Background 2', url: 'https://cdn.pixabay.com/video/2022/10/21/135955-764370986_tiny.mp4' },
+  { name: 'Background 3', url: 'https://cdn.pixabay.com/video/2024/06/06/215475_tiny.mp4' },
+  { name: 'Background 4', url: 'https://cdn.pixabay.com/video/2020/05/23/39892-423345743_tiny.mp4' },
+  { name: 'Background 5', url: 'https://cdn.pixabay.com/video/2016/09/13/5157-183300197_tiny.mp4' },
+  { name: 'Background 6', url: 'https://cdn.pixabay.com/video/2018/09/24/18400-291585376_tiny.mp4' },
+  { name: 'Background 7', url: 'https://cdn.pixabay.com/video/2018/09/24/18399-291585366_tiny.mp4' },
+  { name: 'Background 8', url: 'https://cdn.pixabay.com/video/2024/06/06/215470_tiny.mp4' },
+  { name: 'Background 9', url: 'https://cdn.pixabay.com/video/2021/05/03/73007-545277076_tiny.mp4' },
+  { name: 'Background 10', url: 'https://cdn.pixabay.com/video/2020/04/08/35453-407130965_tiny.mp4' },
+  { name: 'Background 11', url: 'https://cdn.pixabay.com/video/2021/01/03/61037-497754241_tiny.mp4' },
+  { name: 'Background 12', url: 'https://cdn.pixabay.com/video/2022/09/20/131989-751915301_tiny.mp4' }
+];
+
+const KNOWLEDGE_ITEMS = [
+  {
+    text: "Struggling with exams? Crush them with Elimu Connect app from Play Store! Covers KCSE, CBC, IGCSE, CBSE, ICSE & more.",
+    textSW: "Unapata shida na mitihani? Shinda mitihani hiyo na Elimu Connect app kutoka Play Store! Inashughulikia KCSE, CBC, IGCSE, CBSE, ICSE na mengine mengi.",
+    category: "Ad", duration: 8, askComment: true
+  },
+  {
+    text: "Don’t stress over homework! AI + human tutors on Elimu Connect app from Play Store are here 24/7. Only Ksh 500/month in Kenya, $8 worldwide!",
+    textSW: "Usijali kuhusu kazi ya nyumbani! Walimu wa AI + kibinadamu kwenye Elimu Connect app kutoka Play Store wako 24/7. Ksh 500/mwezi Kenya, $8 duniani kote!",
+    category: "Ad", duration: 8, askComment: true
+  },
+  {
+    text: "Confused by Maths formulas? Master them instantly on Elimu Connect app from Play Store – for KCSE, CBC, IGCSE & more!",
+    textSW: "Umchanganyikiwa na formulas za Hisabati? Zidisha uelewa wako mara moja kwenye Elimu Connect app kutoka Play Store – kwa KCSE, CBC, IGCSE na mengine!",
+    category: "Ad", duration: 8, askComment: true
+  },
+  {
+    text: "Need top grades fast? Access 5000+ quizzes & 2000+ videos on Elimu Connect app from Play Store – all curricula covered!",
+    textSW: "Unataka alama za juu haraka? Pata mitihani 5000+ & mafundisho ya video 2000+ kwenye Elimu Connect app kutoka Play Store – mitaala yote inashughulikiwa!",
+    category: "Ad", duration: 9, askComment: true
+  },
+  {
+    text: "Maths made easy! Play fun games & learn at your own pace on Elimu Connect app from Play Store – KCSE, CBC, IGCSE, CBSE, ICSE.",
+    textSW: "Hisabati imefanywa rahisi! Cheza michezo ya kufurahisha & jifunze kwa kasi yako kwenye Elimu Connect app kutoka Play Store – KCSE, CBC, IGCSE, CBSE, ICSE.",
+    category: "Ad", duration: 8, askComment: true
+  },
+  {
+    text: "Late-night study? No problem! AI tutor ready anytime on Elimu Connect app from Play Store – subscription Ksh 500/month (Kenya), $8 worldwide!",
+    textSW: "Masomo ya usiku wa manane? Hakuna shida! Mwalimu wa AI yupo wakati wowote kwenye Elimu Connect app kutoka Play Store – usajili Ksh 500/mwezi (Kenya), $8 duniani kote!",
+    category: "Ad", duration: 7, askComment: true
+  },
+  {
+    text: "Exam panic? Practice past papers & get certificates on Elimu Connect app from Play Store – KCSE, CBC, IGCSE, CBSE, ICSE!",
+    textSW: "Kuweka hofu ya mitihani? Fanya mazoezi na upate vyeti kwenye Elimu Connect app kutoka Play Store – KCSE, CBC, IGCSE, CBSE, ICSE!",
+    category: "Ad", duration: 8, askComment: true
+  },
+  {
+    text: "No tutor nearby? Find the BEST private tutor instantly on Elimu Connect app from Play Store – for all major curricula!",
+    textSW: "Hakuna mwalimu karibu? Pata mwalimu binafsi BORA mara moja kwenye Elimu Connect app kutoka Play Store – kwa mitaala yote mikubwa!",
+    category: "Ad", duration: 8, askComment: true
+  },
+  {
+    text: "Revise smarter! Use AI timetable generator & track progress on Elimu Connect app from Play Store – KCSE, CBC, IGCSE & more!",
+    textSW: "Rudia kwa akili! Tumia kipanga ratiba cha AI & fuatilia maendeleo yako kwenye Elimu Connect app kutoka Play Store – KCSE, CBC, IGCSE na mengine!",
+    category: "Ad", duration: 8, askComment: true
+  },
+  {
+    text: "Affordable live lessons from Ksh 200/hour – start learning now on Elimu Connect app from Play Store. Full subscription Ksh 500/month (Kenya), $8 elsewhere!",
+    textSW: "Masomo ya moja kwa moja kwa bei nafuu kuanzia Ksh 200/sa saa – anza kujifunza sasa kwenye Elimu Connect app kutoka Play Store. Usajili kamili Ksh 500/mwezi (Kenya), $8 nje ya nchi!",
+    category: "Ad", duration: 7, askComment: true
+  }
+];
+
+
+
+
+// animals + birds + butterflies
+const ANIMALS = {
+  dogs: [
+    'https://cdn.pixabay.com/photo/2025/06/20/10/47/dog-9670619_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2018/03/18/18/06/australian-shepherd-3237735_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/09/25/13/12/dog-2785074_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+ 'https://cdn.pixabay.com/photo/2018/04/30/19/16/animal-3363688_640.jpg',
+    'https://cdn.pixabay.com/photo/2014/11/21/15/25/chameleon-540655_1280.jpg',
+    'https://cdn.pixabay.com/photo/2017/05/31/18/38/sea-2361247_640.jpg',
+     'https://cdn.pixabay.com/photo/2019/12/26/02/45/fish-with-lotus-4719551_640.png',
+    'https://cdn.pixabay.com/photo/2013/07/12/18/20/santa-claus-153309_640.png',
+    'https://cdn.pixabay.com/photo/2024/01/24/22/22/knight-8530654_640.jpg',
+   
+    'https://cdn.pixabay.com/photo/2016/05/02/12/58/tiger-1367197_640.jpg',
+    'https://cdn.pixabay.com/photo/2022/03/16/01/52/animal-7071426_640.jpg',
+    'https://cdn.pixabay.com/photo/2021/06/20/15/40/buffalo-6351352_640.jpg',
+    
+  ],
+  cats: [
+    'https://cdn.pixabay.com/photo/2022/03/27/11/23/cat-7094808_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/11/09/21/41/cat-2934720_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2015/11/15/20/21/cat-1044750_640.jpg',
+   'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2023/10/23/08/17/asian-giant-hornet-8335577_640.jpg',
+    'https://cdn.pixabay.com/photo/2020/04/10/07/42/wasp-5024465_640.jpg',
+    'https://cdn.pixabay.com/photo/2013/07/12/16/29/hornet-151003_640.png',
+      'https://cdn.pixabay.com/photo/2022/09/28/17/36/puffer-fish-7485602_640.jpg',
+    'https://cdn.pixabay.com/photo/2015/04/07/21/12/lionfish-711799_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/05/31/00/24/aquarium-2358739_640.jpg',
+     'https://cdn.pixabay.com/photo/2023/06/29/16/10/zebra-8096659_640.png',
+    'https://cdn.pixabay.com/photo/2020/05/04/09/09/giraffe-5128394_1280.jpg',
+    'https://cdn.pixabay.com/photo/2016/04/22/21/07/monkey-1346590_640.jpg'
+  ],
+  birds: [
+    'https://cdn.pixabay.com/photo/2023/07/24/22/07/european-herring-gull-8147941_640.jpg',
+    'https://cdn.pixabay.com/photo/2018/06/22/18/30/seagull-3491309_640.jpg',
+    'https://cdn.pixabay.com/photo/2024/11/22/18/18/mute-swan-9217198_640.jpg',
+    'https://cdn.pixabay.com/photo/2022/08/25/20/44/bird-7411270_640.jpg',
+    'https://cdn.pixabay.com/photo/2016/10/19/13/42/eagle-1753002_640.jpg'
+  ],
+  butterflies: [
+    'https://cdn.pixabay.com/photo/2023/05/30/15/12/blue-butterfuly-8028888_640.jpg',
+    'https://cdn.pixabay.com/photo/2018/06/24/18/46/butterfly-3495224_640.jpg',
+    'https://cdn.pixabay.com/photo/2014/08/28/22/41/speckled-wood-430203_640.jpg',
+    'https://cdn.pixabay.com/photo/2024/12/27/10/28/butterfly-clipart-9293644_640.png',
+    'https://cdn.pixabay.com/photo/2023/01/17/18/26/moth-7725205_640.jpg'
+  ],
+
+exotic: [
+    'https://cdn.pixabay.com/photo/2022/08/25/20/44/bird-7411270_640.jpg',
+  ],
+  fish: [
+    'https://cdn.pixabay.com/photo/2016/11/18/17/47/fish-1834823_640.jpg',
+    
+  ],
+  cartoons: [
+    'https://cdn.pixabay.com/photo/2020/06/23/18/10/cartoon-5331106_640.png',
+    
+  ],
+  insects: [
+    'https://cdn.pixabay.com/photo/2017/03/27/13/16/bee-2178341_640.jpg',
+   
+  ],
+  reptiles: [
+    'https://cdn.pixabay.com/photo/2016/11/23/14/45/lizard-1850046_640.jpg',
+
+  ],
+   
+};
+/* ---------- PIXABAY TRACKS (your chosen 4)
+   We use direct mp3 download CDN links (these should stream from Pixabay).
+   If any fail, download them and host them locally and update the URLs.
+*/
+
+const backgroundMusicList = [
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music1.mp3',
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music2.mp3',
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music3.mp3',
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music4.mp3',
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music5.mp3',
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music6.mp3',
+ 
+  'https://elimuconnect.github.io/ELIMU-CONNECT-/music7.mp3',
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music8.mp3',
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music9.mp3',
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music10.mp3',
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music11.mp3',
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music12.mp3'
+ 
+
+];
+
+  
+/* ---------- Generic shuffler utility (persistent) ---------- */
+/*
+  createShuffler(key, items)
+  - key: unique string to store state in localStorage
+  - items: source array (strings or objects)
+  returns { next(), peek(), reset(), remainingCount() }
+  Behavior:
+  - stores a shuffled list of indices in localStorage and a pointer
+  - if source array length changes, it resets the shuffle
+  - cycles through all items exactly once before reshuffling
+*/
+function createShuffler(key, items) {
+  const storageKey = 'shuffler_' + key;
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) {
+      console.warn('shuffler load failed', e);
+      return null;
+    }
+  }
+  function saveState(state) {
+    try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch (e) { console.warn('shuffler save failed', e); }
+  }
+  function makeOrder(n) {
+    const arr = Array.from({length:n}, (_,i)=>i);
+    // Fisher-Yates shuffle
+    for (let i = arr.length -1; i > 0; i--) {
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  let state = loadState();
+  // if state invalid or length mismatch -> reset
+  if (!state || !Array.isArray(state.order) || state.sourceLength !== items.length) {
+    state = { order: makeOrder(items.length), idx: 0, sourceLength: items.length, createdAt: Date.now() };
+    saveState(state);
+  }
+
+  function ensureFresh() {
+    // if source length changed since creation -> reset
+    if (state.sourceLength !== items.length) {
+      state = { order: makeOrder(items.length), idx: 0, sourceLength: items.length, createdAt: Date.now() };
+      saveState(state);
+    }
+  }
+
+  function next() {
+    ensureFresh();
+    if (state.idx >= state.order.length) {
+      // reshuffle once done
+      state.order = makeOrder(items.length);
+      state.idx = 0;
+      state.sourceLength = items.length;
+    }
+    const resultIndex = state.order[state.idx++];
+    saveState(state);
+    return items[resultIndex];
+  }
+
+  function peek() {
+    ensureFresh();
+    if (state.idx >= state.order.length) return null;
+    return items[state.order[state.idx]];
+  }
+
+  function reset() {
+    state = { order: makeOrder(items.length), idx: 0, sourceLength: items.length, createdAt: Date.now() };
+    saveState(state);
+  }
+
+  function remainingCount() {
+    ensureFresh();
+    return Math.max(0, state.order.length - state.idx);
+  }
+
+  return { next, peek, reset, remainingCount };
+}
+
+/* ---------- Canvas & drawing ---------- */
+const canvas = document.getElementById('canvasPreview');
+const ctx = canvas.getContext('2d', { alpha: false });
+
+
+function getRandomKnowledgeItem() {
+  return knowledgeShuffler.next();
+}
+
+const backgroundsShuffler = createShuffler('backgrounds', BACKGROUNDS);
+const dogsShuffler = createShuffler('dogs', ANIMALS.dogs);
+const catsShuffler = createShuffler('cats', ANIMALS.cats);
+const birdsShuffler = createShuffler('birds', ANIMALS.birds);
+const butterfliesShuffler = createShuffler('butterflies', ANIMALS.butterflies);
+const knowledgeShuffler = createShuffler('knowledge', KNOWLEDGE_ITEMS);
+
+
+// ---------------------
+// Global canvas & scene
+// ---------------------
+canvas.width = CANVAS_W;
+canvas.height = CANVAS_H;
+
+let activeTimer = null;
+let timerValue = 10; 
+let timerProgress = 1;
+
+let scene = {
+  backgroundImg: null,
+  bgName: '',
+  clouds: [
+    {x:-200, y:100, w:200, h:90, speed: 0.2},
+    {x:-350, y:240, w:220, h:100, speed: 0.12}
+  ],
+  animalA: {img:null, x:CANVAS_W*0.12, y:CANVAS_H-320, w:180, h:180, bounceTimer:0},
+  animalB: {img:null, x:CANVAS_W*0.62, y:CANVAS_H-300, w:150, h:150, bounceTimer:0},
+  flying: [],
+  emojis: [],
+  bubble: {text:'Welcome!', x:CANVAS_W*0.5, y:120},
+  subtitle: {text:'', x:CANVAS_W*0.5, y:CANVAS_H - 120}
+};
+
+function drawTimerArc(progress){
+  const cx = CANVAS_W - 150, cy = 220, r = 80;
+  const start = -Math.PI/2;
+  const end = start + progress * 2 * Math.PI;
+
+  // background
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2*Math.PI); 
+  ctx.strokeStyle = "#ddd"; ctx.lineWidth = 10; ctx.stroke();
+
+  // countdown
+  ctx.beginPath(); ctx.arc(cx, cy, r, end, start, true);
+  ctx.strokeStyle = "#1976d2"; ctx.lineWidth = 10; ctx.stroke();
+
+  // text
+  ctx.font = "bold 80px Arial"; ctx.fillStyle = "#FFD700"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(Math.ceil(progress*timerValue), cx, cy);
+}
+
+function animateTimer(duration){
+  const startTime = performance.now();
+  function step(now){
+    const elapsed = (now - startTime)/1000;
+    timerProgress = Math.max(1 - elapsed/duration, 0);
+    drawScene();
+    drawTimerArc(timerProgress);
+
+    if(timerProgress>0) requestAnimationFrame(step);
+    else { playSparkle(); nextKnowledgeItem(); }
+  }
+  requestAnimationFrame(step);
+}
+
+// ---------------------
+// Sparkle Effect
+// ---------------------
+function playSparkle(){
+  try{
+    const ctxAudio = new (window.AudioContext||window.webkitAudioContext)();
+    const osc = ctxAudio.createOscillator();
+    osc.type = "sine"; osc.frequency.value = 880; osc.connect(ctxAudio.destination); osc.start();
+    osc.stop(ctxAudio.currentTime + 0.15);
+
+    const flash = document.createElement("div");
+    flash.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.5);z-index:99999;pointer-events:none";
+    document.body.appendChild(flash);
+    setTimeout(()=>flash.remove(),150);
+  } catch(e){ console.warn("Sparkle skipped:",e); }
+}
+
+
+
+
+
+
+
+
+scene = {
+  backgroundImg: null,
+  bgName: '',
+  clouds: [
+    {x:-200, y:100, w:200, h:90, speed: 0.2},
+    {x:-350, y:240, w:220, h:100, speed: 0.12}
+  ],
+  animalA: {img:null, x:CANVAS_W*0.12, y:CANVAS_H-320, w:180, h:180, bounceTimer:0},
+  animalB: {img:null, x:CANVAS_W*0.62, y:CANVAS_H-300, w:150, h:150, bounceTimer:0},
+  flying: [], // additional flying animals (birds & butterflies)
+  emojis: [], // moving emojis
+  bubble: {text:'Welcome!', x:CANVAS_W*0.5, y:120},
+  subtitle: {text:'', x:CANVAS_W*0.5, y:CANVAS_H - 120}
+};
+
+/* ---------- UI elements ---------- */
+const durationSel = document.getElementById('duration');
+const voiceMethodSel = document.getElementById('voiceMethod');
+const voiceGenderSel = document.getElementById('voiceGender');
+const voiceUploadEl = document.getElementById('voiceUpload');
+const useUploadBtn = document.getElementById('useUploadBtn');
+const genBtn = document.getElementById('genBtn');
+const recordBtn = document.getElementById('recordBtn');
+const statusEl = document.getElementById('status');
+const downloadLink = document.getElementById('downloadLink');
+
+let currentTopic = null;
+let uploadedAudioBuffer = null;
+
+/* ---------- WebAudio: master mix & music loader ---------- */
+const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function ensureAudioCtx(){
+  if(!audioCtx){
+    audioCtx = new AudioContextClass();
+    audioCtx.masterGain = audioCtx.createGain();
+    audioCtx.masterGain.gain.value = 1;
+    audioCtx.masterDest = audioCtx.createMediaStreamDestination();
+    audioCtx.masterGain.connect(audioCtx.masterDest);
+    audioCtx.masterGain.connect(audioCtx.destination);
+  }
+  return audioCtx;
+}
+
+// unlock audio on first gesture and also ensure background music can start
+function unlockAudioOnGesture(){
+  const init = async ()=>{
+    ensureAudioCtx();
+    if(audioCtx.state === 'suspended') try{ await audioCtx.resume(); }catch(e){}
+    document.body.removeEventListener('click', init);
+    document.body.removeEventListener('keydown', init);
+    statusEl.textContent = 'Audio unlocked — ready.';
+  };
+  document.body.addEventListener('click', init);
+  document.body.addEventListener('keydown', init);
+}
+unlockAudioOnGesture();
+
+// BG track handling - load as AudioBuffer for recording capture
+let currentBgSource = null;
+let currentBgGain = null;
+
+
+async function playRandomBackgroundTrack(){
+  const ctx = ensureAudioCtx();
+  // stop previous
+  if(currentBgSource){
+    try{ currentBgSource.stop(); }catch(e){}
+    try{ currentBgSource.disconnect(); }catch(e){}
+    currentBgSource = null;
+  }
+  if(currentBgGain){ try{ currentBgGain.disconnect(); }catch(e){} currentBgGain=null; }
+
+  const url = backgroundMusicList[Math.floor(Math.random()*backgroundMusicList.length)];
+  try{
+    const resp = await fetch(url);
+    const ab = await resp.arrayBuffer();
+    const buf = await ctx.decodeAudioData(ab);
+    const src = ctx.createBufferSource();
+    const gain = ctx.createGain();
+    src.buffer = buf;
+    src.loop = true;
+    gain.gain.value = 0.8;
+    src.connect(gain); gain.connect(ctx.masterGain);
+    try{ src.start(); }catch(err){
+      try{ await ctx.resume(); src.start(); }catch(err){ console.warn('bg start error', err); }
+    }
+    currentBgSource = src; currentBgGain = gain;
+    return {src, gain};
+  }catch(err){
+    console.warn('Failed to load bg track', err);
+    statusEl.textContent = 'Could not load background track (no fallback audio).';
+    return null;
+  }
+}
+
+function stopCurrentBgTrack(){
+  try{ if(currentBgSource){ currentBgSource.stop(); currentBgSource.disconnect(); currentBgSource=null; } }catch(e){}
+  if(currentBgGain){ try{ currentBgGain.disconnect(); }catch(e){} currentBgGain=null; }
+}
+
+/* ---------- Simple synth fallback patterns (kept) ---------- */
+let bgPatternInterval = null, bgOscs = [];
+function startBgPattern(idx){
+  stopBgPattern();
+  const ctx = ensureAudioCtx();
+  if(idx === 0){
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    bgOscs = notes.map(n => {
+      const o = ctx.createOscillator(); const g = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = n; g.gain.value = 0;
+      o.connect(g); g.connect(ctx.masterGain); o.start();
+      return {o,g};
+    });
+    bgPatternInterval = setInterval(()=>{
+      const t = ctx.currentTime;
+      bgOscs.forEach((og,i)=>{
+        og.g.gain.cancelScheduledValues(t);
+        og.g.gain.linearRampToValueAtTime(0.07, t+0.01);
+        og.g.gain.linearRampToValueAtTime(0, t+0.45);
+      });
+    }, 520);
+  } else if(idx === 1){
+    const notes = [392, 523.25, 659.25, 784];
+    bgOscs = notes.map(n => {
+      const o = ctx.createOscillator(); const g = ctx.createGain();
+      o.type = 'square'; o.frequency.value = n; g.gain.value = 0;
+      o.connect(g); g.connect(ctx.masterGain); o.start();
+      return {o,g};
+    });
+    bgPatternInterval = setInterval(()=>{
+      const t = ctx.currentTime;
+      bgOscs.forEach((og,i)=>{
+        og.g.gain.cancelScheduledValues(t);
+        og.g.gain.linearRampToValueAtTime(0.07, t+0.01);
+        og.g.gain.linearRampToValueAtTime(0, t+0.5);
+      });
+    }, 480);
+  } else {
+    bgPatternInterval = setInterval(()=>{
+      const o = ctx.createOscillator(); const g = ctx.createGain();
+      o.type = 'triangle'; o.frequency.value = 600;
+      o.connect(g); g.connect(ctx.masterGain);
+      const t = ctx.currentTime;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.14, t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.001, t+0.5);
+      o.start(); o.stop(t+0.55);
+    }, 700);
+  }
+}
+function stopBgPattern(){ if(bgPatternInterval) { clearInterval(bgPatternInterval); bgPatternInterval = null; } if(bgOscs){ bgOscs.forEach(x=>{ try{x.o.stop()}catch(e){} }); bgOscs = []; } }
+
+/* ---------- Simple SFX (kept) ---------- */
+function playBoing(){ const ctx = ensureAudioCtx(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.type = 'triangle'; o.frequency.value = 520; o.connect(g); g.connect(ctx.masterGain); const t = ctx.currentTime; g.gain.linearRampToValueAtTime(0.12, t+0.01); g.gain.exponentialRampToValueAtTime(0.0001, t+0.6); o.start(); o.stop(t+0.8); }
+function playSparkle(){ const ctx = ensureAudioCtx(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.type = 'sine'; o.frequency.value = 1200; o.connect(g); g.connect(ctx.masterGain); const t = ctx.currentTime; g.gain.linearRampToValueAtTime(0.08, t+0.01); g.gain.exponentialRampToValueAtTime(0.001, t+0.4); o.start(); o.stop(t+0.6); }
+
+/* ---------- Load images helper ---------- */
+function loadImg(url){ return new Promise((res,rej)=>{ const i=new Image(); i.crossOrigin='anonymous'; i.onload=()=>res(i); i.onerror=()=>rej(new Error('Image load error '+url)); i.src=url; }); }
+
+/* ---------- Floating emojis setup ---------- */
+const EMOJIS = [
+  '📚','🧮','🎨','✏️','💡','🔢','🧑‍🏫','🌈',
+  '🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮',
+  '🐷','🐸','🐵','🦄','🐝','🦋','🐌','🐞','🦗','🐢','🐍','🐠','🐟','🐡','🦑','🦐',
+  '🦖','🦕','🐙','🐚','🦜','🐊','🦎','🐉','🐲','🐳','🐋','🦈',
+  '🌟','✨','🎵','🎶','🏫','📝','📖','📎','✂️','🖍️','🖌️','🧪','🔬','🧫',
+  '🌍','🌏','🪐','☀️','🌙','⚡','🔥','💧','🌊','🌳','🎯','🏆','🏅','🎁','🎉','🎈',
+  '🪁','🚀','🚲','🛶'
+];
+
+function spawnEmojis(count = 20) { // more emojis at once
+  scene.emojis = [];
+  for (let i = 0; i < count; i++) {
+    scene.emojis.push({
+      ch: EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
+      x: Math.random() * CANVAS_W,
+      y: Math.random() * CANVAS_H,
+      vx: (Math.random() * 2 - 1) * 0.6,
+      vy: -(0.3 + Math.random() * 0.9),
+      size: 20 + Math.random() * 36,
+      rot: Math.random() * Math.PI * 2,
+      rotV: (Math.random() * 2 - 1) * 0.03
+    });
+  }
+}
+
+
+/* ---------- Flying animals (all visible) ---------- */
+function spawnFlyingAnimals() {
+  scene.flying = [];
+
+  // spawn all birds
+  for (const url of ANIMALS.birds) {
+    scene.flying.push({
+      type: 'bird',
+      imgUrl: url,
+      x: -50 - Math.random() * 300, // start offscreen left
+      y: 50 + Math.random() * (CANVAS_H / 2),
+      vx: 0.5 + Math.random() * 1.5,
+      vy: Math.sin(Math.random() * 2 * Math.PI) * 0.4,
+      size: 50 + Math.random() * 50,
+      img: null
+    });
+  }
+
+  // spawn all butterflies
+  for (const url of ANIMALS.butterflies) {
+    scene.flying.push({
+      type: 'butterfly',
+      imgUrl: url,
+      x: CANVAS_W + 50 + Math.random() * 300, // start offscreen right
+      y: 100 + Math.random() * (CANVAS_H / 2),
+      vx: - (0.4 + Math.random() * 1.2),
+      vy: Math.sin(Math.random() * 2 * Math.PI) * 0.3,
+      size: 40 + Math.random() * 50,
+      img: null
+    });
+  }
+
+  // spawn exotic flying animals (parrots, etc.)
+  for (const url of ANIMALS.exotic) {
+    scene.flying.push({
+      type: 'exotic',
+      imgUrl: url,
+      x: Math.random() > 0.5 ? -50 - Math.random() * 300 : CANVAS_W + 50 + Math.random() * 300,
+      y: 50 + Math.random() * (CANVAS_H / 2),
+      vx: (Math.random() > 0.5 ? 0.5 : -0.5) + Math.random() * 1.5,
+      vy: Math.sin(Math.random() * 2 * Math.PI) * 0.3,
+      size: 50 + Math.random() * 50,
+      img: null
+    });
+  }
+}
+
+/* ---------- Get random knowledge item ---------- */
+function getRandomKnowledgeItem() {
+  return knowledgeShuffler.next();
+}
+
+/* ---------- Global flags ---------- */
+let assetsLoaded = false;
+async function prepareScene() {
+  statusEl.textContent = 'Preparing scene and assets...';
+  scene = scene || {};
+  scene.animalA = scene.animalA || {};
+  scene.animalB = scene.animalB || {};
+  scene.flying = scene.flying || [];
+  scene.clouds = scene.clouds || [];
+  scene.emojis = scene.emojis || [];
+  scene.subtitle = scene.subtitle || {};
+  scene.bubble = scene.bubble || {};
+
+  assetsLoaded = false;
+
+  try {
+    // --- Background ---
+    const bg = (backgroundsShuffler?.next() || { name: "Default", url: null });
+    scene.bgName = bg.name;
+
+    if (bg.url && bg.url.endsWith('.mp4')) {
+      scene.backgroundVideo = await loadVideo(bg.url).catch(() => null);
+      scene.backgroundImg = null;
+    } else if (bg.url) {
+      scene.backgroundImg = await loadImg(bg.url).catch(() => null);
+      scene.backgroundVideo = null;
+    } else {
+      scene.backgroundImg = null;
+      scene.backgroundVideo = null;
+    }
+
+    // --- Animals ---
+    const dogUrl = dogsShuffler?.next() || null;
+    const catUrl = catsShuffler?.next() || null;
+    scene.animalA.img = dogUrl ? await loadImg(dogUrl).catch(() => null) : null;
+    scene.animalB.img = catUrl ? await loadImg(catUrl).catch(() => null) : null;
+
+    // --- Flying animals ---
+    spawnFlyingAnimals();
+    for (const f of scene.flying) {
+      f.img = f.imgUrl ? await loadImg(f.imgUrl).catch(() => null) : null;
+    }
+
+    // --- Clouds & Emojis ---
+    scene.clouds = [];
+    const NUM_CLOUDS = 6;
+    for (let i = 0; i < NUM_CLOUDS; i++) {
+      scene.clouds.push({
+        x: Math.random() * CANVAS_W,
+        y: Math.random() * (CANVAS_H / 2),
+        w: 100 + Math.random() * 150,
+        h: 40 + Math.random() * 30,
+        speed: 0.2 + Math.random() * 0.3
+      });
+    }
+    spawnEmojis(16);
+
+    // --- Knowledge item ---
+    const firstItem = getRandomKnowledgeItem() || { text: "No knowledge item", askComment: false };
+    scene.subtitle.item = firstItem;
+    scene.bubble.item = firstItem;
+    scene.subtitle.text = firstItem.askComment ? "💬 What do you think?" : firstItem.text;
+    scene.bubble.text = firstItem.text;
+
+    // --- Audio ---
+    ensureAudioCtx();
+    try { await playRandomBackgroundTrack(); } catch (e) { console.warn("Audio failed:", e); }
+
+    // --- Emoji burst ---
+    for (let e of scene.emojis) e.vy -= Math.random() * 4 + 2;
+    playSparkle();
+
+    assetsLoaded = true;
+
+    // Flash effect
+    if (canvas) {
+      canvas.style.animation = 'flash 0.6s ease-out';
+      setTimeout(() => canvas.style.animation = '', 600);
+    }
+
+    statusEl.textContent = `Prepared: ${scene.bgName}`;
+  } catch (err) {
+    console.error("Scene preparation failed:", err);
+    statusEl.textContent = "Error preparing scene. Using fallback visuals.";
+
+    scene.bgName = "Fallback";
+    scene.backgroundImg = null;
+    scene.backgroundVideo = null;
+    scene.animalA.img = null;
+    scene.animalB.img = null;
+    scene.flying = [];
+    scene.clouds = [];
+    scene.emojis = [];
+    scene.subtitle.text = "Something went wrong 😅";
+    scene.bubble.text = "Try refreshing!";
+    assetsLoaded = true;
+  }
+}
+
+
+/* ---------- Drawing helpers ---------- */
+function drawRoundRect(x, y, width, height, radius, fillColor, strokeColor, lineWidth) {
+  if (!ctx) return;
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+  if (fillColor) { ctx.fillStyle = fillColor; ctx.fill(); }
+  if (strokeColor) { ctx.strokeStyle = strokeColor; ctx.lineWidth = lineWidth || 1; ctx.stroke(); }
+  ctx.restore();
+}
+
+
+
+/* ---------- Draw Scene ---------- */
+function drawScene(t) {
+  ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+
+  // --- Background (image or video) ---
+  if (scene.backgroundVideo) ctx.drawImage(scene.backgroundVideo, 0, 0, CANVAS_W, CANVAS_H);
+  else if (scene.backgroundImg) ctx.drawImage(scene.backgroundImg, 0, 0, CANVAS_W, CANVAS_H);
+  else { ctx.fillStyle = '#88d'; ctx.fillRect(0, 0, CANVAS_W, CANVAS_H); }
+
+  // --- Clouds ---
+  for (const c of scene.clouds) {
+    c.x += c.speed * (1 + Math.sin(t / 200));
+    if (c.x > CANVAS_W + 200) c.x = -250;
+    ctx.save();
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    ctx.beginPath();
+    ctx.ellipse(c.x, c.y, c.w*0.6, c.h*0.6, 0,0,2*Math.PI);
+    ctx.ellipse(c.x + c.w*0.4, c.y - 10, c.w*0.5, c.h*0.45, 0,0,2*Math.PI);
+    ctx.ellipse(c.x + c.w*0.7, c.y + 6, c.w*0.35, c.h*0.33, 0,0,2*Math.PI);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // --- Flying animals ---
+  for (const f of scene.flying) {
+    f.x += f.vx*(1 + Math.sin((performance.now() + f.y*0.01)/600));
+    f.y += Math.sin((performance.now()/500 + f.x*0.01))*0.5 + f.vy*0.5;
+    if(f.vx>0 && f.x>CANVAS_W+150){ f.x=-150; f.y=50+Math.random()*(CANVAS_H/2);}
+    if(f.vx<0 && f.x<-150){ f.x=CANVAS_W+150; f.y=50+Math.random()*(CANVAS_H/2);}
+    if(f.y<30) f.y=30; if(f.y>CANVAS_H/2) f.y=CANVAS_H/2;
+    if(f.img){ ctx.save(); ctx.translate(f.x+f.size/2,f.y+f.size/2); ctx.rotate(Math.sin(f.x/50)*0.15); ctx.drawImage(f.img,-f.size/2,-f.size/2,f.size,f.size); ctx.restore(); }
+  }
+
+  // --- Animals ---
+  function drawAnimal(a){
+    const bounce=Math.sin((t+(a.bounceTimer||0))/300)*12;
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(a.x + a.w/2, a.y+bounce + a.h - 20, a.w*0.3, 12, 0,0,2*Math.PI);
+    ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.fill();
+    if(a.img) ctx.drawImage(a.img, a.x, a.y+bounce, a.w, a.h);
+    ctx.restore();
+  }
+  scene.animalA.x=CANVAS_W*0.12; scene.animalB.x=CANVAS_W*0.62;
+  drawAnimal(scene.animalA); drawAnimal(scene.animalB);
+
+  // --- Emojis ---
+  for (const e of scene.emojis){
+    e.x+=e.vx; e.y+=e.vy; e.vy+=0.01; e.rot+=e.rotV;
+    if(e.y<-120||e.y>CANVAS_H+120||e.x<-80||e.x>CANVAS_W+80){
+      e.y=Math.random()*CANVAS_H; e.x=Math.random()*CANVAS_W; e.vy=-0.3-Math.random()*0.9; e.vx=(Math.random()*2-1)*0.6;
+    }
+    ctx.save(); ctx.translate(e.x,e.y); ctx.rotate(e.rot); ctx.font=`${e.size}px "Patrick Hand", Arial`; ctx.fillText(e.ch,0,0); ctx.restore();
+  }
+
+  
+ // --- Top text ---
+  ctx.fillStyle='rgba(255,255,255,0.9)'; 
+  ctx.font='bold 60px "Patrick Hand", Arial'; 
+  ctx.textAlign='center'; 
+  ctx.textBaseline='top';
+  ctx.fillText("Elimu Connect App In Play Store", CANVAS_W/2,40);
+
+  // --- Swahili bubble ---
+  drawSwahiliBubble();
+
+ // --- Subtitle / bubble text (center) ---
+const subtitleText = (scene.subtitle.item && scene.subtitle.item.text) || '';
+ctx.font = '"Patrick Hand", Arial, cursive';
+ctx.fillStyle = 'yellow';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+
+// Wrap text
+const wrapped = splitText(ctx, subtitleText, CANVAS_W - 60);
+const lineH = 60;
+const totalH = wrapped.length * lineH;
+let startY = CANVAS_H * 0.5 - totalH / 2 + 30;
+
+// Draw black background rectangle
+const paddingX = 40; // horizontal padding
+const paddingY = 20; // vertical padding per line
+const rectWidth = CANVAS_W - 60; 
+const rectHeight = totalH + paddingY * 2;
+ctx.fillStyle = 'rgba(0,0,0,0.7)'; // semi-transparent black
+ctx.fillRect(CANVAS_W/2 - rectWidth/2, startY - paddingY, rectWidth, rectHeight);
+
+// Draw text over black rectangle
+ctx.fillStyle = 'yellow';
+for (let i = 0; i < wrapped.length; i++) {
+  ctx.fillText(wrapped[i], CANVAS_W / 2, startY + i * lineH);
+}
+
+// --- Sliding logo ---
+drawSlidingLogo(t);
+}
+
+
+
+/* ---------- Sliding logo helper ---------- */
+let logoX = 0, logoPauseTimer = 0, isPaused = false;
+
+function drawSlidingLogo(time, deltaTime = 16) {
+  const logoText = '🎓 Online Tuition: @Sh500 Per month (Kenya) / $4 Per Month (worldwide) at Elimu Connect : Conquer Exams app on Play Store! 💻 Need a Website from Sh10,000? WhatsApp +254769255782! Sell your plot faster |Find your dream home or land in minutes! at realplot connect  🏡 ';
+
+  ctx.font = '28px "Patrick Hand", Arial';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'left';
+
+  const textWidth = ctx.measureText(logoText).width;
+  const rectH = 70, rectY = CANVAS_H - rectH - 150, rectW = CANVAS_W;
+
+  // ✅ Match same speed as second version (2.5 pixels/frame)
+  const speed = 2;
+
+  if (isPaused) {
+    logoPauseTimer += deltaTime;
+    if (logoPauseTimer >= 1000) { // pause for 1s
+      isPaused = false;
+      logoPauseTimer = 0;
+      logoX = 0; // reset position
+    }
+  } else {
+    logoX -= speed;
+    if (logoX <= -textWidth) {
+      isPaused = true;
+    }
+  }
+
+  // 🟦 Background bar
+  drawRoundRect(0, rectY, rectW, rectH, 20, 'rgba(255,255,255,0.95)', 'rgba(0,0,0,0.08)', 2);
+
+  // 🌈 Gradient text
+  const gradient = ctx.createLinearGradient(0, rectY, rectW, rectY + rectH);
+  gradient.addColorStop(0, '#ff8c00');
+  gradient.addColorStop(1, '#1976d2');
+  ctx.fillStyle = gradient;
+
+  // ✨ Draw seamless text
+  ctx.fillText(logoText, logoX, rectY + rectH / 2);
+  ctx.fillText(logoText, logoX + textWidth, rectY + rectH / 2);
+}
+
+  
+function drawSwahiliBubble() {
+  if (!scene.bubble || !scene.bubble.item) return;
+
+  const text = scene.bubble.item.textSW || scene.bubble.item.text || '';
+  if (!text) return;
+
+  ctx.save();
+
+  const t = performance.now();
+
+  // --- Sliding effect from right to left ---
+  ctx.font = 'bold 64px "Gloria Hallelujah", cursive';
+  const textWidth = ctx.measureText(text).width;
+  const padding = 20;
+
+  // Right-to-left sliding
+  const slideX = CANVAS_W - ((t / 5) % (CANVAS_W + textWidth));
+  ctx.translate(slideX, 120);
+
+  // --- Draw translucent background ---
+  ctx.globalAlpha = 0.5; // translucent
+  ctx.fillStyle = '#000'; // black background
+  ctx.fillRect(
+    -padding / 2,
+    -64 / 2 - padding / 2,
+    textWidth + padding,
+    64 + padding
+  );
+
+  // --- Draw text ---
+  ctx.globalAlpha = 1; // fully visible
+  ctx.fillStyle = '#ffb74d';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = '#000';
+  ctx.shadowBlur = 10;
+
+  ctx.fillText(text, 0, 0);
+
+  ctx.restore();
+}
+
+
+
+
+
+genBtn.addEventListener('click', async ()=>{
+  statusEl.textContent = 'Preparing scene...';
+  ensureAudioCtx();
+  try{
+    await prepareScene();
+    // Wait small moment to ensure first frames drawn
+    startAnimation();
+    setTimeout(()=> { if(!assetsLoaded) return; statusEl.textContent = 'Preview ready: ' + scene.bgName; }, 350);
+  }catch(e){
+    statusEl.textContent = 'Prepare failed: ' + e.message;
+    console.error(e);
+  }
+});
+
+
+/* ---------- Voice upload handling (left intact) ---------- */
+voiceUploadEl.addEventListener('change', async (e)=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  statusEl.textContent = 'Decoding uploaded audio...';
+  const ab = await f.arrayBuffer();
+  ensureAudioCtx();
+  uploadedAudioBuffer = await audioCtx.decodeAudioData(ab);
+  statusEl.textContent = 'Uploaded voice ready (will be embedded).';
+});
+useUploadBtn.addEventListener('click', ()=> {
+  if(!uploadedAudioBuffer){ statusEl.textContent = 'No uploaded file. Choose an audio file first.'; return; }
+  voiceMethodSel.value = 'upload';
+  statusEl.textContent = 'Upload selected as narration method.';
+});
+
+/* ---------- Removed speech-synthesis narration entirely ----------
+   (No TTS calls; only background music will play.)
+*/
+
+
+
+
+
+function loadImg(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";  // ✅ critical
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('Image failed: ' + url));
+    img.src = url;
+  });
+}
+
+
+
+function loadVideo(url) {
+  return new Promise((resolve, reject) => {
+    const vid = document.createElement('video');
+    vid.crossOrigin = "anonymous";  
+    vid.src = url;
+    vid.loop = true;
+    vid.muted = true;
+    vid.playsInline = true;
+    vid.onloadedmetadata = async () => {
+      try { await vid.play(); } catch(e){ console.warn('Video play failed:', e); }
+      resolve(vid);
+    };
+    vid.onerror = () => reject(new Error('Video failed: ' + url));
+  });
+}
+
+
+
+
+
+
+/* ---------- TikTok + YouTube Shorts Optimized Recorder ---------- */
+async function startRecordingAuto() {
+  ensureAudioCtx();
+  if (audioCtx.state === 'suspended') {
+    try { await audioCtx.resume(); } catch (e) {}
+  }
+
+  const subtitleText = scene?.subtitle?.text || document.getElementById('subtitleText')?.textContent || '';
+  if (!subtitleText.trim()) {
+    statusEl.textContent = 'Generate preview first.';
+    return;
+  }
+
+  // 🎵 ensure background track
+  if (!currentBgSource) await playRandomBackgroundTrack().catch(() => {});
+
+  let dur = parseInt(durationSel.value, 10) || 30;
+  if (dur > 60) {
+    alert("TikTok allows max 60s — trimming to 60s.");
+    dur = 60;
+  }
+
+  statusEl.textContent = `Recording ${dur}s — preparing streams...`;
+  await new Promise(r => setTimeout(r, 350));
+
+  // 🎥 capture canvas
+  let videoStream;
+  try {
+    videoStream = canvas.captureStream(30);
+  } catch (err) {
+    statusEl.textContent = 'Canvas capture not supported: ' + err.message;
+    return;
+  }
+
+  const combined = new MediaStream();
+  videoStream.getVideoTracks().forEach(t => combined.addTrack(t));
+
+  // 🎙️ optional mic
+  let liveMicStream = null;
+  if (voiceMethodSel.value === 'mic') {
+    try {
+      liveMicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      liveMicStream.getAudioTracks().forEach(t => combined.addTrack(t));
+      statusEl.textContent = '🎤 Live mic connected — speak now!';
+    } catch (err) {
+      console.warn('Mic error', err);
+    }
+  }
+
+  // uploaded narration
+  if (voiceMethodSel.value === 'upload' && uploadedAudioBuffer) {
+    const src = audioCtx.createBufferSource();
+    src.buffer = uploadedAudioBuffer;
+    src.connect(audioCtx.masterGain || audioCtx.destination);
+    src.start();
+  }
+
+  // background + sfx
+  if (audioCtx.masterDest && audioCtx.masterDest.stream) {
+    audioCtx.masterDest.stream.getAudioTracks().forEach(t => combined.addTrack(t));
+  }
+
+  // 🎬 set recording options
+  let options = { mimeType: 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"' };
+  if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+    console.warn('H.264 MP4 not supported, fallback to WebM.');
+    options = { mimeType: 'video/webm;codecs=vp8,opus' };
+  }
+
+  recordedChunks = [];
+  let mediaRecorder;
+  try {
+    mediaRecorder = new MediaRecorder(combined, options);
+  } catch (err) {
+    statusEl.textContent = 'MediaRecorder failed: ' + err.message;
+    return;
+  }
+
+  mediaRecorder.ondataavailable = e => {
+    if (e.data && e.data.size) recordedChunks.push(e.data);
+  };
+  mediaRecorder.onstart = () => {
+    statusEl.textContent = 'Recording... (auto stops after ' + dur + 's)';
+  };
+  mediaRecorder.onerror = e => {
+    statusEl.textContent = 'Recording error: ' + e.message;
+  };
+
+  mediaRecorder.onstop = async () => {
+    if (liveMicStream) liveMicStream.getTracks().forEach(t => t.stop());
+    stopCurrentBgTrack();
+
+    const mime = options.mimeType.includes('mp4') ? 'video/mp4' : 'video/webm';
+    let blob = new Blob(recordedChunks, { type: mime });
+
+    // ✅ Convert to TikTok MP4 if needed
+    if (mime === 'video/webm') {
+      statusEl.textContent = 'Converting WebM → MP4 for TikTok...';
+      blob = await convertToMp4(blob);
+    }
+
+    const url = URL.createObjectURL(blob);
+    const fileName = `elimu_short_${dur}s_${Date.now()}.mp4`;
+    downloadLink.href = url;
+    downloadLink.download = fileName;
+    downloadLink.textContent = '⬇️ Download TikTok & YouTube-Ready MP4';
+    downloadLink.classList.remove('hidden');
+    statusEl.textContent = '✅ Recording complete — ready to upload!';
+    setTimeout(() => { try { downloadLink.click(); } catch (e) {} }, 300);
+  };
+
+  mediaRecorder.start(1000);
+
+  // 🗨️ subtitles + sfx timing
+  const parts = splitText(subtitleText, 3);
+  parts.forEach((p, i) => {
+    setTimeout(() => {
+      if (scene?.subtitle) scene.subtitle.text = p;
+      playBoing();
+    }, Math.floor((i + 0.5) * (dur / parts.length) * 1000));
+  });
+
+  // ⏱ auto stop
+  setTimeout(() => {
+    try {
+      if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+    } catch (e) {}
+  }, dur * 1000 + 500);
+}
+
+<!-- ✅ Add this near the end of your HTML file -->
+
+
+
+async function convertToMp4(webmBlob) {
+  try {
+    statusEl.textContent = "⏳ Converting to TikTok-friendly MP4...";
+    const { createFFmpeg, fetchFile } = FFmpeg;
+    const ffmpeg = createFFmpeg({ log: false });
+    await ffmpeg.load();
+
+    ffmpeg.FS('writeFile', 'input.webm', await fetchFile(webmBlob));
+    await ffmpeg.run('-i', 'input.webm', '-c:v', 'libx264', '-c:a', 'aac', '-b:a', '192k', 'output.mp4');
+
+    const data = ffmpeg.FS('readFile', 'output.mp4');
+    const mp4Blob = new Blob([data.buffer], { type: 'video/mp4' });
+
+    statusEl.textContent = "✅ Conversion complete — ready to download!";
+    return mp4Blob;
+  } catch (err) {
+    console.error("FFmpeg conversion failed:", err);
+    statusEl.textContent = "⚠️ Conversion failed — WebM used instead.";
+    return webmBlob;
+  }
+}
+
+
+
+
+
+  
+
+function splitText(ctx, text, maxWidth) {
+  if (!text || typeof text !== "string") return [];
+  const words = text.trim().split(/\s+/);
+  const lines = [];
+  let line = "";
+
+  for (let i = 0; i < words.length; i++) {
+    const testLine = line ? line + " " + words[i] : words[i];
+    const testWidth = ctx.measureText(testLine).width;
+
+    // if the line would exceed max width, push the old one
+    if (testWidth > maxWidth && line !== "") {
+      lines.push(line);
+      line = words[i]; // start a new line
+    } else {
+      line = testLine;
+    }
+  }
+
+  // push any remaining text
+  if (line) lines.push(line);
+
+  return lines;
+}
+
+// ---------- Knowledge items counter ----------
+let knowledgeIndex = 0; // starts at 0
+let showingKnowledge = false; // ensures nothing shows before clicking
+
+function nextKnowledgeItem() {
+  if (!showingKnowledge) return;
+
+  if (usedFacts.length >= KNOWLEDGE_ITEMS.length) {
+    statusEl.textContent = 'All items completed!';
+    return;
+  }
+
+  // Pick random unused item
+  const unused = KNOWLEDGE_ITEMS.filter((_, i) => !usedFacts.includes(i));
+  const idx = Math.floor(Math.random() * unused.length);
+  const item = unused[idx];
+  const realIndex = KNOWLEDGE_ITEMS.indexOf(item);
+  usedFacts.push(realIndex);
+
+  // Show numbering (optional)
+  const counterText = `${usedFacts.length}/6`;
+
+  showKnowledgeItem({
+    ...item,
+    text: `${counterText} • ${item.text}`
+  });
+
+  
+  
+}
+
+recordBtn.addEventListener('click', async () => {
+  ensureAudioCtx();
+  if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+  if (!assetsLoaded) {
+    statusEl.textContent = 'Scene not ready. Preparing...';
+    try {
+      await prepareScene();
+      startAnimation();
+    } catch (e) {
+      statusEl.textContent = 'Failed to prepare scene: ' + e.message;
+      console.error(e);
+      return; // ✅ valid inside async arrow
+    }
+  }
+  
+  // Start the flow
+  showingKnowledge = true;
+  usedFacts = [];           // reset used items
+  nextKnowledgeItem();      // show first random item
+
+  // Mini loop for Swahili bubble effects
+  function bubbleLoop() {
+    if (!showingKnowledge) return;
+    if (scene.bubble.item) drawSwahiliBubble();
+    requestAnimationFrame(bubbleLoop);
+  }
+  requestAnimationFrame(bubbleLoop);
+
+  // Mic support check
+  if (voiceMethodSel.value === 'mic' && !navigator.mediaDevices?.getUserMedia) {
+    statusEl.textContent = 'Mic not supported in this browser.';
+    return;
+  }
+
+  // Start recording
+  try {
+    await startRecordingAuto();
+  } catch (err) {
+    statusEl.textContent = 'Recording failed: ' + err.message;
+    console.error(err);
+  }
+}); // ✅ closes the click listener
+
+
+
+
+// Optional helper for comment items
+function showCommentPrompt(item) {
+  // Customize this for your shorts UI
+  console.log("💬 Ask your viewers:", item.text);
+  // Example: show a speech bubble overlay
+  const bubble = document.createElement('div');
+  bubble.className = 'comment-bubble';
+  bubble.textContent = item.text;
+  document.body.appendChild(bubble);
+  setTimeout(() => bubble.remove(), 5000); // remove after 5s
+}
+// Optional helper for comment items
+function showCommentPrompt(item) {
+  // Only show if item asks for comment
+  if (!item.askComment) return;
+
+  // Example: show a speech bubble overlay below the main card
+  const bubble = document.createElement('div');
+  bubble.className = 'comment-bubble';
+
+  // ✅ Fixed comment text instead of item.text
+  bubble.textContent = "💬 Comment your answer";
+
+  // Style it smartly
+  bubble.style.position = 'absolute';
+  bubble.style.bottom = '10%';      // below main bubble
+  bubble.style.left = '50%';
+  bubble.style.transform = 'translateX(-50%)';
+  bubble.style.fontSize = '32px';
+  bubble.style.color = '#ff5722';
+  bubble.style.background = 'rgba(255,255,255,0.8)';
+  bubble.style.padding = '8px 16px';
+  bubble.style.borderRadius = '12px';
+  bubble.style.textAlign = 'center';
+  bubble.style.fontFamily = "'Patrick Hand', Comic Sans";
+  bubble.style.boxShadow = '0 0 15px #fff';
+  bubble.style.zIndex = 9999;
+  bubble.style.maxWidth = '80%';      // fit nicely in card
+  bubble.style.whiteSpace = 'pre-wrap'; // allow line breaks
+
+  document.body.appendChild(bubble);
+
+  // Remove after 5 seconds
+  setTimeout(() => bubble.remove(), 5000);
+}
+
+
+
+
+
+
+
+function getRandomKnowledgeItem() {
+  if (usedFacts.length >= KNOWLEDGE_ITEMS.length) {
+    usedFacts = []; // Reset when all have been used
+  }
+
+  // Pick only unused items
+  const unused = KNOWLEDGE_ITEMS.filter((_, i) => !usedFacts.includes(i));
+  const idx = Math.floor(Math.random() * unused.length);
+  const item = unused[idx];
+
+  // Mark it as used
+  const realIndex = KNOWLEDGE_ITEMS.indexOf(item);
+  usedFacts.push(realIndex);
+
+  return item;
+}
+
+// When clicking Start & Record
+startBtn.addEventListener('click', () => {
+  currentItem = getRandomKnowledgeItem(); // Pick a random item to start with
+  startAnimation();
+});
+
+
+
+window.addEventListener('load', ()=> {
+  // Warm audio context/voices (no TTS used)
+  try { speechSynthesis.getVoices(); } catch(e){}
+
+  // Only update status — don't start scene yet
+  statusEl.textContent = 'Ready. Click Generate Preview and then Start & Record.';
+});
+
+
+
+// Now it's safe to use
+function getRandomKnowledgeItem() {
+  return knowledgeShuffler.next();
+}
+
+
+
+
+function startAnimation() {
+  if (animRunning) return;
+  animRunning = true;
+  let start = performance.now();
+
+  // Pick initial item immediately
+  currentItem = getRandomKnowledgeItem();
+  lastItemTime = start;
+
+  function loop(now) {
+    const t = now - start;
+
+    // Animate animals
+    scene.animalA.bounceTimer = t;
+    scene.animalB.bounceTimer = t + 70;
+    drawScene(t);
+
+    // Update knowledge item every ITEM_INTERVAL
+    if (now - lastItemTime > ITEM_INTERVAL) {
+      currentItem = getRandomKnowledgeItem();
+      lastItemTime = now;
+    }
+
+    // Draw comment effect for current item
+    drawCommentEffect(t, currentItem);
+
+    if (animRunning) requestAnimationFrame(loop);
+  }
+
+  requestAnimationFrame(loop);
+}
+
+function stopAnimation() {
+  animRunning = false;
+}
+
+
+function drawCommentEffect(time, item) { 
+  if (!ctx || !item) return;
+
+  ctx.save();
+
+  // 💬 Floating animation (same style)
+  const baseY = CANVAS_H / 2 + 200; // position BELOW main text
+  const floatY = baseY - Math.sin(time / 400) * 12;
+
+  // Bubble background (rounded)
+  const bubbleWidth = 520;
+  const bubbleHeight = 150; // slightly taller for two lines
+  const bubbleX = (CANVAS_W / 2) - (bubbleWidth / 2);
+  const bubbleY = floatY - bubbleHeight / 2;
+
+  // 🔆 Gradient bubble background
+  const gradient = ctx.createLinearGradient(bubbleX, bubbleY, bubbleX, bubbleY + bubbleHeight);
+  gradient.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+  gradient.addColorStop(1, 'rgba(255, 220, 150, 0.9)');
+
+  // Draw bubble background
+  ctx.beginPath();
+  ctx.roundRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight, 30);
+  ctx.fillStyle = gradient;
+  ctx.shadowColor = 'rgba(255, 200, 50, 0.9)';
+  ctx.shadowBlur = 25;
+  ctx.fill();
+
+  // Border
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = 'rgba(255, 100, 0, 0.8)';
+  ctx.stroke();
+
+  // 💬 Comment line
+  ctx.font = 'bold 42px "Patrick Hand", Comic Sans MS, Arial';
+  ctx.fillStyle = '#ff5722';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = 'rgba(0,0,0,0.2)';
+  ctx.shadowBlur = 0;
+  ctx.fillText('📲 Install now!', CANVAS_W / 2, floatY - 25);
+
+  // 📢 Subscribe line (below)
+  ctx.font = 'bold 38px "Patrick Hand", Comic Sans MS, Arial';
+  ctx.fillStyle = '#1976d2';
+  ctx.fillText('📢 Please Subscribe!', CANVAS_W / 2, floatY + 35);
+
+  ctx.restore();
+}
+
+
+
+function showKnowledgeItem(item) {
+  if (!item) return;
+
+  if (activeTimer) cancelAnimationFrame(activeTimer);
+
+  // Assign current item to scene
+  scene.subtitle.item = item;
+  scene.bubble.item = item;
+ // Always show the main item text only — comment will be drawn separately
+scene.subtitle.text = item.text;
+
+  scene.bubble.text = item.text;
+
+  // Start time for animations
+  scene.subtitle.startTime = performance.now(); 
+  timerValue = item.duration || 10;
+  const startTime = performance.now();
+
+  function step(now) {
+    const elapsed = (now - startTime) / 1000;
+    timerProgress = Math.max(1 - elapsed / timerValue, 0);
+
+    // Draw the main scene (knowledge text)
+    drawScene(now);            
+
+    // Draw timer arc
+    drawTimerArc(timerProgress); 
+
+    // If this knowledge item needs a comment, draw it BELOW
+    if (item.askComment) {
+      drawCommentEffect(now, item);
+    }
+
+    // Draw Swahili bubble
+    drawSwahiliBubble();
+
+    if (timerProgress > 0) {
+      activeTimer = requestAnimationFrame(step);
+    } else {
+      playSparkle();
+      nextKnowledgeItem();
+    }
+  }
+
+  activeTimer = requestAnimationFrame(step);
+}
+
+
+
+
+
+
+</script>
+</body> 
+</html>
+
+

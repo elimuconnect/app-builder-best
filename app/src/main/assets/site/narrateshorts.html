@@ -1,0 +1,1084 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Elimu Connect • 5-Minute Compilation (Merged)</title>
+
+
+
+  <style>
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    margin: 0;
+    padding: 0;
+    background: #0b1220;
+    color: #fff;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  header {
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 22px;
+    margin: 0;
+  }
+
+  .small {
+    font-size: 12px;
+    color: #cbd5e1;
+  }
+
+  .controls {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 8px 0;
+  }
+
+  .controls label {
+    font-size: 14px;
+  }
+
+  /* ✅ Desktop: fills 3/4 of screen */
+  #stageWrap {
+    position: relative;
+    width: 75vw;       /* 3/4 of viewport width */
+    height: 75vh;      /* 3/4 of viewport height */
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+    background: #000;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;   /* scale canvas visually */
+    height: 100%;  /* scale canvas visually */
+  }
+
+  .status {
+    margin-top: 10px;
+    color: #fffb;
+    font-size: 13px;
+  }
+
+  .hint {
+    font-size: 12px;
+    color: #cbd5e1;
+    text-align: center;
+  }
+
+  button {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 0;
+    background: #1f2937;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  a {
+    color: #9ae6b4;
+  }
+
+  /* ✅ Mobile phones: switch to 9:16 portrait ratio */
+  @media (max-width: 768px) {
+    #stageWrap {
+      width: 90vw;
+      aspect-ratio: 9 / 16;
+      height: auto; /* maintain ratio automatically */
+    }
+  }
+</style>
+
+  
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Elimu Connect • 2-Minute Compilation</h1>
+      <div class="small">10 Clips (15s each) • Total Duration: 2.5 Minutes</div>
+    </header>
+
+    <div class="controls">
+      <label>Voice method:
+        <select id="voiceMethod">
+          <option value="mic">Mic live (embed)</option>
+          <option value="upload">Upload voice file (embed)</option>
+          <option value="tts" selected>TTS preview (not embedded)</option>
+        </select>
+      </label>
+
+      <label>Voice gender:
+        <select id="voiceGender"><option value="auto" selected>Auto</option><option value="male">Male</option><option value="female">Female</option></select>
+      </label>
+    </div>
+
+    <div class="controls">
+      <input type="file" id="voiceUpload" accept="audio/*" class="w-full sm:w-auto" />
+      <button id="useUploadBtn">Use Upload</button>
+    </div>
+    
+    <div class="controls">
+      <button id="genBtn" class="w-full sm:w-1/2">🎲 Generate Preview (Clip 1)</button>
+      <button id="recordBtn" class="w-full sm:w-1/2">🔴 Start 2.5-Minute Record</button>
+    </div>
+
+    <div id="stageWrap" title="This box is the recorded 9:16 area">
+      <canvas id="canvasPreview" width="720" height="1280"></canvas>
+    </div>
+
+    <div class="controls">
+      <a id="downloadLink" class="hidden"></a>
+    </div>
+
+    <div class="status" id="status">Click Generate Preview to check the first clip's visuals and audio.</div>
+    <div class="hint">The recording will automatically stop after 30 minutes (30 transitions). Audio is captured only from the background music and any embedded voice method (mic/upload).</div>
+  </div>
+
+
+
+<script>
+/* =========================
+   MERGED: A + assets from B
+   Single file output
+   ========================= */
+
+/* ---------- CONFIGURATION FOR 30 MIN VIDEO ---------- */
+const CANVAS_W = 720, CANVAS_H = 1280; // portrait 9:16
+const CLIP_DURATION_S = 15; 
+const TOTAL_CLIPS = 10;
+const TOTAL_DURATION_MS = TOTAL_CLIPS * CLIP_DURATION_S * 1000;
+
+/* ---------- Global State & Control ---------- */
+let currentClip = 0;
+let longRecordingTimeout = null;
+let clipCycleInterval = null;
+let animationFrameId = null;
+let mediaRecorder = null;
+let recordedChunks = [];
+let audioTrack = null;
+let videoTrack = null;
+let timerProgress = 1;
+let currentTopic = null;
+let assetsLoaded = false;
+let clipStartTime = 0;
+
+/* ---------- UI elements and Canvas Setup ---------- */
+const canvas = document.getElementById('canvasPreview');
+const ctx = canvas.getContext('2d', { alpha: false });
+canvas.width = CANVAS_W;
+canvas.height = CANVAS_H;
+
+const voiceMethodSel = document.getElementById('voiceMethod');
+const voiceGenderSel = document.getElementById('voiceGender');
+const voiceUploadEl = document.getElementById('voiceUpload');
+const useUploadBtn = document.getElementById('useUploadBtn');
+const genBtn = document.getElementById('genBtn');
+const recordBtn = document.getElementById('recordBtn');
+const statusEl = document.getElementById('status');
+const downloadLink = document.getElementById('downloadLink');
+
+recordBtn.disabled = false;
+
+/* =========================
+   ASSETS & DATA (from B)
+   ========================= */
+const BACKGROUNDS = [
+{ name: 'Cat 2', url: 'https://res.cloudinary.com/dwvt4e9o2/image/upload/v1767447072/ChatGPT_Image_Jan_3_2026_04_20_13_PM_qcovmo.png', type: 'image' },
+  { name: 'Forest Glade', url: 'https://res.cloudinary.com/dwvt4e9o2/image/upload/v1767447072/ChatGPT_Image_Jan_3_2026_04_20_13_PM_qcovmo.png', type: 'image' },
+
+  { name: 'Grasshopper', url: 'https://res.cloudinary.com/dwvt4e9o2/image/upload/v1767447059/ChatGPT_Image_Jan_3_2026_04_30_05_PM_l2zeo9.png', type: 'image' },
+  { name: 'Forest Glade', url: 'https://res.cloudinary.com/dwvt4e9o2/image/upload/v1767447064/ChatGPT_Image_Jan_3_2026_04_20_16_PM_tqf0zc.png', type: 'image' },
+
+   { name: 'Forest Glade1', url: 'https://res.cloudinary.com/dwvt4e9o2/image/upload/v1767447058/ChatGPT_Image_Jan_3_2026_04_22_02_PM_kx2hev.png', type: 'image' },
+
+  
+
+
+  
+];
+const KNOWLEDGE_ITEMS = [
+  
+  
+  { text: "👹💀", textSW: " 💀👹Usiku Uliokataa Kulala — Siri ya Mtaa Uliojaa Roho", category: "Domestic Animals", duration: 7, askComment: false },
+  
+  
+  ];
+  
+  
+  
+  
+// animals + birds + butterflies
+const ANIMALS = {
+  dogs: [
+    'https://cdn.pixabay.com/photo/2025/06/20/10/47/dog-9670619_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2018/03/18/18/06/australian-shepherd-3237735_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/09/25/13/12/dog-2785074_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+ 'https://cdn.pixabay.com/photo/2018/04/30/19/16/animal-3363688_640.jpg',
+    'https://cdn.pixabay.com/photo/2014/11/21/15/25/chameleon-540655_1280.jpg',
+    'https://cdn.pixabay.com/photo/2017/05/31/18/38/sea-2361247_640.jpg',
+     'https://cdn.pixabay.com/photo/2019/12/26/02/45/fish-with-lotus-4719551_640.png',
+    'https://cdn.pixabay.com/photo/2013/07/12/18/20/santa-claus-153309_640.png',
+    'https://cdn.pixabay.com/photo/2024/01/24/22/22/knight-8530654_640.jpg',
+   
+    'https://cdn.pixabay.com/photo/2016/05/02/12/58/tiger-1367197_640.jpg',
+    'https://cdn.pixabay.com/photo/2022/03/16/01/52/animal-7071426_640.jpg',
+    'https://cdn.pixabay.com/photo/2021/06/20/15/40/buffalo-6351352_640.jpg',
+    
+  ],
+  cats: [
+    'https://cdn.pixabay.com/photo/2022/03/27/11/23/cat-7094808_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/11/09/21/41/cat-2934720_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2015/11/15/20/21/cat-1044750_640.jpg',
+   'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2023/10/23/08/17/asian-giant-hornet-8335577_640.jpg',
+    'https://cdn.pixabay.com/photo/2020/04/10/07/42/wasp-5024465_640.jpg',
+    'https://cdn.pixabay.com/photo/2013/07/12/16/29/hornet-151003_640.png',
+      'https://cdn.pixabay.com/photo/2022/09/28/17/36/puffer-fish-7485602_640.jpg',
+    'https://cdn.pixabay.com/photo/2015/04/07/21/12/lionfish-711799_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/05/31/00/24/aquarium-2358739_640.jpg',
+     'https://cdn.pixabay.com/photo/2023/06/29/16/10/zebra-8096659_640.png',
+    'https://cdn.pixabay.com/photo/2020/05/04/09/09/giraffe-5128394_1280.jpg',
+    'https://cdn.pixabay.com/photo/2016/04/22/21/07/monkey-1346590_640.jpg'
+  ],
+  birds: [
+    'https://cdn.pixabay.com/photo/2023/07/24/22/07/european-herring-gull-8147941_640.jpg',
+    'https://cdn.pixabay.com/photo/2018/06/22/18/30/seagull-3491309_640.jpg',
+    'https://cdn.pixabay.com/photo/2024/11/22/18/18/mute-swan-9217198_640.jpg',
+    'https://cdn.pixabay.com/photo/2022/08/25/20/44/bird-7411270_640.jpg',
+    'https://cdn.pixabay.com/photo/2016/10/19/13/42/eagle-1753002_640.jpg'
+  ],
+  butterflies: [
+    'https://cdn.pixabay.com/photo/2023/05/30/15/12/blue-butterfuly-8028888_640.jpg',
+    'https://cdn.pixabay.com/photo/2018/06/24/18/46/butterfly-3495224_640.jpg',
+    'https://cdn.pixabay.com/photo/2014/08/28/22/41/speckled-wood-430203_640.jpg',
+    'https://cdn.pixabay.com/photo/2024/12/27/10/28/butterfly-clipart-9293644_640.png',
+    'https://cdn.pixabay.com/photo/2023/01/17/18/26/moth-7725205_640.jpg'
+  ],
+
+exotic: [
+    'https://cdn.pixabay.com/photo/2022/08/25/20/44/bird-7411270_640.jpg',
+  ],
+  fish: [
+    'https://cdn.pixabay.com/photo/2016/11/18/17/47/fish-1834823_640.jpg',
+    
+  ],
+  cartoons: [
+    'https://cdn.pixabay.com/photo/2020/06/23/18/10/cartoon-5331106_640.png',
+    
+  ],
+  insects: [
+    'https://cdn.pixabay.com/photo/2017/03/27/13/16/bee-2178341_640.jpg',
+   
+  ],
+  reptiles: [
+    'https://cdn.pixabay.com/photo/2016/11/23/14/45/lizard-1850046_640.jpg',
+
+  ],
+   
+};
+
+
+
+
+const EMOJIS = ['📚','🧮','🎨','✏️','💡','🔢','🧑‍🏫','🌈','🐶','🐱','🐭','🌟','✨','🎵','🎶','📝','📖','🌍','🌏','☀️','🌙','⚡','🔥','💧','🌊','🌳','🎯','🏆','🏅','🎁','🎉','🎈','🚀','🚲','🛶'];
+
+const backgroundMusicList = [
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music1..mp3',
+ 
+];
+
+  
+/* ---------- Utility: Shuffler (persistent) ---------- */
+function createShuffler(key, items) {
+  const storageKey = 'shuffler_' + key;
+  function loadState() { try { const raw = localStorage.getItem(storageKey); return raw ? JSON.parse(raw) : null; } catch (e) { return null; } }
+  function saveState(state) { try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch (e) {} }
+  function makeOrder(n) {
+    const arr = Array.from({length:n}, (_,i)=>i);
+    for (let i = arr.length -1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [arr[i], arr[j]] = [arr[j], arr[i]]; }
+    return arr;
+  }
+  let state = loadState();
+  if (!state || !Array.isArray(state.order) || state.sourceLength !== items.length) {
+    state = { order: makeOrder(items.length), idx: 0, sourceLength: items.length };
+    saveState(state);
+  }
+  function ensureFresh() {
+    if (state.sourceLength !== items.length) {
+      state = { order: makeOrder(items.length), idx: 0, sourceLength: items.length };
+      saveState(state);
+    }
+  }
+  function next() {
+    ensureFresh();
+    if (state.idx >= state.order.length) {
+      state.order = makeOrder(items.length);
+      state.idx = 0;
+      state.sourceLength = items.length;
+    }
+    const resultIndex = state.order[state.idx++];
+    saveState(state);
+    return items[resultIndex];
+  }
+  return { next, reset: () => { state = { order: makeOrder(items.length), idx: 0, sourceLength: items.length }; saveState(state);} };
+}
+/* Sequential Shuffler for systematic use */
+function createSequentialShuffler(items) {
+  let idx = 0;
+  return {
+    next: () => {
+      if(items.length === 0) return null;
+      const result = items[idx];
+      idx = (idx + 1) % items.length;
+      return result;
+    },
+    reset: () => { idx = 0; }
+  };
+}
+
+// Replace random shufflers only for backgrounds and knowledge
+const backgroundsShuffler = createSequentialShuffler(BACKGROUNDS);
+const knowledgeShuffler = createSequentialShuffler(KNOWLEDGE_ITEMS);
+
+// Keep all other animal shufflers random as before
+const dogsShuffler = createShuffler('dogs', ANIMALS.dogs);
+const catsShuffler = createShuffler('cats', ANIMALS.cats);
+const birdsShuffler = createShuffler('birds', ANIMALS.birds);
+const butterfliesShuffler = createShuffler('butterflies', ANIMALS.butterflies);
+
+
+/* =========================
+   AUDIO: WebAudio Master Mix
+   ========================= */
+const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+function ensureAudioCtx(){
+  if(!audioCtx){
+    audioCtx = new AudioContextClass();
+    audioCtx.masterGain = audioCtx.createGain();
+    audioCtx.masterGain.gain.value = 1;
+    audioCtx.masterDest = audioCtx.createMediaStreamDestination();
+    audioCtx.masterGain.connect(audioCtx.masterDest);
+    audioCtx.masterGain.connect(audioCtx.destination);
+  }
+  if(audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+  return audioCtx;
+}
+
+let currentBgSource = null;
+let currentBgGain = null;
+let uploadedVoiceBuffer = null;
+let uploadedVoiceSource = null;
+let micStreamNode = null;
+let micStreamTrack = null;
+
+async function playRandomBackgroundTrack(){
+  const ctx = ensureAudioCtx();
+  if(currentBgSource){ try{ currentBgSource.stop(); currentBgSource.disconnect(); }catch(e){} currentBgSource = null; }
+  if(currentBgGain){ try{ currentBgGain.disconnect(); }catch(e){} currentBgGain=null; }
+
+  const url = backgroundMusicList[Math.floor(Math.random()*backgroundMusicList.length)];
+  try{
+    const resp = await fetch(url);
+    const ab = await resp.arrayBuffer();
+    const buf = await ctx.decodeAudioData(ab);
+    const src = ctx.createBufferSource();
+    const gain = ctx.createGain();
+    src.buffer = buf;
+    src.loop = true;
+    gain.gain.value = 0.6;
+    src.connect(gain); gain.connect(ctx.masterGain);
+    try{ src.start(); }catch(e){ try{ await ctx.resume(); src.start(); }catch(e){} }
+    currentBgSource = src; currentBgGain = gain;
+    return {src, gain};
+  }catch(err){
+    console.warn('Failed to load bg track', err);
+    statusEl.textContent = 'Background music failed to load.';
+    return null;
+  }
+}
+
+function stopCurrentBgTrack(){
+  try{ if(currentBgSource){ currentBgSource.stop(); currentBgSource.disconnect(); currentBgSource=null; } }catch(e){}
+  if(currentBgGain){ try{ currentBgGain.disconnect(); }catch(e){} currentBgGain=null; }
+}
+
+/* ---------- Voice handling: Upload & Mic ---------- */
+useUploadBtn.addEventListener('click', async ()=>{
+  const file = voiceUploadEl.files && voiceUploadEl.files[0];
+  if(!file){ statusEl.textContent = 'No upload selected.'; return; }
+  try{
+    const ctx = ensureAudioCtx();
+    const ab = await file.arrayBuffer();
+    uploadedVoiceBuffer = await ctx.decodeAudioData(ab);
+    statusEl.textContent = `Upload loaded: ${file.name} — will be embedded when recording starts.`;
+  }catch(err){
+    console.error('Upload decode failed', err);
+    statusEl.textContent = 'Failed to load uploaded audio.';
+  }
+});
+
+async function enableMicMixing(){
+  try{
+    if(micStreamNode) return;
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    micStreamTrack = stream.getAudioTracks()[0];
+    const ctx = ensureAudioCtx();
+    const source = ctx.createMediaStreamSource(new MediaStream([micStreamTrack]));
+    source.connect(ctx.masterGain);
+    micStreamNode = source;
+    statusEl.textContent = 'Microphone connected and will be embedded.';
+  }catch(err){
+    console.warn('Mic not available', err);
+    statusEl.textContent = 'Microphone permission denied or unavailable.';
+  }
+}
+
+function disableMicMixing(){
+  if(micStreamNode){ try{ micStreamNode.disconnect(); }catch(e){} micStreamNode = null; }
+  if(micStreamTrack){ try{ micStreamTrack.stop(); }catch(e){} micStreamTrack = null; }
+}
+
+/* =========================
+   Asset loaders & scene helpers (from B)
+   ========================= */
+function loadImg(url){ return new Promise((res,rej)=>{ const i=new Image(); i.crossOrigin='anonymous'; i.onload=()=>res(i); i.onerror=()=>rej(new Error('Image load error '+url)); i.src=url; }); }
+
+function loadVideo(url) {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video');
+    video.crossOrigin = 'anonymous';
+    video.preload = 'auto';
+    video.muted = true;
+    video.loop = true;
+    video.playsInline = true;
+    video.oncanplaythrough = () => { video.play().catch(()=>{}); resolve(video); };
+    video.onerror = () => reject(new Error('Video load error ' + url));
+    video.src = '';
+    video.load();
+    video.src = url;
+    video.load();
+  });
+}
+
+function spawnEmojis(count = 20) { 
+  scene.emojis = [];
+  for (let i = 0; i < count; i++) {
+    scene.emojis.push({
+      ch: EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
+      x: Math.random() * CANVAS_W,
+      y: Math.random() * CANVAS_H,
+      vx: (Math.random() * 2 - 1) * 0.6,
+      vy: -(0.3 + Math.random() * 0.9) - (Math.random() * 4 + 2),
+      size: 20 + Math.random() * 36,
+      rot: Math.random() * Math.PI * 2,
+      rotV: (Math.random() * 2 - 1) * 0.03
+    });
+  }
+}
+
+function spawnFlyingAnimals() {
+  scene.flying = [];
+  for (const group of [ANIMALS.birds, ANIMALS.butterflies, ANIMALS.exotic]) {
+    for (const url of group) {
+      scene.flying.push({
+        type: 'animal',
+        imgUrl: url,
+        x: Math.random() > 0.5 ? -50 - Math.random() * 300 : CANVAS_W + 50 + Math.random() * 300,
+        y: 50 + Math.random() * (CANVAS_H / 2),
+        vx: (Math.random() > 0.5 ? 0.5 : -0.5) + Math.random() * 1.5,
+        vy: Math.sin(Math.random() * 2 * Math.PI) * 0.3,
+        size: 50 + Math.random() * 50,
+        img: null
+      });
+    }
+  }
+}
+
+function spawnClouds(n=6){ scene.clouds=[]; for(let i=0;i<n;i++){ scene.clouds.push({x:Math.random()*CANVAS_W, y:Math.random()*(CANVAS_H/2), w:100+Math.random()*150, h:40+Math.random()*30, speed:0.2+Math.random()*0.3}); } }
+
+/* =========================
+   Scene & drawing (combined)
+   ========================= */
+let scene = {
+  backgroundImg: null,
+  backgroundVideo: null,
+  bgName: '',
+  clouds: [],
+  animalA: {img:null, x:CANVAS_W*0.12, y:CANVAS_H-320, w:180, h:180, bounceTimer:0},
+  animalB: {img:null, x:CANVAS_W*0.62, y:CANVAS_H-300, w:150, h:150, bounceTimer:0},
+  flying: [],
+  emojis: [],
+  bubble: {text:'Welcome!', x:CANVAS_W*0.5, y:120},
+  subtitle: {text:'', x:CANVAS_W*0.5, y:CANVAS_H - 120}
+  
+   
+  
+};
+
+
+
+
+
+
+
+function splitText(context, text, maxWidth) {
+  if(!text) return [];
+  const words = text.split(' ');
+  let lines = [];
+  let currentLine = words[0] || '';
+  for (let i = 1; i < words.length; i++) {
+    const word = words[i];
+    const testLine = currentLine + " " + word;
+    if (context.measureText(testLine).width > maxWidth) {
+      lines.push(currentLine);
+      currentLine = word;
+    } else currentLine = testLine;
+  }
+  lines.push(currentLine);
+  return lines;
+}
+
+function drawRoundRect(x, y, w, h, r, fill, stroke, lw = 4) {
+  if (typeof r === 'number') r = {tl:r,tr:r,br:r,bl:r};
+  ctx.beginPath();
+  ctx.moveTo(x + r.tl, y);
+  ctx.lineTo(x + w - r.tr, y);
+  ctx.arcTo(x + w, y, x + w, y + r.tr, r.tr);
+  ctx.lineTo(x + w, y + h - r.br);
+  ctx.arcTo(x + w, y + h, x + w - r.br, y + h, r.br);
+  ctx.lineTo(x + r.bl, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r.bl, r.bl);
+  ctx.lineTo(x, y + r.tl);
+  ctx.arcTo(x, y, x + r.tl, y, r.tl);
+  ctx.closePath();
+  if(fill){ ctx.fillStyle = fill; ctx.fill(); }
+  if(stroke){ ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke(); }
+}
+
+function drawSwahiliBubble(){
+  const text = (scene.bubble && (scene.bubble.text || (scene.bubble.item && scene.bubble.item.textSW))) || '';
+  if (!text) return;
+  const x = CANVAS_W * 0.5; const y = CANVAS_H * 0.1;
+  const padding = 22; const fontSize = 40;
+  ctx.font = `${fontSize}px "Patrick Hand", Arial`;
+  const wrapped = splitText(ctx, text, CANVAS_W - 100);
+  const lineH = fontSize * 1.15;
+  const textW = wrapped.reduce((max, line) => Math.max(max, ctx.measureText(line).width), 0);
+  const totalH = wrapped.length * lineH;
+  const rectW = textW + padding * 2; const rectH = totalH + padding * 2;
+  const rectX = x - rectW / 2; const rectY = y - rectH / 2;
+  const radius = 18;
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.45)';
+  ctx.shadowBlur = 10;
+  ctx.shadowOffsetX = 4;
+  ctx.shadowOffsetY = 4;
+  drawRoundRect(rectX, rectY, rectW, rectH, radius, 'white', '#222', 4);
+  ctx.restore();
+  // text
+  ctx.fillStyle = '#000';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  let startY = rectY + padding + lineH / 2 - 4;
+  for (let i = 0; i < wrapped.length; i++) ctx.fillText(wrapped[i], x, startY + i * lineH);
+}
+
+
+
+let logoX = 0;
+const logoText = '🎓 Online Tuition: @Sh500 P.M (Kenya) | Elimu Connect app / $4 P.M (Global) | SmartLearn: IGCSE IB CBSE ICSE on Play Store! 💻 Need a Website from Sh10,000? WhatsApp +254769255782! Sell your plot faster |Find your dream home or land in minutes! at realplot connect  🏡 ';
+
+function drawSlidingLogo(time) {
+  ctx.font = 'bold 30px "Patrick Hand", Arial';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'left';
+
+  const textWidth = ctx.measureText(logoText).width;
+  const rectH = 70;
+  const rectY = CANVAS_H - rectH - 80;
+  const rectW = CANVAS_W;
+
+  // 🚀 Increase speed for smoother motion
+  const speed = 1.5; // Try between 2.0–3.0 for ideal speed
+  logoX -= speed;
+  if (logoX <= -textWidth) logoX += textWidth; // wrap cleanly
+
+  // 🟦 Background bar (light, clean)
+  drawRoundRect(0, rectY, rectW, rectH, 20, 'rgba(255,255,255,0.92)', 'rgba(0,0,0,0.1)', 2);
+
+  // 🌈 Gradient text for modern look
+  const grad = ctx.createLinearGradient(0, rectY, rectW, rectY + rectH);
+  grad.addColorStop(0, '#ff8c00');
+  grad.addColorStop(1, '#1976d2');
+  ctx.fillStyle = grad;
+
+  // ✨ Draw the text twice to create seamless scrolling
+  ctx.fillText(logoText, logoX, rectY + rectH / 2);
+  ctx.fillText(logoText, logoX + textWidth, rectY + rectH / 2);
+}
+
+
+
+
+
+  
+function drawTimerArc(progress){
+  const cx = CANVAS_W - 100, cy = 100, r = 70;
+  const start = -Math.PI/2;
+  const end = start + progress * 2 * Math.PI;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2*Math.PI); ctx.strokeStyle = "rgba(0,0,0,0.2)"; ctx.lineWidth = 10; ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx, cy, r, end, start, true); ctx.strokeStyle = "#FFD700"; ctx.lineWidth = 10; ctx.stroke();
+  ctx.font = "bold 60px 'Patrick Hand', Arial"; ctx.fillStyle = "#FFD700"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(Math.ceil(progress*CLIP_DURATION_S), cx, cy);
+  ctx.font = "24px 'Patrick Hand', Arial"; ctx.fillStyle = "white"; ctx.fillText("Clip: " + currentClip, cx, cy + r + 25);
+}
+
+
+function drawScene(t){
+  ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+
+  // ---------- Background ----------
+  if(scene.backgroundVideo){
+    try { 
+      ctx.drawImage(scene.backgroundVideo, 0, 0, CANVAS_W, CANVAS_H); 
+    } catch(e){}
+  } 
+  else if(scene.backgroundImg){
+    // Draw only the static background image
+    ctx.drawImage(scene.backgroundImg, 0, 0, CANVAS_W, CANVAS_H);
+  }
+  else {
+    // fallback background color
+    ctx.fillStyle = '#88d';
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+  }
+
+  // ---------- Clouds ----------
+  for(const c of scene.clouds){
+    c.x += c.speed*(1+Math.sin(t/200));
+    if(c.x>CANVAS_W+200) c.x=-250;
+    ctx.save(); ctx.fillStyle='rgba(255,255,255,0.95)'; ctx.beginPath();
+    ctx.ellipse(c.x,c.y,c.w*0.6,c.h*0.6,0,0,2*Math.PI);
+    ctx.ellipse(c.x+c.w*0.4,c.y-10,c.w*0.5,c.h*0.45,0,0,2*Math.PI);
+    ctx.ellipse(c.x+c.w*0.7,c.y+6,c.w*0.35,c.h*0.33,0,0,2*Math.PI);
+    ctx.fill(); ctx.restore();
+  }
+
+  // ---------- Flying animals ----------
+  for(const f of scene.flying){
+    f.x += f.vx*(1+Math.sin((performance.now()+f.y*0.01)/600));
+    f.y += Math.sin((performance.now()/500 + f.x*0.01))*0.5 + f.vy*0.5;
+    if(f.vx>0 && f.x>CANVAS_W+150){ f.x=-150; f.y=50+Math.random()*(CANVAS_H/2); }
+    if(f.vx<0 && f.x<-150){ f.x=CANVAS_W+150; f.y=50+Math.random()*(CANVAS_H/2); }
+    if(f.y<30) f.y=30; if(f.y>CANVAS_H/2) f.y=CANVAS_H/2;
+    if(f.img){ ctx.save(); ctx.translate(f.x+f.size/2,f.y+f.size/2); ctx.rotate(Math.sin(f.x/50)*0.15); ctx.drawImage(f.img,-f.size/2,-f.size/2,f.size,f.size); ctx.restore(); }
+  }
+
+  // ---------- Animals ----------
+  function drawAnimal(a){
+    const bounce=Math.sin((t+(a.bounceTimer||0))/300)*12;
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(a.x+a.w/2,a.y+bounce+a.h-20,a.w*0.3,12,0,0,2*Math.PI);
+    ctx.fillStyle='rgba(0,0,0,0.12)';
+    ctx.fill();
+    if(a.img) ctx.drawImage(a.img,a.x,a.y+bounce,a.w,a.h);
+    ctx.restore();
+  }
+  scene.animalA.x=CANVAS_W*0.12; scene.animalB.x=CANVAS_W*0.62;
+  drawAnimal(scene.animalA); drawAnimal(scene.animalB);
+
+  // ---------- Emojis ----------
+  for(const e of scene.emojis){
+    e.x+=e.vx; e.y+=e.vy; e.vy+=0.01; e.rot+=e.rotV;
+    if(e.y<-120||e.y>CANVAS_H+120||e.x<-80||e.x>CANVAS_W+80){
+      e.y=Math.random()*CANVAS_H; 
+      e.x=Math.random()*CANVAS_W; 
+      e.vy=-0.3-Math.random()*0.9; 
+      e.vx=(Math.random()*2-1)*0.6; 
+    }
+    ctx.save(); ctx.translate(e.x,e.y); ctx.rotate(e.rot); 
+    ctx.font=`${e.size}px "Patrick Hand", Arial`; 
+    ctx.fillText(e.ch,0,0); 
+    ctx.restore();
+  }
+
+  // ---------- Top text ----------
+  ctx.fillStyle='rgba(255,255,255,0.9)';
+  ctx.font='bold 60px "Patrick Hand", Arial';
+  ctx.textAlign='center';
+  ctx.textBaseline='top';
+  ctx.fillText("Fun, Facts, Memes, Laughs", CANVAS_W/2, 40);
+
+  // ---------- Swahili bubble ----------
+  drawSwahiliBubble();
+}
+
+
+
+// --- Subtitle / bubble text (center) ---
+const subtitleText = (scene.subtitle && scene.subtitle.text) ? scene.subtitle.text : '';
+
+ctx.font='64px "Patrick Hand", Arial';
+ctx.textAlign='center';
+ctx.textBaseline='middle';
+
+// Wrap text
+const lines = splitText(ctx, subtitleText, CANVAS_W - 80);
+const lineH = 64;
+const totalH = lines.length * lineH;
+let startY = CANVAS_H * 0.5 - totalH / 2 + 30;
+
+// Draw black background for the subtitle
+const paddingX = 40;
+const paddingY = 30;
+const rectWidth = CANVAS_W - 80;
+const rectHeight = totalH + paddingY * 2;
+
+ctx.fillStyle = 'rgba(0,0,0,0.75)';
+ctx.fillRect(
+  CANVAS_W/2 - rectWidth/2,
+  startY - paddingY,
+  rectWidth,
+  rectHeight
+);
+
+// Draw subtitle text on top
+ctx.fillStyle = 'yellow';
+for (let i = 0; i < lines.length; i++) {
+  ctx.fillText(lines[i], CANVAS_W / 2, startY + i * lineH);
+}
+
+// --- Sliding logo ---
+drawSlidingLogo();
+
+// --- Timer arc if needed ---
+if(currentClip > 0) drawTimerArc(timerProgress);
+
+
+
+/* ---------- animation loop controls ---------- */
+function startAnimationLoop(){
+  if(animationFrameId) return;
+  let last = performance.now();
+  function loop(now){
+    animationFrameId = requestAnimationFrame(loop);
+    drawScene(now);
+    last = now;
+  }
+  animationFrameId = requestAnimationFrame(loop);
+}
+
+function stopAnimationLoop(){
+  if(animationFrameId){ cancelAnimationFrame(animationFrameId); animationFrameId = null; }
+}
+
+
+
+
+
+async function prepareScene() {
+  assetsLoaded = false;
+  statusEl.textContent = 'Loading assets for next clip...';
+  try {
+    const bg = (backgroundsShuffler.next() || { name: "Default", url: null, type: 'image' });
+    scene.bgName = bg.name;
+
+    // Reset previous background
+    if(scene.backgroundVideo){ try{ scene.backgroundVideo.pause(); scene.backgroundVideo.src = ''; }catch(e){} scene.backgroundVideo = null; }
+    scene.backgroundImg = null;
+
+    if (bg.type === 'video' && bg.url) {
+      scene.backgroundVideo = await loadVideo(bg.url).catch(()=>null);
+    } else if (bg.type === 'image' && bg.url) {
+      scene.backgroundImg = await loadImg(bg.url).catch(()=>null);
+      // reset animation state
+      scene.bgAnim = { x: 0, y: 0, scale: 1, dx: 0.1, dy: 0.05, dscale: 0.0005 };
+    }
+
+    // Then continue with animals, clouds, emojis, knowledge, audio...
+    const dogUrl = dogsShuffler.next() || null;
+    const catUrl = catsShuffler.next() || null;
+    scene.animalA.img = dogUrl ? await loadImg(dogUrl).catch(()=>null) : null;
+    scene.animalB.img = catUrl ? await loadImg(catUrl).catch(()=>null) : null;
+    spawnFlyingAnimals();
+    await Promise.all(scene.flying.map(f => f.imgUrl ? loadImg(f.imgUrl).then(img => f.img = img).catch(()=>null) : Promise.resolve()));
+    spawnClouds(6); spawnEmojis(18);
+
+    const nextItem = knowledgeShuffler.next() || { text: "No knowledge item available.", textSW: "Hakuna kitu.", askComment: false };
+    scene.subtitle.item = nextItem;
+    scene.bubble.item = nextItem;
+    scene.subtitle.text = nextItem.text;
+    scene.bubble.text = nextItem.textSW;
+
+    await playRandomBackgroundTrack().catch(()=>{});
+
+    if (canvas) { canvas.style.animation = 'flash 0.6s ease-out'; setTimeout(()=>canvas.style.animation='',600); }
+    assetsLoaded = true;
+    statusEl.textContent = `Prepared: ${scene.bgName}`;
+  } catch(err){
+    console.error("Scene preparation failed:", err);
+    statusEl.textContent = 'Error preparing clip — using fallback visuals.';
+    assetsLoaded = true;
+  }
+}
+
+
+
+
+
+async function loadNextBackground() {
+  const bg = backgroundsShuffler.next(); // pick next random background
+  scene.bgName = bg.name;
+  scene.backgroundVideo = null;
+  scene.backgroundImg = null;
+  scene.bgAnim = { x:0, y:0, scale:1, ...getMixedBgAnimation() }; // new animation
+
+  if(bg.type === 'video' || bg.url.endsWith('.mp4')) {
+    try {
+      scene.backgroundVideo = await loadVideo(bg.url);
+      console.log('Video background loaded:', bg.name);
+    } catch(e) {
+      console.warn('Video failed, fallback to image', e);
+      scene.backgroundImg = await loadImg(bg.url);
+    }
+  } else {
+    try {
+      scene.backgroundImg = await loadImg(bg.url);
+      console.log('Image background loaded:', bg.name);
+    } catch(e) {
+      console.warn('Image load failed', e);
+    }
+  }
+}
+
+
+
+
+async function startNextClip() {
+  currentClip++;
+  await loadNextBackground();
+  spawnClouds();
+  spawnFlyingAnimals();
+  spawnEmojis();
+  clipStartTime = performance.now();
+}
+
+
+
+
+
+
+/* =========================
+   Clips cycle & timing
+   ========================= */
+async function cycleClips() {
+  if (currentClip >= TOTAL_CLIPS) {
+    clearInterval(clipCycleInterval);
+    clipCycleInterval = null;
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    return;
+  }
+  currentClip++;
+  try {
+    await prepareScene();
+    clipStartTime = performance.now();
+    // set timer progress animation per CLIP_DURATION_S
+    timerProgress = 1;
+    // animate timer countdown using a simple interval that updates timerProgress
+    const start = performance.now();
+    const tick = setInterval(()=>{
+      const elapsed = (performance.now() - start)/1000;
+      timerProgress = Math.max(1 - elapsed/CLIP_DURATION_S, 0);
+      if(timerProgress <= 0) clearInterval(tick);
+    }, 200);
+    // update status
+    const remainingTimeS = (TOTAL_CLIPS - currentClip) * CLIP_DURATION_S;
+    const remainingMinutes = Math.floor(remainingTimeS / 60);
+    const remainingSeconds = remainingTimeS % 60;
+    let baseStatus = `Recording Clip ${currentClip}/${TOTAL_CLIPS}.`;
+    if (currentClip < TOTAL_CLIPS) baseStatus += ` Next transition in ${CLIP_DURATION_S}s.`;
+    baseStatus += ` Total remaining: ${remainingMinutes}m ${remainingSeconds}s.`;
+    statusEl.textContent = baseStatus;
+  } catch (err) {
+    console.error(`Failed to prepare clip ${currentClip}:`, err);
+    statusEl.textContent = `Error on Clip ${currentClip}. Continuing...`;
+  }
+}
+
+/* =========================
+   Media Recorder: combine canvas + audio into webm
+   ========================= */
+async function startLongRecording() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') return;
+  currentClip = 0;
+  recordedChunks = [];
+  downloadLink.classList.add('hidden');
+  recordBtn.disabled = true;
+  genBtn.disabled = true;
+  stopAnimationLoop();
+  try {
+    // Prepare audio inputs: depending on voice method
+    const method = voiceMethodSel.value;
+    // Ensure audio context exists
+    const ctx = ensureAudioCtx();
+    // If upload present and selected, create source and connect
+    if(method === 'upload' && uploadedVoiceBuffer){
+      uploadedVoiceSource = ctx.createBufferSource();
+      uploadedVoiceSource.buffer = uploadedVoiceBuffer;
+      uploadedVoiceSource.loop = true;
+      const ug = ctx.createGain(); ug.gain.value = 1;
+      uploadedVoiceSource.connect(ug); ug.connect(ctx.masterGain);
+      try{ uploadedVoiceSource.start(); }catch(e){}
+    }
+    // If mic selected, enable mic mixing
+    if(method === 'mic'){
+      await enableMicMixing();
+    }
+    // Start bg music (ensures currentBgSource exists)
+    await playRandomBackgroundTrack().catch(()=>{});
+    // Grab canvas stream
+    const canvasStream = canvas.captureStream(30);
+    const audioStream = ctx.masterDest.stream;
+    const combinedStream = new MediaStream();
+    const vTrack = canvasStream.getVideoTracks()[0];
+    const aTrack = audioStream.getAudioTracks()[0];
+    if(vTrack) combinedStream.addTrack(vTrack);
+    if(aTrack) combinedStream.addTrack(aTrack);
+    videoTrack = vTrack; audioTrack = aTrack;
+    // Create MediaRecorder
+    const options = { mimeType: 'video/webm; codecs=vp9,opus' };
+    mediaRecorder = new MediaRecorder(combinedStream, options);
+    mediaRecorder.ondataavailable = (ev) => { if(ev.data && ev.data.size>0) recordedChunks.push(ev.data); };
+    mediaRecorder.onstop = () => {
+      // cleanup
+      stopCurrentBgTrack();
+      if(uploadedVoiceSource){ try{ uploadedVoiceSource.stop(); uploadedVoiceSource.disconnect(); }catch(e){} uploadedVoiceSource = null; }
+      disableMicMixing();
+      clearInterval(clipCycleInterval);
+      clearTimeout(longRecordingTimeout);
+      stopAnimationLoop();
+      statusEl.textContent = 'Finalizing 30-minute video...';
+      // stop tracks
+      if(videoTrack) try{ videoTrack.stop(); }catch(e){}
+      if(audioTrack) try{ audioTrack.stop(); }catch(e){}
+      // build blob and download link
+      const blob = new Blob(recordedChunks, { type: 'video/webm' });
+      const url = URL.createObjectURL(blob);
+      downloadLink.href = url;
+      downloadLink.download = `Elimu_5_Minute_Compilation_${Date.now()}.webm`;
+      downloadLink.textContent = `✅ Download 5-Minute Video (${(blob.size/(1024*1024)).toFixed(2)} MB)`;
+      downloadLink.classList.remove('hidden');
+      recordBtn.disabled = false; genBtn.disabled = false;
+      statusEl.textContent = 'Recording complete. Download link available.';
+      currentClip = 0; timerProgress = 1;
+      genBtn.click();
+    };
+    // start
+    mediaRecorder.start();
+    startAnimationLoop();
+    await cycleClips();
+    clipCycleInterval = setInterval(cycleClips, CLIP_DURATION_S * 1000);
+    longRecordingTimeout = setTimeout(()=>{
+      if(mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    }, TOTAL_DURATION_MS);
+  } catch(err){
+    console.error('Error starting recording', err);
+    statusEl.textContent = 'Error starting recording. Check console and permissions.';
+    recordBtn.disabled = false; genBtn.disabled = false;
+    stopCurrentBgTrack();
+    disableMicMixing();
+    if(uploadedVoiceSource){ try{ uploadedVoiceSource.stop(); uploadedVoiceSource.disconnect(); }catch(e){} uploadedVoiceSource=null; }
+    clearInterval(clipCycleInterval); clearTimeout(longRecordingTimeout);
+    stopAnimationLoop();
+    currentClip = 0;
+  }
+}
+
+/* =========================
+   Event listeners & boot
+   ========================= */
+genBtn.addEventListener('click', async ()=>{
+  if(mediaRecorder && mediaRecorder.state !== 'inactive'){ statusEl.textContent = 'Please wait for the current recording to finish.'; return; }
+  stopAnimationLoop();
+  stopCurrentBgTrack();
+  currentClip = 1; timerProgress = 1;
+  // If mic method selected, don't auto-start mic until recording unless chosen; but we will not enable mic here.
+  await prepareScene();
+  startAnimationLoop();
+  clipStartTime = performance.now();
+  statusEl.textContent = `Previewing Clip ${currentClip}/${TOTAL_CLIPS}. Press "Start 5-Minute Record" to begin compilation.`;
+});
+
+recordBtn.addEventListener('click', startLongRecording);
+
+/* Unlock audio on first gesture (helpful for mobile/Chrome) */
+function unlockAudioOnGesture(){
+  const init = async ()=>{
+    ensureAudioCtx();
+    if(audioCtx && audioCtx.state === 'suspended') try{ await audioCtx.resume(); }catch(e){}
+    document.body.removeEventListener('click', init);
+    document.body.removeEventListener('keydown', init);
+    statusEl.textContent = 'Audio unlocked — ready.';
+  };
+  document.body.addEventListener('click', init);
+  document.body.addEventListener('keydown', init);
+}
+unlockAudioOnGesture();
+
+/* Wire voiceMethod selection: enable mic immediately if mic selected by user before recording */
+voiceMethodSel.addEventListener('change', async ()=>{
+  const v = voiceMethodSel.value;
+  if(v === 'mic'){
+    statusEl.textContent = 'Please allow microphone when prompted.';
+    // do not force permission until recording; but if user explicitly chose mic, prompt now
+    await enableMicMixing();
+  } else {
+    // stop existing mic if user switched away
+    disableMicMixing();
+    statusEl.textContent = 'Voice set to: ' + v;
+  }
+});
+
+/* On load: initialize scene preview */
+window.addEventListener('load', async ()=>{
+  // small initial scene
+  spawnClouds(6);
+  spawnEmojis(22);
+  scene.animalA.img = await loadImg('https://i.imgur.com/5n6R2vI.png').catch(()=>null);
+  scene.animalB.img = await loadImg('https://i.imgur.com/9Y7kzKZ.png').catch(()=>null);
+  // spawn a few flying animals using placeholder lists
+  spawnFlyingAnimals();
+  for(const f of scene.flying){ if(f.imgUrl) f.img = await loadImg(f.imgUrl).catch(()=>null); }
+  startAnimationLoop();
+  ensureAudioCtx();
+  genBtn.click();
+});
+</script>
+</body>
+</html>

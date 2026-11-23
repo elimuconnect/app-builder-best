@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ELIMU CONNECT website - Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #4CAF50, #81C784);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .login-container {
+      background-color: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .login-container h2 {
+      margin-bottom: 20px;
+      color: #4CAF50;
+    }
+
+    .login-form select {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    .login-form button {
+      width: 100%;
+      padding: 12px;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .login-form button:hover {
+      background-color: #45a049;
+    }
+
+    .footer-note {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #888;
+    }
+
+    #chatbox-body {
+      margin-top: 20px;
+      text-align: left;
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .chat-message {
+      margin-bottom: 10px;
+    }
+
+    .bot-message {
+      text-align: left;
+      background-color: #eef4ff;
+      padding: 12px;
+      border-radius: 8px;
+      color: #222;
+      font-size: 15px;
+      line-height: 1.6;
+      font-family: Arial, sans-serif;
+    }
+
+    .bot-message a {
+      color: #007BFF;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .bot-message a:hover {
+      text-decoration: underline;
+      color: #0056b3;
+    }
+
+    a {
+      color: #007BFF;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    a:hover {
+      text-decoration: underline;
+      color: #0056b3;
+    }
+
+    /* Tools UI container, hidden by default */
+    #tools-ui {
+      margin-top: 30px;
+      text-align: left;
+      display: none; /* Hidden initially */
+    }
+
+    #tools-ui h3 {
+      color: #4CAF50;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    #tools-ui ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    #tools-ui ul li {
+      margin-bottom: 12px;
+    }
+
+    #tools-ui ul li a {
+      display: inline-block;
+      padding: 10px 15px;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 5px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    #tools-ui ul li a:hover {
+      background-color: #45a049;
+    }
+
+
+  /* Style for main category dropdown */
+  #mainDropdown {
+    width: 100%;
+    padding: 16px;
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+
+  /* Style for all subject/tool dropdowns */
+  .category select {
+    width: 100%;
+    padding: 16px;
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+
+  /* Style for tool section heading */
+  #tools-ui h3 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #4CAF50;
+    text-align: center;
+    margin-bottom: 25px;
+  }
+
+  /* Optional spacing for each tool section */
+  .category {
+    margin-bottom: 30px;
+  }
+
+
+
+
+
+
+    
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <h2>Welcome to ELIMU CONNECT Website</h2>
+    <form class="login-form" onsubmit="event.preventDefault(); sendMessage();">
+      <select id="role-select" required>
+        <option value="" disabled selected>Select your role</option>
+        <option value="student-paid">Student Paid Features</option>
+        <option value="tutor-paid">Tutor Paid Features</option>
+      </select>
+      <button type="submit">Continue</button>
+    </form>
+
+    <div id="chatbox-body" class="messages"></div>
+
+    <div class="footer-note">Choose your role to continue</div>
+
+    <!-- Tools UI hidden initially -->
+    <div id="tools-ui">
+
+
+
+<!-- Combined Tools Dropdown -->
+<div style="margin-top: 40px;">
+  <h3>Select a Tool Category</h3>
+  <select id="mainDropdown" onchange="showCategory()" style="width:100%; padding:12px; margin-bottom:20px;">
+    <option value="">Select a category...</option>
+
+<option value="coding">LEARN TO CODE</option>
+    
+    <option value="resources">Past Papers, Videos, eBooks</option>
+    <option value="quizes">Quizzes</option>
+    <option value="math">Mathematics</option>
+    <option value="chemistry">Chemistry</option>
+    <option value="biology">Biology</option>
+    <option value="physics">Physics</option>
+    <option value="kiswahili">Kiswahili</option>
+    <option value="english">English</option>
+  </select>
+
+  <!-- Tool Categories -->
+  <div id="resources" class="category" style="display:none">
+    <select onchange="openLink(this)">
+      <option value="">Select resources...</option>
+      <option value="https://www.socialcreator.com/pastpapersandquizes">ALL RESOURCES</option>
+    </select>
+  </div>
+
+  <div id="quizes" class="category" style="display:none">
+    <select onchange="openLink(this)">
+      <option value="">Select A QUIZ...</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/quizes">ALL QUIZZES</option>
+    </select>
+  </div>
+
+
+
+  <div id="coding" class="category" style="display:none">
+    <select onchange="openLink(this)">
+      <option value="">LEARN TO CODE...</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/adverts">LEARN TO CODE</option>
+    </select>
+  </div>
+
+
+  
+  <div id="math" class="category" style="display:none">
+    <select onchange="openLink(this)">
+      <option value="">Select a Math tool...</option>
+      
+            <option value="mathformulars.html">Math Formulas</option>
+            <option value="mathgraphs.html">Math Graphs</option>
+            <option value="transformation.html">Transformation</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/tables">Math Tables</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/trigonometry">Trigonometry (Unit Circle)</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/sohcahtoa">Trigonometry (SOHCAHTOA)</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/areas">Area</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/volumes">Volume</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/quadraticsolver">Quadratic Solver</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/statistics">Statistics</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/vectors">Vectors</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/matrix1">Matrix 1</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/matrix2">Matrix 2</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/long&lat">Longitude & Latitude</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/differentiate&integrate">Differentiation & Integration</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/area%20approximation">Mid-ordinate & Trapezium</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/integrationarea">Integration Area Approx.</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/error">Error</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/logs">Logarithms</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/commercial1">Interest (Simple & Compound)</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/incometax">Income Tax</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/variations">Variations</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/binomial">Binomial Expansion</option>
+    </select>
+  </div>
+
+  <div id="chemistry" class="category" style="display:none">
+    <select onchange="openLink(this)">
+      <option value="">Select a Chemistry tool...</option>
+
+      <option value="chemreactions.html">Chem Reactions</option>
+            <option value="moleconcept.html">Mole Concept</option>
+            <option value="organicchem.html">Organic Chemistry</option>
+            <option value="periodictable.html">Periodic Table</option>
+            <option value="commongases.html">Common Gases</option>
+      <option value="chemgraphs.html">Chem Graphs</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/chemformulars">Chem Formulas</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/chemicalformula&quations">Chemical Formulas & Equations</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/gaslaws">Gas Laws</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/diffusionlaw">Diffusion Law</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/ram">R.A.M</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/molesmassmm">Moles, Mass, Molar Mass</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/empiricalmolecular">Empirical & Molecular</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/titrations">Titrations</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/radioactivity">Radioactivity</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/solubility">Solubility</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/bondenergies">Bond Energies</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/thermochemistry">Thermochemistry</option>
+    </select>
+  </div>
+
+  <div id="biology" class="category" style="display:none">
+    <select onchange="openLink(this)">
+      <option value="">Select a Biology tool...</option>
+      <option value="bones.html">Bones</option>
+            <option value="humanandfishanatomy.html">Human and Fish Anatomy</option>
+            <option value="plantantomy.html">Plant Anatomy</option>
+    </select>
+  </div>
+
+  <div id="physics" class="category" style="display:none">
+    <select onchange="openLink(this)">
+      <option value="">Select a Physics tool...</option>
+      <option value="physicsformulars.html">Physics Formulas</option>
+      <option value="physicsprinciplesexplorer.html">Principles Explorer</option>
+      <option value="unitconverter.html">Unit Converter</option>
+    </select>
+  </div>
+
+  <div id="kiswahili" class="category" style="display:none">
+    <select onchange="openLink(this)">
+      <option value="">Select a Kiswahili tool...</option>
+      <option value="kamusi.html">Kamusi</option>
+      <option value="methali.html">Methali</option>
+      <option value="nahaunamisema.html">Nahau na Misemo</option>
+    </select>
+  </div>
+
+  <div id="english" class="category" style="display:none">
+    <select onchange="openLink(this)">
+      <option value="">Select an English tool...</option>
+      <option value="dictionary.html">Dictionary</option>
+      <option value="ideoms.html">Idioms</option>
+      <option value="proverbs.html">Proverbs</option>
+      <option value="similiesandmetaphors.html">Similes and Metaphors</option>
+    </select>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+      
+    </div>
+  </div>
+
+  <script>
+    let chatboxBody = document.getElementById("chatbox-body");
+    const toolsUI = document.getElementById("tools-ui");
+
+    // Array of 100 passwords (simplified example)
+    const passwords = [
+       "pS9hJk!hPmD0bF7T", "Qw4$KiH6dFg8L2Zn", "M5a#Hq9oLpD1g0Fj", "R!3hP8LsE6kZyTf7",
+            "Xj2zU!hYqW8mK9Rn", "ZnD5oFq#XlT1hHs7", "P@0xWq2yLoS3tGb8", "Ym9bZqJk!5R2fX7Tc", "7Vq#9tE0yPjKn3Gs",
+            "B2FpZ#6dSk8CwLJ9", "WmR1!Yd9q8TzJ7p5", "N2xL5rPv@z6oK7iF", "QeJ8iP1#FzR2tCw0", "YpW5L7sT2h3Xo9kG",
+            "O4b6jQsN@r9V3YwT", "R#7yX9sTz0J4wKvG", "i2Xy6D$LqY7CmFvR", "P8yK0sZf9w6N3H2iL", "S3QzT9x5aX7pW!2v",
+            "zT3X1y4Mv#Ls7q0P", "iD7T6H2rX3kVbW9G", "fYz9p0B4ZxK8@W6t", "K5PqX9cL2V3#hYt7", "P9Lm#vF0Q8gR2tJ3",
+            "uZ6fM9jY8t0p5W2S", "F3vPz9hJ7B0Yx2R1", "wG7D5kX2lZ8F1rQj", "q5J7kL0xS3yFz1pY", "A8wQ9P7fK2R1!zTx",
+            "v9H0G7Uq2Z#5nL3F", "Kp2J4tQyR8wV5mF1", "Z3vN6kF2T9Xr4sB0", "wL2vY1X9Z7fTpG3M", "j6sQ8W5P1Fz0iR2C",
+            "bF9Y3kL1Rz5vH2oT", "Q3K7T9vN1g6pFz0m", "s8Yq3oR1V9pLz7gD", "F2mV6iW9zX1P0rT7", "N4g9X3L2sQk7vWzJ",
+            "vR5pY1G2mZ7s9B0W", "Q9X1tK0L2y5mF7Pz", "k8WzN2V7yF3jL0X1", "Y2tM9P1gL6X0vF7R", "f4T3JbK7h9Z2N0pV",
+            "V1m5zP9L8rY3Kj0X", "G6V9oQ2Z1p8XyR3T", "w9Y1gF4Tz2P7H0mL", "L9P7tX2Bq6vY1Wz3", "V1X2L5Tz9rF0b3Y7",
+            "Q7X6t1zP9f3yV2J5", "rP5zK2W8Q1F7yL0t", "v9X2F4T3k7J1Y0Qm", "sR1P7zF6L2X0y9jT", "B2t8kF6X5Zq1V0m7",
+            "Q9W6tL5y1G2s0X3J", "F3z0R7m5B2X8t9Y1", "K6Q4zP7f5R1Xy9T0", "F1T9W7p2Y6kXrL0m", "D9g7B6v1J2F0tX3P",
+            "m8L9F3V1X2pY4W0t", "j0T6X3K9L1B5vP2Y", "Y3R2tP7F1X6L9v0W", "sT5X9yP0F2K1L7Qm", "J2F7vT8P1X5L9Y0k",
+            "B4X2F7W1t9mL3R6p", "L9Y0vX5t2P3J1F6k", "R7B9zF2L1X6P3t0Y", "F5X2mR9Y1pL7V3tK", "K9Y6pR7L3z2F1X0t",
+            "Z4F7T1P9X3Y8L5m0", "V2kX5T1L3F9pY0R7", "qB8R9Y1mX2L5P3F0", "B9F2X1Y5L7T3v0mP", "V1L7X9p2R0Y6B3tF",
+            "L5X2F1T9Y0R6pK3m", "F1R7T6X0P3Y9L2B5", "Y7B2X5L9T1F6m3P0", "Q3X1F7Y5R2L0T9K8", "K9P1X2Y5F3L6R7t0",
+            "T7X9F1L3Y0R2B5k6", "Q1X9T2Y7F3P6L0R5", "Z3T9L2F5Y0X6P1B7", "X5Y9F7L0T2K3R1P6", "B9T1X0Y7L3F5K2R6",
+            "P7Y9X3L2T0F5R6K1", "L2X9Y0P5T6R1F7K3", "Y1L9F7X2T0R5P3K6", "K3X7P1Y0T2F9L6R5", 
+    ];
+
+    // Function to display messages in chatbox
+    function displayMessage(message, sender, id = '') {
+      const messageDiv = document.createElement("div");
+      messageDiv.classList.add("chat-message", `${sender}-message`);
+      messageDiv.innerHTML = message;
+      if (id) messageDiv.id = id;
+      chatboxBody.appendChild(messageDiv);
+      chatboxBody.scrollTop = chatboxBody.scrollHeight;
+    }
+
+    // Validate password
+    function validatePassword(password) {
+      return passwords.includes(password);
+    }
+
+    // Show tools UI and hide login form
+    function showToolsUI() {
+      document.querySelector(".login-form").style.display = "none";
+      toolsUI.style.display = "block";
+      chatboxBody.innerHTML = ""; // clear any messages if you want
+    }
+
+    // Main sendMessage handler
+    function sendMessage() {
+      let role = document.getElementById("role-select").value;
+      if (!role) {
+        alert("Please select your role.");
+        return;
+      }
+
+      const passwordValidated = localStorage.getItem('passwordValidated');
+
+      if (role === "student-paid" || role === "tutor-paid") {
+        if (!passwordValidated) {
+          const inputPassword = prompt("Enter your password:");
+          if (validatePassword(inputPassword)) {
+            localStorage.setItem('passwordValidated', 'true');
+            displayMessage("Password validated successfully! Access granted to paid features.", "bot");
+            showToolsUI();
+            startPaidFeaturesCountdown();
+          } else {
+            displayMessage("Invalid or expired password. Please check your password or subscribe.", "bot");
+          }
+        } else {
+          displayMessage("You already have access to paid features.", "bot");
+          showToolsUI();
+          startPaidFeaturesCountdown();
+        }
+      } else {
+        // For now, only handle paid roles — can extend for free/trial here if needed
+        displayMessage("Please select a paid role to access the tools.", "bot");
+      }
+    }
+
+    // Countdown timer for paid features (optional)
+    function startPaidFeaturesCountdown() {
+      const paidAccessKey = "student-paid-access-start";
+      const paidDuration = 30 * 24 * 60 * 60 * 1000; // 30 days
+      let paidAccessStart = localStorage.getItem(paidAccessKey);
+
+      if (!paidAccessStart) {
+        paidAccessStart = Date.now();
+        localStorage.setItem(paidAccessKey, paidAccessStart);
+      }
+
+      const paidAccessEnd = parseInt(paidAccessStart) + paidDuration;
+
+      function updateCountdown() {
+        const now = Date.now();
+        const remainingTime = paidAccessEnd - now;
+
+        if (remainingTime <= 0) {
+          displayMessage("Your paid features have expired. Please renew your subscription.", "bot");
+          clearInterval(countdownInterval);
+          return;
+        }
+
+        const days = Math.floor(remainingTime / (24 * 60 * 60 * 1000));
+        const hours = Math.floor((remainingTime % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+        const minutes = Math.floor((remainingTime % (60 * 60 * 1000)) / (60 * 1000));
+        const seconds = Math.floor((remainingTime % (60 * 1000)) / 1000);
+
+        const countdownMessage = `Your paid features expire in: <b>${days} days, ${hours} hours, ${minutes} minutes, and ${seconds} seconds</b>.`;
+
+        // Display countdown inside chatbox, update or create
+        let countdownEl = document.getElementById("paid-countdown");
+        if (!countdownEl) {
+displayMessage(countdownMessage, "bot", "paid-countdown");
+} else {
+countdownEl.innerHTML = countdownMessage;
+}
+}
+      updateCountdown();
+  const countdownInterval = setInterval(updateCountdown, 1000);
+}
+
+// Auto-show tools if already logged in before
+window.onload = () => {
+  if (localStorage.getItem("passwordValidated") === "true") {
+    showToolsUI();
+    startPaidFeaturesCountdown();
+  }
+};
+
+
+
+
+
+
+
+
+function showCategory() {
+  const categories = document.querySelectorAll(".category");
+  categories.forEach(c => c.style.display = "none");
+  const selected = document.getElementById("mainDropdown").value;
+  if (selected) {
+    const cat = document.getElementById(selected);
+    if (cat) cat.style.display = "block";
+  }
+}
+
+function openLink(selectElement) {
+  const value = selectElement.value;
+  if (value) {
+    window.open(value, '_blank');
+    selectElement.selectedIndex = 0;
+  }
+}
+
+
+
+
+
+    
+</script> 
+</body>
+</html> ```
+

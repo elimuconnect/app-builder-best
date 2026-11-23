@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Elimu Connect – Supabase File Sharing</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Arial; text-align: center; padding: 20px; background: #f0f4f8; }
+    input, button { padding: 10px; margin: 10px; border-radius: 5px; }
+    #fileList { margin-top: 20px; max-width: 500px; margin-inline: auto; text-align: left; }
+    .file-item { background: white; padding: 10px; margin-bottom: 10px; border-radius: 6px; box-shadow: 0 0 4px rgba(0,0,0,0.1); }
+    a { color: #0645AD; text-decoration: none; }
+    #status { margin-top: 10px; font-weight: bold; color: green; }
+  </style>
+</head>
+<body>
+
+  <h2>📤 Elimu Connect – File Sharing (Supabase)</h2>
+
+  <input type="text" id="uploaderName" placeholder="Your Name (e.g., Mr. Otieno)" />
+  <input type="file" id="fileInput" />
+  <button onclick="uploadFile()">Upload File</button>
+
+  <div id="status"></div>
+  <div id="fileList"><h3>📁 Shared Files</h3></div>
+
+  <!-- Supabase Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.42.2/dist/umd/supabase.min.js"></script>
+  <script>
+    const supabaseUrl = 'https://kknhfulcgahmtlbgfya.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Use your actual anon key
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    const BUCKET = 'shared-files';
+
+    async function uploadFile() {
+      const uploader = document.getElementById("uploaderName").value.trim();
+      const file = document.getElementById("fileInput").files[0];
+      const status = document.getElementById("status");
+      status.style.color = 'black';
+
+      if (!uploader || !file) {
+        status.innerText = "❌ Please enter your name and select a file.";
+        return;
+      }
+
+      const filename = Date.now() + "_" + file.name;
+      status.innerText = "⏳ Uploading file...";
+
+      const { data: uploadData, error: uploadError } = await supabase
+        .storage.from(BUCKET)
+        .upload(filename, file);
+
+      if (uploadError) {
+        status.innerText = "❌ Upload failed: " + uploadError.message;
+        status.style.color = 'red';
+        return;
+      }
+
+      const { data: publicUrlData, error: urlError } = supabase
+        .storage.from(BUCKET)
+        .getPublicUrl(filename);
+
+      if (urlError) {
+        status.innerText = "❌ Could not get public URL.";
+        status.style.color = 'red';
+        return;
+      }
+
+      const url = publicUrlData.publicUrl;
+
+      const { error: dbError } = await supabase.from("files").insert([{
+        name: file.name,
+        url,
+        uploaded_by: uploader,
+        created_at: new Date().toISOString()
+      }]);
+
+      if (dbError) {
+        status.innerText = "❌ Failed to save file info to database.";
+        status.style.color = 'red';
+        return;
+      }
+
+      status.innerText = "✅ File uploaded and saved!";
+      status.style.color = 'green';
+      loadFiles();
+    }
+
+   async function loadFiles() {
+  const list = document.getElementById("fileList");
+  list.innerHTML = "<h3>📁 Shared Files</h3>";
+
+  const { data, error } = await supabase.from('files').select('*').order('created_at', { ascending: false });
+
+  if (error) {
+    console.error("❌ Error loading files:", error);  // ← See the exact error in browser console
+    list.innerHTML += "<p>❌ Failed to load files.</p>";
+    return;
+  }
+
+  data.forEach(f => {
+    const div = document.createElement("div");
+    div.className = "file-item";
+    div.innerHTML = `<strong>${f.name}</strong><br>
+      Shared by: ${f.uploaded_by}<br>
+      <a href="${f.url}" target="_blank">🔗 Download/View</a>`;
+    list.appendChild(div);
+  });
+}
+
+
+    window.onload = loadFiles;
+  </script>
+</body>
+</html>

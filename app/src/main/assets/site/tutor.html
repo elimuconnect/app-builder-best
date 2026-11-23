@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Tutor: Save + Repeat + Download</title>
+  <script src="https://unpkg.com/mathlive"></script>
+  <link rel="stylesheet" href="https://unpkg.com/mathlive/dist/mathlive.core.css" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif;
+      background: #eef1f5;
+    }
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    #toolbar {
+      padding: 15px;
+      background: #1976d2;
+      color: white;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    #toolbar button {
+      background: white;
+      color: #1976d2;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #editor {
+      flex: 1;
+      padding: 30px;
+      font-size: 1.6em;
+      background: #fff;
+      overflow-y: auto;
+      outline: none;
+      white-space: pre-wrap;
+      cursor: text;
+    }
+    math-field {
+      font-size: 1.4em;
+      margin: 0 4px;
+    }
+    #status {
+      padding: 10px;
+      background: #388e3c;
+      color: white;
+      font-weight: bold;
+      text-align: center;
+    }
+    .question { color: #333; margin-bottom: 20px; font-weight: bold; }
+    .solution { color: #2e7d32; font-weight: normal; }
+    .hand-writing {
+      cursor: url('https://cur.cursors-4u.net/people/peo-2/peo129.cur'), auto !important;
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <div id="toolbar">
+    <button onclick="startTutor()">▶️ Start Tutor</button>
+    <button onclick="pauseLesson()">⏸️ Pause</button>
+    <button onclick="resumeLesson()">▶️ Resume</button>
+    <button onclick="repeatLesson()">🔁 Repeat Lesson</button>
+    <button onclick="repeatQuestion()">🔁 Repeat Question</button>
+    <button onclick="skipLesson()">⏭️ Skip</button>
+    <button onclick="downloadAll()">⬇️ Download All</button>
+  </div>
+
+  <div id="editor" contenteditable="true">
+    <p>Click "Start Tutor" to begin.</p>
+  </div>
+
+  <div id="status">⏳ Ready when you are!</div>
+</div>
+
+<script>
+const lessonsArray = [
+  `Lesson 1: Solving Linear Equations – Grade 9 Mathematics
+
+Question:
+Solve for x in the equation: 3x - 5 = 10
+
+Solution:
+Step 1: Add 5 to both sides → 3x = 15  
+Step 2: Divide both sides by 3 → x = 5
+
+Final Answer:
+x = 5`,
+
+  `Lesson 2: Perimeter of a Rectangle – Grade 9 Mathematics
+
+Question:
+Find the perimeter of a rectangle with length 12 cm and width 7 cm.
+
+Solution:
+Perimeter = 2 × (length + width)  
+= 2 × (12 + 7)  
+= 2 × 19 = 38 cm
+
+Final Answer:
+38 cm`,
+
+  `Lesson 3: Probability – Grade 9 Mathematics
+
+Question:
+A bag contains 2 red, 3 blue, and 5 green balls. What is the probability of picking a blue ball?
+
+Solution:
+Total balls = 2 + 3 + 5 = 10  
+Blue balls = 3  
+Probability = 3/10
+
+Final Answer:
+3/10
+
+📲 Install *Elimu Connect* on Play Store to access geometry tools, past papers, and quizzes.  
+Website: https://elimuconnect.github.io/ELIMU-CONNECT-/elimu`
+];
+
+
+  const editor = document.getElementById("editor");
+  const status = document.getElementById("status");
+
+  let tutorStarted = false;
+  let paused = false;
+  let typingTimer = null;
+  let waitTimer = null;
+  let inLessonMode = true;
+  let currentLesson = 0;
+  let currentQuestion = 0;
+  const fullTranscript = [];
+
+  function getVoice() {
+    const voices = speechSynthesis.getVoices();
+    const preferred = ["Google UK English Male", "en-GB", "en-IN", "en-KE"];
+    return voices.find(v => preferred.includes(v.name) || preferred.includes(v.lang)) || voices[0];
+  }
+
+  function speak(text, onEnd) {
+    speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.voice = getVoice();
+    utter.rate = 0.88;
+    utter.onend = () => onEnd && onEnd();
+    speechSynthesis.speak(utter);
+  }
+
+  function typeSolution(text, callback) {
+    const solutionDiv = document.createElement("div");
+    solutionDiv.className = "solution";
+    editor.appendChild(solutionDiv);
+    editor.classList.add("hand-writing");
+
+    let i = 0;
+    typingTimer = setInterval(() => {
+      if (paused) return;
+      if (i >= text.length) {
+        clearInterval(typingTimer);
+        editor.classList.remove("hand-writing");
+        callback && callback();
+        return;
+      }
+      solutionDiv.textContent += text[i++];
+    }, 80);
+  }
+
+  function showLesson(index) {
+    if (index >= lessonsArray.length) {
+      inLessonMode = false;
+      showQuestion(currentQuestion);
+      return;
+    }
+
+    const text = lessonsArray[index];
+    editor.innerHTML = `<div class="question">${text}</div>`;
+    status.textContent = `📖 Lesson ${index + 1}: Reading...`;
+    fullTranscript.push(`Lesson ${index + 1}:\n${text}\n`);
+
+    speak(text, () => {
+      currentLesson++;
+      setTimeout(() => showLesson(currentLesson), 4000);
+    });
+  }
+
+  function showQuestion(index) {
+    if (index >= questionsArray.length) {
+      editor.innerHTML = "✅ All lessons and questions completed.";
+      status.textContent = "✅ Done.";
+      return;
+    }
+
+    const q = questionsArray[index];
+    editor.innerHTML = `<div class="question">${q.question}</div>`;
+    status.textContent = `🔊 Reading Question ${index + 1}...`;
+    fullTranscript.push(`\n${q.question}\n`);
+
+    speak(q.question, () => {
+      status.textContent = `⌛ Writing solution in 10 seconds...`;
+      waitTimer = setTimeout(() => {
+        if (!paused) {
+          status.textContent = `✍️ Writing Solution...`;
+          typeSolution(q.solution, () => {
+            status.textContent = `🔊 Reading Solution...`;
+            fullTranscript.push(`${q.solution}\n`);
+            speak(q.solution, () => {
+              status.textContent = `✅ Done with Question ${index + 1}.`;
+              currentQuestion++;
+              setTimeout(() => showQuestion(currentQuestion), 5000);
+            });
+          });
+        }
+      }, 10000);
+    });
+  }
+
+  function startTutor() {
+    if (tutorStarted) return;
+    tutorStarted = true;
+    status.textContent = "🟢 Tutor is starting...";
+    showLesson(currentLesson);
+  }
+
+  function pauseLesson() {
+    paused = true;
+    clearTimeout(waitTimer);
+    clearInterval(typingTimer);
+    speechSynthesis.cancel();
+    editor.classList.remove("hand-writing");
+    status.textContent = "⏸️ Paused.";
+  }
+
+  function resumeLesson() {
+    if (!paused) return;
+    paused = false;
+    status.textContent = '⏯️ Resumed lesson';
+    speak(editor.textContent);
+  }
+
+  function repeatLesson() {
+    if (currentLesson > 0) {
+      currentLesson--;
+      showLesson(currentLesson);
+    }
+  }
+
+  function repeatQuestion() {
+    if (!inLessonMode && currentQuestion > 0) {
+      currentQuestion--;
+      showQuestion(currentQuestion);
+    }
+  }
+
+  function skipLesson() {
+    if (inLessonMode) {
+      currentLesson++;
+      showLesson(currentLesson);
+    } else {
+      currentQuestion++;
+      showQuestion(currentQuestion);
+    }
+  }
+
+  function downloadAll() {
+    const blob = new Blob([fullTranscript.join("\n")], { type: 'text/plain' });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "tutor_transcript.txt";
+    a.click();
+  }
+</script>
+</body>
+</html>

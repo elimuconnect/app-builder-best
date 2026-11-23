@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ELIMU CONNECT/SSMARTLEARN - Past Papers & Schemes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #4CAF50, #81C784);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .login-container {
+      background-color: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .login-container h2 {
+      margin-bottom: 20px;
+      color: #4CAF50;
+    }
+
+    .footer-note {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #888;
+    }
+
+    #chatbox-body {
+      margin-top: 20px;
+      text-align: left;
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .bot-message {
+      margin-bottom: 10px;
+      background-color: #eef4ff;
+      padding: 12px;
+      border-radius: 8px;
+      color: #222;
+      font-size: 15px;
+      line-height: 1.6;
+      font-family: Arial, sans-serif;
+    }
+
+    #tools-ui {
+      margin-top: 30px;
+      text-align: left;
+      display: none;
+    }
+
+    #tools-ui h3 {
+      color: #4CAF50;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    #tools-ui ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    #tools-ui ul li {
+      margin-bottom: 12px;
+    }
+
+    #tools-ui ul li a {
+      display: inline-block;
+      padding: 10px 15px;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 5px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    #tools-ui ul li a:hover {
+      background-color: #45a049;
+    }
+
+    /* ✅ WhatsApp button styling */
+    .whatsapp-btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 20px;
+      background-color: #25D366;
+      color: white;
+      border-radius: 5px;
+      font-weight: bold;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .whatsapp-btn:hover {
+      background-color: #1ebe5b;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <h2>Welcome to ELIMU CONNECT/SmartLearn, RATE OUR APP AND WRITE A REVIEW , THEN CLAIM THE PASSWORD</h2>
+
+    <div id="chatbox-body"></div>
+
+    <!-- ✅ WhatsApp Button now inside the box -->
+    <a class="whatsapp-btn" href="https://wa.me/254769255782?text=Hello,%20I%20have%20rated%20the%20app.%20Please%20send%20me%20a%20password%20to%20unlock%20Past%20Papers%20and%20Schemes." target="_blank">
+      📩 Claim Password on WhatsApp
+    </a>
+
+    <div class="footer-note">Enter your password to unlock Past Papers & Schemes</div>
+
+    <!-- Tools UI -->
+    <div id="tools-ui">
+      <h3>Past Papers & Schemes</h3>
+      <ul>
+        <li><a href="https://drive.google.com/drive/folders/1laNlb9teri_dcaAGz18Jw4tacrLShfXh?usp=drive_link">CBC/KCSE/IGCSE pastpapers</a></li>
+        
+<li><a href="https://your-link.com/schemes" target="_blank">Schemes of Work</a></li>
+
+<li><a href="https://drive.google.com/drive/folders/1aAM9IRN28OUHwMDjhu2wqzihsIiy0XNV?usp=drive_link" target="_blank">More CBC & IGCSE past papers</a></li>
+
+<li><a href="
+https://drive.google.com/drive/folders/14NroBpHqgUy3SrRacVQKsFnpGZFJ3wDO?usp=drive_link">CBSE past papers</a></li>
+
+     </ul>
+    </div
+  </div>
+
+
+
+
+<script>
+  const chatboxBody = document.getElementById("chatbox-body");
+  const toolsUI = document.getElementById("tools-ui");
+
+  // ✅ Passwords you manage manually
+  const passwords = [
+  "M3y#N5sL8wR2pD0H","V9q$J2hF7tK4mX6C","Z1p!X8rT3vL5wN0B",
+  "R4y#W6kD2pM9xJ7Q","H2t$C9fL1vK5rZ8P","T8m!V3xQ0rF7pJ2Y","K5w#L9vH3tD1xP6N",
+  "F7r$Q2pJ6vX0kM9Z","B1p!N8tF3yR5wL2G","J6v#K3xL9pT2mY7Q","P2f$H7rX1tM6vC8Z",
+  "S9t!W5kD0rL3pN2Y","C3v#F2pJ8xT6mQ1R","L4y$H7tV1pK5rX9B","N8p!Q2vT3rF6xM0G",
+  "D5r#X9kL2tJ1pV6Z","Y1m$N3vP7xR2tF8H","K6p!C4rJ0vL9tX2Q","V3t#H5xF1pM7rZ8N",
+  "F2y$L8kR6vQ1pT9J","P7v!J3tX0rL4pK2Y","G5r#N2xH9pT1vF7M","S1p$V6tJ3xK8rQ4Z",
+  "M4t!C9vL2rP7xF1H","Q8r#X1kD5tJ3pV0N","B2y$F7pH6xT1vM9R","L3p!N5tK0rF9xJ2Y",
+  "R6v#H8xP2tJ1pQ7C","D0t$L3kF5rV8pX2Z","Y4p!M9tJ2xK7rH1G","K1r#Q6vL3tF0pX8N",
+  "F8y$C2pR7xT5vM1J","P3t!J6vX1rL4pK9Y","G0r#N7xH5pT2vF3M","S9p$V1tJ6xK4rQ8Z",
+  "M2t!C5vL0rP8xF7H","Q4r#X3kD1tJ9pV6N","B6y$F0pH2xT7vM5R","L0p!N7tK5rF1xJ8Y",
+  "R5v#H0xP7tJ4pQ2C","D3t$L9kF0rV1pX8Z","Y2p!M8tJ5xK0rH6G","K0r#Q5vL8tF3pX1N",
+  "F9y$C1pR0xT6vM4J","P4t!J9vX2rL0pK7Y","G1r#N6xH3pT9vF2M","S0p$V7tJ8xK1rQ5Z",
+  "M7t!C0vL9rP2xF3H","Q2r#X5kD8tJ0pV1N","B8y$F1pH4xT0vM6R","L0p!N7tK5rF1xJ8Y",
+  "R1v#H6xP3tJ9pQ0C","D7t$L2kF5rV8pX1Z","Y0p!M4tJ6xK3rH9G","K5r#Q1vL7tF0pX2N",
+  "F1y$C9pR8xT4vM0J","P0t!J2vX7rL5pK9Y","G3r#N5xH0pT1vF8M","S7p$V9tJ4xK2rQ1Z",
+  "M1t!C8vL6rP3xF0H","Q5r#X0kD9tJ2pV7N","B0y$F3pH1xT9vM2R","L2p!N6tK8rF5xJ0Y",
+  "R9v#H3xP5tJ0pQ2C","D1t$L7kF4rV9pX0Z","Y6p!M1tJ8xK5rH2G","K2r#Q8vL0tF3pX6N",
+  "F0y$C5pR9xT1vM7J","P9t!J0vX6rL2pK4Y","G2r#N1xH7pT3vF5M","S4p$V0tJ9xK7rQ6Z",
+  "M3t!C2vL5rP0xF9H","Q7r#X4kD0tJ5pV1N","B1y$F8pH3xT6vM0R","L5p!N0tK2rF8xJ1Y",
+  "R0v#H9xP1tJ6pQ3C","D6t$L5kF3rV0pX9Z","Y5p!M2tJ0xK8rH7G","K8r#Q3vL1tF5pX0N",
+  "F4y$C0pR6xT9vM3J","P6t!J1vX5rL3pK0Y","G9r#N0xH2pT8vF1M","S3p$V4tJ7xK0rQ9Z",
+  "M0t!C7vL1rP5xF6H","Q1r#X9kD4tJ8pV2N","B7y$F5pH0xT3vM1R","L6p!N3tK9rF2xJ5Y",
+  "R2v#H1xP6tJ8pQ4C","D9t$L0kF7rV3pX5Z","Y3p!M7tJ4xK1rH0G","K4r#Q2vL5tF9pX3N",
+  "F5y$C3pR1xT8vM2J","P1t!J4vX0rL9pK8Y","G6r#N8xH5pT2vF0M","S2p$V3tJ1xK6rQ7Z",
+  "M8t!C4vL0rP7xF2H","Q0r#X6kD2tJ1pV9N","B3y$F9pH6xT5vM8R","L1p!N5tK0rF4xJ7Y",
+  "R7v#H2xP9tJ3pQ1C","D8t$L1kF6rV4pX7Z","Y9p!M0tJ5xK2rH3G","K7r#Q4vL6tF1pX5N"
+];
+
+
+  function displayMessage(message) {
+    chatboxBody.innerHTML = `<div class="bot-message">${message}</div>`;
+  }
+
+  function validatePassword(password) {
+    return passwords.includes(password);
+  }
+
+  function showToolsUI() {
+    toolsUI.style.display = "block";
+    displayMessage("✅ Access granted! Welcome to Access pastpapers and schemes.");
+  }
+
+  function askPassword() {
+    const savedPassword = localStorage.getItem("schoolPassword");
+
+    if (savedPassword && validatePassword(savedPassword)) {
+      showToolsUI();
+      return;
+    }
+
+    const input = prompt("Enter your password to access pastpapers and schemes:");
+    if (input === null) return; // user cancelled
+
+    if (validatePassword(input)) {
+      localStorage.setItem("schoolPassword", input);
+      showToolsUI();
+    } else {
+      displayMessage("❌ Invalid password. Refresh page to try again.");
+      alert("Invalid password! Refresh the page to retry.");
+    }
+  }
+
+  window.onload = askPassword;
+</script>
+
+</body>
+</html>

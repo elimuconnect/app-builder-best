@@ -1,0 +1,2153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Elimu Connect • ShortsGen v4 (9:16 Canvas) — Edited (Music Only)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #1976d2;
+    --math: #ef6c00;
+    --sci: #2e7d32;
+    --eng: #0d47a1;
+    --bubble-bg: #fff9e6;
+    --subtitle-bg: rgba(10, 25, 90, 0.85);
+  }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    font-family: 'Patrick Hand', ComicSans, Arial;
+    background: linear-gradient(#e6f7ff, #ffffff);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  .app {
+    width: 420px;
+    max-width: 100%;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  h1 {
+    font-size: 1rem;
+    margin: 0;
+    text-align: center;
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0;
+    justify-content: center;
+  }
+
+  select,
+  input[type="file"],
+  button {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-weight: bold;
+  }
+
+  button {
+    background: var(--accent);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+
+  button:hover {
+    transform: scale(1.04);
+  }
+
+  .small {
+    font-size: 0.8rem;
+    color: #444;
+    text-align: center;
+  }
+
+  #stageWrap {
+    width: 360px;
+    height: 640px;
+    margin: 12px auto;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.2);
+    position: relative;
+    background: #222;
+  }
+
+  /* Canvas fits inside stageWrap but actual pixels are 720x1280 (portrait) */
+  #canvasPreview {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: #000;
+  }
+
+  .controls .row {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+  }
+
+  .status {
+    font-size: 0.9rem;
+    margin-top: 8px;
+    text-align: center;
+  }
+
+  a.hidden {
+    display: none;
+  }
+
+  .hint {
+    font-size: 0.8rem;
+    color: #555;
+    margin-top: 6px;
+    text-align: center;
+  }
+
+  @keyframes flash {
+    0% { opacity: 0; filter: brightness(3); }
+    100% { opacity: 1; filter: brightness(1); }
+  }
+
+  header h1 {
+    background: linear-gradient(90deg, #ff9800, #2196f3);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  /* 📱 MOBILE RESPONSIVE ADJUSTMENTS */
+  @media (max-width: 480px) {
+    .app {
+      width: 100%;
+    }
+
+    #stageWrap {
+      width: 100%;
+      height: 80vh;
+      border-radius: 12px;
+    }
+
+    h1 {
+      font-size: 0.9rem;
+    }
+
+    button,
+    select,
+    input[type="file"] {
+      font-size: 0.85rem;
+      padding: 6px 8px;
+    }
+
+    .status,
+    .hint {
+      font-size: 0.8rem;
+    }
+  }
+</style>
+
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Elimu Connect • ShortsGen v4</h1>
+      <div class="small">9:16 Canvas • Cartoon bubble subtitles • Auto WebM</div>
+    </header>
+
+    <div class="controls">
+      <label>Duration:
+        <select id="duration"><option value="30">30s</option><option value="45">45s</option><option value="60" selected>60s</option></select>
+      </label>
+
+      <label>Voice method:
+        <select id="voiceMethod">
+          <option value="mic">Mic live (embed)</option>
+          <option value="upload">Upload voice file (embed)</option>
+          <option value="tts">SpeechSynthesis preview (not embedded)</option>
+        </select>
+      </label>
+
+      <label>Voice gender:
+        <select id="voiceGender"><option value="auto">Auto</option><option value="male">Male</option><option value="female">Female</option></select>
+      </label>
+    </div>
+
+    <div class="controls row">
+      <input type="file" id="voiceUpload" accept="audio/*" />
+      <button id="useUploadBtn">Use Upload</button>
+      <button id="genBtn">🎲 Generate Preview</button>
+      <button id="recordBtn">🔴 Start & Record (auto-stop)</button>
+    </div>
+
+    <div id="stageWrap" title="This box is the recorded 9:16 area">
+      <canvas id="canvasPreview" width="720" height="1280"></canvas>
+    </div>
+
+    <div class="controls">
+      <a id="downloadLink" class="hidden"></a>
+    </div>
+
+    <div class="status" id="status">Click Generate Preview to unlock audio, then press Start & Record.</div>
+    <div class="hint">Tip: if browser prompts to allow mic, allow it. For embedded narration use Upload or Mic. TTS is disabled (no narration).</div>
+  </div>
+
+
+
+<script>
+/* ---------- Configuration & assets ---------- */
+const CANVAS_W = 720, CANVAS_H = 1280; // portrait 9:16
+
+// updated to free catchy backgrounds (Pixabay/Unsplash style)
+const BACKGROUNDS = [
+  {name:'Sunny Schoolyard', url:'https://cdn.pixabay.com/photo/2022/10/07/06/11/verbena-7504222_640.jpg'},
+  {name:'Green Park', url:'https://cdn.pixabay.com/photo/2020/06/21/10/56/flower-5324314_640.jpg'},
+  {name:'Sky & Clouds', url:'https://cdn.pixabay.com/photo/2015/11/10/17/00/still-life-1037378_640.jpg'},
+  {name:'Playground', url:'https://cdn.pixabay.com/photo/2022/05/12/20/59/tulips-7192345_640.jpg'},
+  {name:'Chalkboard Classroom', url:'https://cdn.pixabay.com/photo/2016/11/29/05/08/chalkboard-1866616_1280.jpg'},
+  {name:'Beach', url:'https://cdn.pixabay.com/photo/2024/11/08/13/40/tulips-9183358_640.jpg'},
+  {name:'Space (kids)', url:'https://cdn.pixabay.com/photo/2023/12/08/10/56/mandarins-8437425_640.jpg'},
+  {name:'Forest Glade', url:'https://cdn.pixabay.com/photo/2015/06/19/21/24/avenue-815297_1280.jpg'},
+  {name:'Rainbow Hills', url:'https://cdn.pixabay.com/photo/2016/07/16/16/21/flowers-1522260_640.jpg'},
+  {name:'Science Lab', url:'https://cdn.pixabay.com/photo/2023/04/26/16/01/lighthouse-7952718_640.jpg'},
+
+  {name:'Sunny Schoolyard', url:'https://cdn.pixabay.com/photo/2025/09/24/11/49/ai-9852653_1280.jpg'},
+  {name:'Green Park', url:'https://cdn.pixabay.com/photo/2024/08/29/12/44/images-9006886_960_720.jpg'},
+  {name:'Sky & Clouds', url:'https://cdn.pixabay.com/photo/2017/12/11/15/34/lion-3012515_640.jpg'},
+  {name:'Playground', url:'https://cdn.pixabay.com/photo/2024/08/29/12/36/images-9006863_1280.jpg'},
+  {name:'Chalkboard Classroom', url:'https://cdn.pixabay.com/photo/2016/02/20/20/17/animals-1212716_960_720.png'},
+  {name:'Beach', url:'https://cdn.pixabay.com/photo/2024/08/22/11/59/images-8989212_640.jpg'},
+  {name:'Space (kids)', url:'https://cdn.pixabay.com/photo/2023/08/18/18/19/car-8199052_640.jpg'},
+  {name:'Forest Glade', url:'https://cdn.pixabay.com/photo/2024/08/22/11/58/images-8989205_640.jpg'},
+  {name:'Rainbow Hills', url:'https://cdn.pixabay.com/photo/2024/08/20/13/51/images-8983354_640.jpg'},
+  {name:'Science Lab', url:'https://cdn.pixabay.com/photo/2024/08/20/13/51/images-8983354_640.jpg'},
+  { name: 'Sunset', url: 'https://cdn.pixabay.com/photo/2022/04/15/07/58/sunset-7133867_640.jpg' },
+  { name: 'Landscape', url: 'https://cdn.pixabay.com/photo/2022/08/08/19/36/landscape-7373484_1280.jpg' },
+  { name: 'Forest Avenue', url: 'https://cdn.pixabay.com/photo/2015/06/19/21/24/avenue-815297_640.jpg' },
+  { name: 'Glacier', url: 'https://cdn.pixabay.com/photo/2022/05/10/14/37/glacier-7187291_640.jpg' },
+  { name: 'Lonely Tree', url: 'https://cdn.pixabay.com/photo/2022/11/27/13/22/tree-7619791_640.jpg' },
+  { name: 'Field', url: 'https://cdn.pixabay.com/photo/2024/12/28/03/39/field-9295186_640.jpg' },
+  { name: 'Styggkarret Lake', url: 'https://cdn.pixabay.com/photo/2014/09/02/15/28/styggkarret-433688_640.jpg' },
+  { name: 'Bachalpsee Lake', url: 'https://cdn.pixabay.com/photo/2022/11/05/19/56/bachalpsee-7572681_640.jpg' },
+  { name: 'Windsurfing', url: 'https://cdn.pixabay.com/photo/2022/06/04/01/35/windsurfing-7241074_640.jpg' },
+  { name: 'Snow Mountain', url: 'https://cdn.pixabay.com/photo/2025/05/21/15/34/snow-mountain-9614087_640.jpg' },
+  { name: 'Sailboat', url: 'https://cdn.pixabay.com/photo/2025/05/13/12/40/sailboat-9597523_640.jpg' },
+  { name: 'Chilli Plant', url: 'https://cdn.pixabay.com/photo/2024/11/17/04/52/chilli-9202873_640.jpg' },
+  { name: 'Dolomites', url: 'https://cdn.pixabay.com/photo/2020/04/22/08/06/dolomites-5076487_640.jpg' },
+  { name: 'Desert', url: 'https://cdn.pixabay.com/photo/2017/08/16/01/23/desert-2646209_640.jpg' },
+  { name: 'Cape', url: 'https://cdn.pixabay.com/photo/2022/08/23/01/10/cape-7404790_640.jpg' },
+  { name: 'Forest', url: 'https://cdn.pixabay.com/photo/2018/11/23/14/19/forest-3833973_640.jpg' },
+  { name: 'Owl', url: 'https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg' },
+  { name: 'Water', url: 'https://cdn.pixabay.com/photo/2021/08/27/18/50/water-6579313_640.jpg' },
+  { name: 'Lynx', url: 'https://cdn.pixabay.com/photo/2023/12/11/12/51/lynx-8443540_640.jpg' },
+  { name: 'River', url: 'https://cdn.pixabay.com/photo/2022/08/25/20/34/river-7411236_640.jpg' },
+  { name: 'Bird', url: 'https://cdn.pixabay.com/photo/2023/05/03/11/20/bird-7967356_640.jpg' },
+  { name: 'Strawberries', url: 'https://cdn.pixabay.com/photo/2022/04/14/20/59/strawberries-7133242_640.jpg' },
+  { name: 'Dog', url: 'https://cdn.pixabay.com/photo/2013/10/02/23/03/dog-190056_640.jpg' },
+  { name: 'Bird Flying', url: 'https://cdn.pixabay.com/photo/2023/04/05/21/09/bird-7902319_640.jpg' },
+  { name: 'Landscape Sunset', url: 'https://cdn.pixabay.com/photo/2025/04/08/10/42/landscape-9521261_640.jpg' },
+  { name: 'Lighthouse', url: 'https://cdn.pixabay.com/photo/2022/07/07/09/08/lighthouse-7306839_640.jpg' },
+  { name: 'Pine Cones', url: 'https://cdn.pixabay.com/photo/2025/09/25/17/56/pine-cones-9855502_640.jpg' },
+  { name: 'Fisherman', url: 'https://cdn.pixabay.com/photo/2017/09/11/14/11/fisherman-2739115_640.jpg' },
+  { name: 'Squirrel', url: 'https://cdn.pixabay.com/photo/2025/08/02/03/27/squirrel-9749860_640.jpg' },
+  { name: 'Fly', url: 'https://cdn.pixabay.com/photo/2015/02/16/06/11/fly-637949_640.jpg' },
+  { name: 'Rain', url: 'https://cdn.pixabay.com/photo/2017/08/02/21/15/rain-2573488_640.jpg' },
+  { name: 'Sleeve', url: 'https://cdn.pixabay.com/photo/2024/01/18/13/05/sleeve-8516924_640.jpg' },
+  { name: 'Spoonbill', url: 'https://cdn.pixabay.com/photo/2024/11/07/18/01/spoonbill-9181508_640.jpg' },
+  { name: 'Hill', url: 'https://cdn.pixabay.com/photo/2020/06/21/09/48/hill-5324149_640.jpg' },
+  { name: 'Waterfall', url: 'https://cdn.pixabay.com/photo/2020/05/28/04/42/waterfall-5229807_640.jpg' },
+  { name: 'Sunset 2', url: 'https://cdn.pixabay.com/photo/2024/01/18/10/07/sunset-8516639_640.jpg' },
+  { name: 'Flower', url: 'https://cdn.pixabay.com/photo/2022/10/24/09/31/flower-7543035_640.jpg' },
+  { name: 'Flycatcher', url: 'https://cdn.pixabay.com/photo/2024/07/01/10/50/flycatcher-8864922_640.jpg' },
+  { name: 'Pamir', url: 'https://cdn.pixabay.com/photo/2025/10/09/15/17/pamir-9883842_640.jpg' },
+  { name: 'Tram', url: 'https://cdn.pixabay.com/photo/2024/12/28/13/28/tram-9296118_640.jpg' },
+  { name: 'Animals', url: 'https://cdn.pixabay.com/photo/2025/04/14/16/31/animals-9533774_640.jpg' },
+  { name: 'Leaves', url: 'https://cdn.pixabay.com/photo/2024/12/04/15/37/leaves-9244714_640.jpg' },
+  { name: 'Blossoms', url: 'https://cdn.pixabay.com/photo/2022/02/03/18/49/blossoms-6991112_640.jpg' },
+  { name: 'Leaves 2', url: 'https://cdn.pixabay.com/photo/2023/07/08/19/28/leaves-8115077_640.jpg' },
+  { name: 'Sunset 3', url: 'https://cdn.pixabay.com/photo/2023/10/21/11/46/sunset-8331285_640.jpg' },
+  { name: 'Altai Mountains', url: 'https://cdn.pixabay.com/photo/2022/01/17/06/38/altai-6943982_640.jpg' },
+  { name: 'Spider', url: 'https://cdn.pixabay.com/photo/2018/07/12/11/46/spider-3533177_640.jpg' },
+  { name: 'City Sunset', url: 'https://cdn.pixabay.com/photo/2024/11/02/17/29/city-9169729_640.jpg' },
+  { name: 'Giraffe', url: 'https://cdn.pixabay.com/photo/2020/05/04/09/09/giraffe-5128394_640.jpg' },
+  { name: 'Mountains', url: 'https://cdn.pixabay.com/photo/2016/05/24/16/48/mountains-1412683_640.png' },
+  { name: 'Leaf', url: 'https://cdn.pixabay.com/photo/2021/04/22/18/35/leaf-6199807_640.jpg' },
+  { name: 'Dorset', url: 'https://cdn.pixabay.com/photo/2024/10/23/09/00/dorset-9141987_640.jpg' },
+  { name: 'Bridge', url: 'https://cdn.pixabay.com/photo/2025/05/14/10/09/bridge-9599215_640.jpg' },
+  { name: 'Elephant', url: 'https://cdn.pixabay.com/photo/2024/08/24/14/42/elephant-8994442_640.jpg' },
+  { name: 'Plant', url: 'https://cdn.pixabay.com/photo/2020/03/10/05/40/plant-4917877_640.jpg' },
+  { name: 'Fly Agaric', url: 'https://cdn.pixabay.com/photo/2014/11/27/10/04/fly-agaric-547324_640.jpg' },
+  { name: 'Forest 2', url: 'https://cdn.pixabay.com/photo/2018/05/11/23/33/forest-3392077_640.jpg' },
+  { name: 'Insect', url: 'https://cdn.pixabay.com/photo/2023/08/10/14/17/insect-8181775_640.jpg' },
+  { name: 'Branch', url: 'https://cdn.pixabay.com/photo/2022/12/12/03/13/branch-7650059_640.jpg' },
+  { name: 'Animal', url: 'https://cdn.pixabay.com/photo/2020/02/17/06/06/animal-4855514_640.jpg' },
+  { name: 'Elephants', url: 'https://cdn.pixabay.com/photo/2022/12/12/17/05/elephants-7651446_640.jpg' },
+  { name: 'Peacock', url: 'https://cdn.pixabay.com/photo/2018/08/19/19/56/peacock-3617474_640.jpg' },
+  { name: 'Wood', url: 'https://cdn.pixabay.com/photo/2022/12/03/22/15/wood-7633457_640.jpg' },
+  { name: 'Mountain', url: 'https://cdn.pixabay.com/photo/2024/11/03/17/49/mountain-9172053_640.jpg' },
+  { name: 'Mushroom', url: 'https://cdn.pixabay.com/photo/2023/11/16/18/46/mushroom-8392883_640.jpg' },
+  { name: 'Plant 2', url: 'https://cdn.pixabay.com/photo/2022/10/17/18/19/plant-7528416_640.jpg' },
+  { name: 'Bavarian Forest', url: 'https://cdn.pixabay.com/photo/2018/05/09/19/31/bavarian-forest-3385966_640.jpg' },
+  { name: 'Cat', url: 'https://cdn.pixabay.com/photo/2021/09/28/13/14/cat-6664412_640.jpg' },
+  { name: 'Drops', url: 'https://cdn.pixabay.com/photo/2023/03/27/06/06/drops-7879899_640.jpg' },
+  { name: 'Path', url: 'https://cdn.pixabay.com/photo/2021/08/01/17/31/path-6514885_640.jpg' },
+  { name: 'Landscape 2', url: 'https://cdn.pixabay.com/photo/2019/10/29/14/46/landscape-4587079_640.jpg' },
+  { name: 'Dog 2', url: 'https://cdn.pixabay.com/photo/2020/03/31/19/20/dog-4988985_640.jpg' },
+  { name: 'Animal 2', url: 'https://cdn.pixabay.com/photo/2020/02/17/06/06/animal-4855514_640.jpg' },
+  { name: 'Costa Rica', url: 'https://cdn.pixabay.com/photo/2024/12/31/01/02/costa-rica-9301364_640.jpg' },
+  { name: 'Fish', url: 'https://cdn.pixabay.com/photo/2018/04/15/17/45/fish-3322230_640.jpg' },
+  { name: 'Dog 2', url: 'https://cdn.pixabay.com/photo/2020/03/31/19/20/dog-4988985_640.jpg' },
+  { name: 'Meerkat', url: 'https://cdn.pixabay.com/photo/2018/07/09/11/53/meerkat-3525978_640.jpg' },
+  { name: 'Tree', url: 'https://cdn.pixabay.com/photo/2018/03/15/21/10/tree-3229512_640.jpg' },
+  { name: 'Fox', url: 'https://cdn.pixabay.com/photo/2015/04/10/01/41/fox-715588_640.jpg' },
+  { name: 'Caterpillar', url: 'https://cdn.pixabay.com/photo/2023/08/07/14/08/caterpillar-8175147_640.jpg' },
+  { name: 'Foliage', url: 'https://cdn.pixabay.com/photo/2023/11/28/16/10/foliage-8417776_640.jpg' },
+  { name: 'Animal 3', url: 'https://cdn.pixabay.com/photo/2021/10/31/08/34/animal-6756619_640.jpg' },
+  { name: 'Cascade', url: 'https://cdn.pixabay.com/photo/2022/04/23/17/16/cascade-7152189_640.jpg' },
+  { name: 'Puddle', url: 'https://cdn.pixabay.com/photo/2017/08/05/15/19/puddle-2584378_640.jpg' },
+  { name: 'Herons', url: 'https://cdn.pixabay.com/photo/2023/03/27/19/18/herons-7881512_640.png' },
+  { name: 'Nature', url: 'https://cdn.pixabay.com/photo/2023/04/16/10/55/nature-7929920_640.jpg' },
+  { name: 'Water Bird', url: 'https://cdn.pixabay.com/photo/2023/11/11/16/07/water-bird-8381451_640.jpg' },
+  { name: 'Squirrel 2', url: 'https://cdn.pixabay.com/photo/2015/02/01/18/05/squirrel-619968_640.jpg' },
+  { name: 'Rain 2', url: 'https://cdn.pixabay.com/photo/2022/04/25/05/48/rain-7155121_640.jpg' },
+  { name: 'Palm Trees', url: 'https://cdn.pixabay.com/photo/2018/08/20/15/31/palm-trees-3619180_640.jpg' },
+  { name: 'Hut', url: 'https://cdn.pixabay.com/photo/2025/05/06/12/19/hut-9582608_640.jpg' },
+  { name: 'Crocus', url: 'https://cdn.pixabay.com/photo/2025/04/02/11/45/crocus-9508835_640.jpg' },
+  { name: 'Bridge 2', url: 'https://cdn.pixabay.com/photo/2024/08/28/09/34/bridge-9003553_640.jpg' },
+  { name: 'Fall Leaves', url: 'https://cdn.pixabay.com/photo/2023/08/15/17/25/fall-8192375_640.png' },
+  { name: 'Plant', url: 'https://cdn.pixabay.com/photo/2023/03/14/00/30/plant-7851213_640.jpg' },
+  { name: 'Landscape 3', url: 'https://cdn.pixabay.com/photo/2020/03/13/15/38/landscape-4928266_640.jpg' },
+  { name: 'Grapes', url: 'https://cdn.pixabay.com/photo/2021/10/01/18/27/grapes-6673291_640.jpg' },
+  { name: 'Mountains 2', url: 'https://cdn.pixabay.com/photo/2023/08/07/21/37/mountains-8175997_640.png' },
+  { name: 'Deer', url: 'https://cdn.pixabay.com/photo/2018/12/25/11/10/deer-3894103_640.png' },
+  { name: 'Sea Bird', url: 'https://cdn.pixabay.com/photo/2020/03/12/19/55/sea-bird-4926108_640.jpg' },
+  { name: 'Cat 2', url: 'https://cdn.pixabay.com/photo/2022/06/06/10/55/cat-7245850_640.jpg' },
+  { name: 'Grasshopper', url: 'https://cdn.pixabay.com/photo/2023/09/03/12/52/grasshopper-8230682_640.jpg' },
+  { name: 'Animal 4', url: 'https://cdn.pixabay.com/photo/2021/10/31/09/25/animal-6756751_640.jpg' }
+];
+const KNOWLEDGE_ITEMS = [
+  "The Moon has moonquakes.",
+  "Bananas are berries, but strawberries aren't.",
+  "Octopuses have three hearts.",
+  "Sharks existed before trees.",
+  "Honey never spoils.",
+  "Some turtles can breathe through their butts.",
+  "Water can boil and freeze at the same time.",
+  "Sloths can hold their breath longer than dolphins.",
+  "There are more stars than grains of sand.",
+  "Wombat poop is cube-shaped.",
+  "Butterflies taste with their feet.",
+  "A day on Venus is longer than a year.",
+  "Your stomach gets a new lining every 3-4 days.",
+  "Hot water freezes faster than cold water.",
+  "Cats can't taste sweetness.",
+  "There are more fake flamingos than real ones.",
+  "Koalas have fingerprints like humans.",
+  "Cows have best friends and get stressed apart.",
+  "Sea otters hold hands while sleeping.",
+  "Rats laugh when tickled.",
+  "Humans share 60% of their DNA with bananas.",
+  "A group of flamingos is called a 'flamboyance'.",
+  "The heart of a shrimp is located in its head.",
+  "The Eiffel Tower grows taller in summer.",
+  "Bees can recognize human faces.",
+  "A sneeze travels at about 160 km/h.",
+  "There’s enough DNA in your body to stretch to Pluto and back.",
+  "Ants don’t sleep.",
+  "Some frogs can be frozen solid and still survive.",
+  "There’s a species of jellyfish that can live forever.",
+  "Your nose can remember 50,000 different scents.",
+  "Some metals are so reactive they explode in water.",
+  "Humans are the only animals that blush.",
+  "Tomatoes have more genes than humans.",
+  "The shortest war in history lasted only 38 minutes.",
+  "A cloud can weigh more than a million kilograms.",
+  "The word 'school' comes from a Greek word meaning 'leisure'.",
+  "Lightning strikes the Earth about 8 million times a day.",
+  "You can’t hum while holding your nose closed.",
+  "The average cumulus cloud weighs about 500 tons.",
+  "It rains diamonds on Saturn and Jupiter.",
+  "A snail can sleep for three years.",
+  "Giraffes have the same number of neck bones as humans.",
+  "Earth’s rotation is gradually slowing down.",
+  "Avocados are fruits, not vegetables.",
+  "Penguins propose with pebbles.",
+  "Space smells like burnt steak.",
+  "An ostrich’s eye is bigger than its brain.",
+  "There are more trees on Earth than stars in the Milky Way.",
+  "Goldfish can see infrared and ultraviolet light.",
+  "A day on Mercury lasts 1,408 hours.",
+  "The dot over an 'i' or 'j' is called a tittle.",
+  "Your brain generates about 20 watts of power — enough to power a light bulb.",
+  "A teaspoon of honey is the life’s work of 12 bees.",
+  "If you cut a starfish, it can regrow its arms.",
+  "The human body contains enough iron to make a small nail.",
+  "The fingerprints of koalas and humans are nearly identical.",
+  "Every minute, 240 babies are born around the world.",
+  "Polar bears have black skin under their white fur.",
+  "The Great Wall of China is not visible from the Moon.",
+  "Elephants can’t jump.",
+  "Dolphins sleep with one eye open.",
+  "Earth is hit by lightning 100 times every second.",
+  "Rainbows can appear at night — they’re called moonbows.",
+  "The longest hiccuping spree lasted 68 years.",
+  "Mosquitoes are attracted to people who just ate bananas.",
+  "Your tongue print is unique, just like your fingerprint.",
+  "There are more stars in the universe than atoms in a grain of sand.",
+  "Peanuts are not nuts; they’re legumes.",
+  "Birds are the closest living relatives of dinosaurs.",
+  "Octopuses have blue blood.",
+  "The smell of freshly cut grass is a plant distress signal.",
+  "Some cats are allergic to humans.",
+  "Saturn’s rings could disappear in 100 million years.",
+  "The inventor of the Pringles can is buried in one.",
+  "A 'moment' technically means 90 seconds.",
+  "Rabbits can see behind them without moving their heads.",
+  "There are more possible chess moves than atoms in the known universe.",
+  "Bees can’t see red but can see ultraviolet light.",
+  "Humans shed about 600,000 particles of skin every hour.",
+  "The longest time between two twins being born is 87 days.",
+  "Octopus ink doesn't just hide them — it also dulls predators’ sense of smell.",
+  "The first oranges weren’t orange — they were green.",
+  "Cleopatra lived closer to the invention of the iPhone than to the building of the pyramids.",
+  "Some metals can remember their shape.",
+  "The shortest commercial flight lasts only 57 seconds.",
+  "Dogs can smell time.",
+  "There’s a type of fungus that turns ants into zombies.",
+  "The hashtag symbol is technically called an octothorpe.",
+  "Your small intestine is about 6 meters long.",
+  "Horses can’t vomit.",
+  "The word 'nerd' was first coined by Dr. Seuss.",
+  "Venus rotates backward compared to most planets.",
+  "You can’t fold a piece of paper more than seven times.",
+  "Some spiders can fly using electricity in the air.",
+  "The longest recorded echo lasted 75 seconds.",
+  "Human saliva contains a painkiller stronger than morphine.",
+  "Whales can communicate across entire oceans.",
+  "The human eye can distinguish about 10 million colors.",
+  "Bananas glow blue under black light.",
+    "Butterflies can’t fly if they’re too cold.",
+  "The human body glows in the dark, but our eyes can’t see it.",
+  "Spiders can’t stand the smell of peppermint.",
+  "There’s a planet made entirely of diamonds.",
+  "A shrimp’s heart beats in its head.",
+  "Apples float in water because they’re 25% air.",
+  "Humans are the only animals that cook food.",
+  "The tongue is the strongest muscle relative to its size.",
+  "There are more bacteria in your mouth than people on Earth.",
+  "Bubble wrap was originally invented as wallpaper.",
+  "Koalas sleep up to 22 hours a day.",
+  "The inventor of the frisbee was turned into a frisbee after he died.",
+  "Your brain shrinks slightly when you’re dehydrated.",
+  "Banging your head against a wall burns 150 calories an hour.",
+  "Cows produce more milk when listening to music.",
+  "Blue whales have hearts the size of small cars.",
+  "Carrots were originally purple, not orange.",
+  "Some fish can climb trees.",
+  "Lobsters taste with their legs.",
+  "Butterflies remember being caterpillars.",
+  "Your bones are about five times stronger than steel of the same density.",
+  "The average person spends six months of their life waiting for red lights.",
+  "Sea cucumbers eat with their feet.",
+  "Owls can’t move their eyes — that’s why they turn their heads.",
+  "Some lizards can squirt blood from their eyes.",
+  "The smell of rain is called petrichor.",
+  "Crows can recognize and remember human faces.",
+  "Pineapples take nearly two years to grow.",
+  "The first alarm clock could only ring at 4 a.m.",
+  "Orcas are actually dolphins.",
+  "The inventor of the microwave was inspired by a melting chocolate bar.",
+  "Snails have thousands of tiny teeth.",
+  "A crocodile can’t stick its tongue out.",
+  "Sharks are immune to cancer — mostly.",
+  "Apples wake you up better than coffee in the morning.",
+  "A group of owls is called a parliament.",
+  "Gorillas can catch human colds.",
+  "Your fingernails grow faster on your dominant hand.",
+  "The average person walks around the world three times in a lifetime.",
+  "Pigs can’t look up into the sky.",
+  "Bamboo can grow almost one meter in a single day.",
+  "Jellyfish have been around for more than 500 million years.",
+  "Humans and giraffes have the same number of neck bones.",
+  "The strongest muscle in your body is your jaw.",
+  "There’s enough salt in the ocean to cover all land 500 feet deep.",
+  "Rats multiply so quickly that in 18 months, two rats could have a million descendants.",
+  "Apples, peaches, and raspberries are all members of the rose family.",
+  "Birds don’t urinate.",
+  "Antarctica has no official time zone.",
+  "If you could fold paper 42 times, it would reach the moon.",
+  "The first computer virus was created in 1986.",
+  "The human stomach can dissolve razor blades.",
+  "Some cats have thumbs.",
+  "The first oranges were actually green.",
+  "Sound travels 15 times faster through steel than through air.",
+  "Earth once had two moons.",
+  "Potatoes can absorb and reflect Wi-Fi signals.",
+  "An octopus can taste with its tentacles.",
+  "Sea lions have rhythm — they can dance to a beat.",
+  "Dolphins have names for each other.",
+  "In Japan, letting a sumo wrestler make your baby cry is considered good luck.",
+  "Bubble tea was invented by accident.",
+  "A group of frogs is called an army.",
+  "Your heart beats about 100,000 times a day.",
+  "Some jellyfish can clone themselves.",
+  "Chewing gum helps you concentrate.",
+  "A single strand of spider silk is thinner than human hair but five times stronger than steel.",
+  "The average person produces 25,000 quarts of saliva in a lifetime.",
+  "Bees sometimes sting other bees.",
+  "The inventor of matchsticks was a pharmacist.",
+  "The fingerprints of twins are different.",
+  "The world’s largest desert isn’t the Sahara — it’s Antarctica.",
+  "Koalas have chlamydia.",
+  "Your taste buds have a lifespan of about 10 days.",
+  "A single sneeze can spread over 100,000 germs.",
+  "Sharks can live for up to 500 years.",
+  "Some plants can count and do math.",
+  "The smell of vanilla comes from beaver glands in some perfumes.",
+  "A bolt of lightning is five times hotter than the sun.",
+  "The average human eats 70 insects a year while sleeping.",
+  "Tigers’ skin is striped, not just their fur.",
+  "Dolphins sleep half their brain at a time.",
+  "Bees can make colored honey if they eat colored syrup.",
+  "Snakes can help predict earthquakes.",
+  "Some turtles can live without food for over a year.",
+  "Humans are born with 300 bones but die with 206.",
+  "Caterpillars have 12 eyes.",
+  "There’s a mushroom that can control ants’ minds.",
+  "Elephants use their trunks as snorkels.",
+  "Bats always turn left when leaving a cave.",
+  "Pineapple works as a natural meat tenderizer.",
+  "Ants can lift up to 50 times their body weight.",
+  "Rain contains vitamin B12.",
+  "You can’t breathe and swallow at the same time.",
+  "Cows moo in regional accents.",
+  "Goldfish lose their color if kept in dim light.",
+  "There’s a phobia of long words — called hippopotomonstrosesquippedaliophobia.",
+  "Humans are the only animals that cry emotional tears.",
+  "The unicorn is Scotland’s national animal.",
+  "Dragonflies have six legs but can’t walk.",
+  "Some sea cucumbers fight by vomiting their organs.",
+  "The average person will spend six years of their life dreaming.",
+  "Giraffes only sleep about 30 minutes a day.",
+  "Slugs have four noses.",
+  "A group of porcupines is called a prickle.",
+  "The inventor of the lightbulb also created the first movie camera.",
+  "Male seahorses give birth to babies.",
+  "Roses can grow taller than humans in some regions.",
+  "Coconuts kill more people each year than sharks.",
+  "Some animals dream just like humans.",
+  "There are more stars in the universe than all the grains of sand on Earth.",
+  "Bees can fly higher than Mount Everest.",
+  "A crocodile can’t move its tongue.",
+  "Kangaroos can’t walk backward.",
+  "The longest wedding veil was longer than 60 football fields.",
+  "Your brain is 73% water.",
+  "The first person convicted of speeding was going 13 km/h.",
+  "A day on Pluto lasts 153 hours.",
+  "A group of jellyfish is called a smack.",
+  "Sharks can smell a drop of blood from miles away.",
+  "The dot on the number 9 is called a 'plume'.",
+  "Ravens can solve puzzles as well as seven-year-old children.",
+  "Camels have three eyelids.",
+  "Some frogs give birth through their skin.",
+  "Humans and cows share about 80% of their DNA.",
+  "A shrimp’s heart beats 120 times per minute.",
+  "Snakes can sense heat with their tongues.",
+  "There’s enough water in Lake Superior to cover North and South America in one foot of water.",
+  "Ants never get fat.",
+  "Your left lung is smaller than your right to make room for your heart.",
+  "The fingerprints of a lemur are almost identical to humans.",
+  "Jellyfish don’t have brains, hearts, or bones.",
+  "Sharks are older than dinosaurs.",
+  "Some moths drink the tears of sleeping birds.",
+  "Apples are 25% air — that’s why they float.",
+  "Bananas share 50% of their DNA with humans.",
+  "Sea sponges are animals, not plants.",
+  "Otters use rocks as tools.",
+  "You can’t tickle yourself.",
+  "A sneeze can travel faster than a hurricane wind.",
+  "An octopus has nine brains.",
+  "It rains metal on Venus.",
+  "Humans can live longer without food than sleep.",
+  "There are more plastic flamingos than real ones on Earth.",
+  "Dolphins can recognize themselves in mirrors.",
+  "A bolt of lightning can power 200 homes for a day.",
+  "You are taller in the morning than at night.",
+  "Some frogs glow under UV light.",
+  "The world’s largest living structure is the Great Barrier Reef.",
+  "Some plants can hear themselves being eaten.",
+  "A baby blue whale gains 90 kilograms every day.",
+  "Sea otters have the thickest fur in the animal kingdom.",
+  "Butterflies can see ultraviolet light.",
+  "Your body has enough carbon to make 900 pencils.",
+  "A starfish has no brain or blood.",
+  "The first email was sent in 1971.",
+  "Some mushrooms glow in the dark.",
+  "Rabbits can’t vomit.",
+  "An octopus has three hearts and blue blood.",
+  "The longest time someone has hiccupped is 68 years.",
+  "A bolt of lightning lasts less than one second but is 30,000°C hot.",
+  "A cat’s whiskers are as wide as its body.",
+  "Most of the dust in your house is made from dead skin.",
+  "Sharks don’t have bones.",
+  "The smell of cut grass is a distress signal.",
+  "The human brain stops growing at age 25.",
+  "The ocean produces 70% of the Earth’s oxygen.",
+  "The first person to be called a 'nerd' was in 1950.",
+  "Pigeons can recognize themselves in a mirror.",
+  "Cows produce different milk when they hear happy music.",
+  "Every year, millions of trees grow from squirrels forgetting their nuts.",
+  "Rainbows can appear double or even triple at once.",
+   "The fingerprints of a cat’s nose are unique, like human fingerprints.",
+  "Sharks can go into a trance-like state when flipped upside down.",
+  "There’s a lake in Australia that is naturally bright pink.",
+  "The word 'muscle' comes from the Latin word meaning 'little mouse'.",
+  "An eagle’s eyesight is about eight times stronger than a human’s.",
+  "A crocodile’s jaw can’t move sideways.",
+  "Rain sometimes falls as fish or frogs during rare weather phenomena.",
+  "The longest recorded flight of a chicken is 13 seconds.",
+  "Human bones are replaced every 10 years through regeneration.",
+  "There are more fake flamingos than real flamingos on Earth.",
+  "A hummingbird’s heart beats over 1,200 times per minute.",
+  "Snails have both male and female reproductive organs.",
+  "The average cumulus cloud contains enough water to fill 80 elephants.",
+  "In Japan, it’s common to find square watermelons grown in boxes.",
+  "Some turtles can live without their shells — they would die instantly.",
+  "The fingerprints of chimpanzees are so similar to humans they can confuse crime scene analysis.",
+  "A group of crows is called a murder.",
+  "The first bar of chocolate was invented in 1847.",
+  "Venus is the only planet that spins clockwise.",
+  "An ostrich’s kick can kill a lion.",
+  "Spiders have blue blood like octopuses.",
+  "The only continent with no reptiles or snakes is Antarctica.",
+  "Horses can’t breathe through their mouths.",
+  "Each year, the Moon moves about 3.8 cm farther from Earth.",
+  "The first recorded Olympic Games were held in 776 BC.",
+  "Sloths take about two weeks to digest a single leaf.",
+  "The average human will take 7,000 steps a day.",
+  "Butterflies can’t see the color red.",
+  "The deepest part of the ocean is over 11 kilometers deep.",
+  "Cats can rotate their ears 180 degrees.",
+  "The longest-living insect is the termite queen, which can live 50 years.",
+  "A full head of human hair can support 12 tons in weight collectively.",
+  "The giant squid has the largest eyes in the animal kingdom.",
+  "The word 'alphabet' comes from the first two Greek letters: alpha and beta.",
+  "A blue whale’s tongue weighs as much as an elephant.",
+  "Tigers’ roars can be heard from two miles away.",
+  "There are volcanoes on Mars taller than Mount Everest.",
+  "The average adult human has about 100,000 miles of blood vessels.",
+  "Hummingbirds can fly backward.",
+  "A raindrop falls at an average speed of 14 km/h.",
+  "Some ants farm fungi for food.",
+  "A group of kangaroos is called a mob.",
+  "Bees communicate through a dance called the waggle dance.",
+  "The average lifespan of a red blood cell is 120 days.",
+  "There’s a metal that melts in your hand — gallium.",
+  "Some species of worms can regrow their entire bodies from a fragment.",
+  "Cats dream when they sleep deeply, just like humans.",
+  "The heaviest onion ever grown weighed over 8 kilograms.",
+  "Some fish can change their gender.",
+  "There are volcanoes that erupt under the sea.",
+  "The first recorded use of the word 'robot' was in 1921.",
+  "The Amazon rainforest produces 20% of the world’s oxygen.",
+  "Venus is hotter than Mercury despite being farther from the Sun.",
+  "A newborn kangaroo is smaller than a cherry.",
+  "It’s impossible to burp in space without vomiting.",
+  "Polar bear fur is transparent, not white.",
+  "A day on Jupiter is only 10 hours long.",
+  "Some snakes can fly — they glide through the air using their ribs.",
+  "Human bones are stronger than concrete by weight.",
+  "There’s a spider that can jump 50 times its body length.",
+  "Every year, thousands of new species are discovered.",
+  "Caterpillars completely liquefy before becoming butterflies.",
+  "There’s enough gold in Earth’s core to cover the planet knee-deep.",
+  "Your liver can regenerate up to 75% of its tissue.",
+  "Rainbows can form full circles, but we usually see only half.",
+  "Sharks can be born from unfertilized eggs in rare cases (parthenogenesis).",
+  "The Sun makes up 99.86% of the solar system’s mass.",
+  "Most of the oxygen you breathe comes from ocean algae.",
+  "The world’s smallest mammal is the bumblebee bat.",
+  "A group of hippos is called a bloat.",
+  "A human sneeze can travel 8 meters away.",
+  "Giraffes clean their ears with their 45 cm-long tongues.",
+  "Humans can’t taste food well without saliva.",
+  "Some ants explode themselves to protect the colony.",
+  "Wolves have over 200 million scent cells in their noses.",
+  "A shark can lose and regrow over 20,000 teeth in a lifetime.",
+  "Venus has no moons or rings.",
+  "Some trees can ‘talk’ through underground fungi networks.",
+  "The first recorded map was drawn around 2,300 BC.",
+  "A newborn panda is about the size of a stick of butter.",
+  "There’s a waterfall in Antarctica that flows red due to iron.",
+  "The Sun is about 93 million miles from Earth.",
+  "The first airplane flew for only 12 seconds.",
+  "Owls can rotate their heads 270 degrees.",
+  "Bananas grow upside down.",
+  "Cows can climb upstairs but not down.",
+  "Octopuses can open jars from the inside.",
+  "The Pacific Ocean is larger than all land combined.",
+  "Some frogs give birth through their backs.",
+  "The Eiffel Tower can be 15 cm taller in summer.",
+  "The Sahara Desert used to be a tropical rainforest.",
+  "Cats spend about 70% of their lives sleeping.",
+  "The smell of space has been described as burnt metal and steak.",
+  "Bees can sense electric fields.",
+  "The oldest tree in the world is over 4,800 years old.",
+  "A blue whale’s heartbeat can be heard two miles away.",
+  "Humans are bioluminescent, but the glow is invisible to our eyes.",
+  "There’s a lake in Africa that explodes every few centuries.",
+  "A bolt of lightning contains enough energy to toast 100,000 slices of bread.",
+  "The human brain uses 20% of the body’s oxygen supply.",
+  "Pigeons can recognize all 26 letters of the English alphabet.",
+  "Some fish can survive being frozen solid.",
+  "The first vending machine dispensed holy water in ancient Greece.",
+  "Bamboo can survive nuclear explosions.",
+  "The average lifespan of a taste bud is 10 days.",
+  "Wombats run faster than humans.",
+  "A single strand of hair can support up to 100 grams.",
+  "The word 'planet' means 'wanderer' in Greek.",
+  "There’s a species of jellyfish that never dies naturally.",
+  "Slugs are hermaphrodites — they have both male and female organs.",
+  "Male lions sleep up to 20 hours a day.",
+  "The largest snowflake ever recorded was 38 cm wide.",
+  "The longest-living animal is a clam over 500 years old.",
+  "Elephants are right or left-tusked, like humans are right or left-handed.",
+  "Sharks don’t have vocal cords — they can’t make sound.",
+  "Earth’s core is as hot as the Sun’s surface.",
+  "Camels store fat, not water, in their humps.",
+  "There’s enough air inside a soda can to support a small insect for hours.",
+  "A single ant can carry 50 times its body weight.",
+  "A hummingbird’s wings beat up to 80 times per second.",
+  "The human stomach replaces its lining every few days to avoid digesting itself.",
+  "Some starfish can regenerate their entire bodies from one arm.",
+  "The deepest living fish was found over 8,000 meters below sea level.",
+  "Spiders can’t chew; they liquefy their food before eating.",
+  "There’s a lake in Tanzania that turns animals into stone.",
+  "Some jellyfish can turn back into their younger form after maturity.",
+  "The Milky Way galaxy is moving through space at 2.1 million km/h.",
+  "Your ears never stop growing.",
+  "Horseshoe crabs have blue blood due to copper.",
+  "Cats can jump up to six times their body length.",
+  "The smallest bone in the human body is in the ear.",
+  "Each taste bud has about 50 sensory cells.",
+  "Dogs’ sense of smell is 40 times better than humans’.",
+  "The largest volcano in the solar system is Olympus Mons on Mars.",
+  "Some birds can sleep while flying.",
+  "A full moon always rises at sunset.",
+  "The Great Wall of China is over 21,000 kilometers long.",
+  "Tigers have striped skin as well as fur.",
+  "There’s a frog that gives birth through its mouth.",
+  "Ants never sleep but do take naps.",
+  "Clouds move at speeds of up to 160 km/h.",
+  "The human heart creates enough pressure to squirt blood 9 meters.",
+  "It’s impossible to tickle yourself because your brain predicts the touch.",
+  "The oldest known animal lived for 507 years.",
+  "Whales sleep vertically in the water.",
+  "The heaviest rain ever recorded fell in 1 minute — 31 mm.",
+  "A group of flamingos is called a flamboyance.",
+  "The fingerprints of pandas are nearly indistinguishable from humans.",
+  "Birds can see Earth’s magnetic field.",
+  "The first camera took eight hours to capture an image.",
+  "Rainbows can appear at 360 degrees from an airplane.",
+  "There are more bacteria in your mouth than people on Earth.",
+  "Venus’s clouds rain sulfuric acid.",
+  "Jupiter’s moon Europa has more water than Earth.",
+  "An adult human has about 37 trillion cells.",
+  "Honey bees flap their wings about 230 times per second.",
+  "Earth’s atmosphere extends over 10,000 km into space.",
+  "Some fish can walk on land.",
+  "A 'jiffy' is an actual unit of time — 1/100 of a second.",
+  "Lightning can strike the same place twice — and often does.",
+  "A spider’s silk is five times stronger than steel by weight.",
+  "Rats and mice can sing ultrasonic songs.",
+  "Crows can use tools and understand cause and effect.",
+  "A teaspoon of neutron star material weighs about a billion tons.",
+  "The largest living organism is a fungus that covers 9 km² in Oregon.",
+  "There’s a planet where it rains glass sideways.",
+  "A sneeze travels faster than a speeding car.",
+  "Sharks can detect one drop of blood in 25 gallons of water.",
+  "The Moon is moving away from Earth each year.",
+  "Some worms have more than 10 hearts.",
+  "A day on Neptune lasts 16 hours.",
+  "Human skin renews itself every 27 days.",
+  "A hummingbird weighs less than a coin.",
+  "Space is completely silent.",
+  "There are more cells in your body than stars in the Milky Way.",
+  "Birds evolved from small, feathered dinosaurs.",
+  "Most lipsticks contain fish scales for shine.",
+  "It snows metal on Venus.",
+  "The coldest temperature ever recorded on Earth was -128°F.",
+  "Your brain contains 86 billion neurons.",
+  "A crocodile can live for over 100 years.",
+  "Butterflies can see colors invisible to humans.",
+  "A lightning bolt lasts less than one second but is hotter than the Sun.",
+  "Frogs drink water through their skin.",
+  "Some animals can glow to attract mates or warn predators.",
+"Bananas are naturally radioactive due to potassium-40.",
+"The Sahara Desert can reach temperatures over 50°C in summer.",
+"Sharks can detect electrical fields produced by other animals.",
+"A cheetah can accelerate from 0 to 100 km/h faster than most sports cars.",
+"The oldest known living tree is over 5,000 years old.",
+"Water can exist in all three states simultaneously at the triple point.",
+"The human brain has about 86 billion neurons.",
+"Mars has the tallest volcano in the solar system, Olympus Mons.",
+"A honeybee visits about 50-100 flowers on a single trip.",
+"Lake Victoria is the largest lake in Africa by area.",
+"Humans blink about 15-20 times per minute on average.",
+"Some frogs can survive being frozen solid during winter.",
+"Mount Kilimanjaro is the highest peak in Africa.",
+"The fastest recorded raindrop falls at 18 mph.",
+"Julius Caesar was once kidnapped by pirates.",
+"Light from the Sun takes approximately 8 minutes to reach Earth.",
+"The tongue of a blue whale can weigh as much as an elephant.",
+"Kenya is home to the Great Rift Valley, a major geological formation.",
+"The longest recorded flight of a chicken lasted 13 seconds.",
+"Mercury’s day is longer than its year.",
+"Camels can drink up to 40 gallons of water in one go.",
+"The first computer mouse was made of wood.",
+"The Pyramids of Giza were built around 4,500 years ago.",
+"A goldfish has a memory span of several months.",
+"Your body has about 60,000 miles of blood vessels.",
+"The Nile River is the longest river in Africa.",
+"The Sun makes up 99.86% of the total mass of the Solar System.",
+"Elephants can communicate using low-frequency sounds called infrasound.",
+"The first known Olympic Games took place in 776 BC.",
+"Ants can carry up to 50 times their body weight.",
+"Lightning strikes can reach up to 30,000 Kelvin.",
+"A cheetah’s spots are unique like human fingerprints.",
+"The first photograph ever taken was in 1826.",
+"Kenya’s Maasai Mara National Reserve is home to the Big Five.",
+"The human skeleton is completely replaced every 10 years.",
+"Some species of octopus can change both color and texture to camouflage.",
+"Chocolate was once used as currency in ancient Mesoamerica.",
+"Rainforests cover less than 2% of the Earth’s surface but contain over 50% of species.",
+"The Moon is moving away from Earth at 3.8 centimeters per year.",
+"Honey never spoils if stored properly.",
+"The Eiffel Tower can be 15 cm taller during summer due to thermal expansion.",
+"The cheetah is the only big cat that cannot retract its claws.",
+"A crocodile cannot stick out its tongue.",
+"Kenya’s Lake Naivasha is a freshwater lake known for its hippos.",
+"A day on Venus lasts 243 Earth days.",
+"Some species of bamboo can grow nearly 1 meter per day.",
+"The average person walks about 70,000 miles in their lifetime.",
+"Sharks are older than trees by millions of years.",
+"The Great Wall of China is over 21,000 km long.",
+"Polar bears have black skin under their white fur.",
+"The first written recipe dates back over 4,000 years to Mesopotamia.",
+"A group of flamingos is called a 'flamboyance'.",
+"The Sahara was once a lush green landscape thousands of years ago.",
+"Saturn’s rings are made mostly of ice and rock particles.",
+"Kenya’s Mount Kenya is the second-highest peak in Africa.",
+"A honeybee produces about 1/12 teaspoon of honey in its lifetime.",
+"Octopuses have three hearts and blue blood.",
+"Some lizards can squirt blood from their eyes to deter predators.",
+"The first email was sent in 1971 by Ray Tomlinson.",
+"The Sahara Desert is roughly the size of the United States.",
+"The fingerprints of a koala are nearly identical to humans.",
+"Lightning can strike the same place multiple times.",
+"Butterflies can see ultraviolet light.",
+"The largest volcano in the solar system is Olympus Mons on Mars.",
+"Kenya’s Amboseli National Park is famous for its elephants with huge tusks.",
+"The Amazon Rainforest produces 20% of the Earth’s oxygen.",
+"Human bones are about 5 times stronger than steel of the same density.",
+"Penguins mate for life and use stones to propose.",
+"The first smartphone was invented in 1992 and called Simon.",
+"A hummingbird can flap its wings up to 80 times per second.",
+"The Nile crocodile can hold its breath for up to 2 hours.",
+"The human heart beats about 100,000 times per day.",
+"Some jellyfish are biologically immortal.",
+"The largest desert on Earth is Antarctica, not the Sahara.",
+"The fastest recorded gust of wind on Earth reached 253 mph.",
+"The average lifespan of a red blood cell is 120 days.",
+"Kenya is known for producing world-class long-distance runners.",
+"The tongue of a giraffe can be 45 cm long.",
+"The first known book was written in ancient Sumeria around 2600 BC.",
+"Sloths can hold their breath longer than dolphins — up to 40 minutes.",
+"The Moon has moonquakes caused by tidal forces.",
+"Sharks can live up to 500 years in some species.",
+"A single bolt of lightning contains enough energy to toast 100,000 slices of bread.",
+"The Great Barrier Reef is the largest living structure on Earth.",
+"The first vaccine was developed by Edward Jenner in 1796.",
+"A cheetah can reach speeds up to 112 km/h.",
+"The Sahara Desert has temperatures that can exceed 50°C in summer.",
+"The blue whale is the largest animal to have ever lived.",
+"Some frogs can survive complete freezing during winter.",
+"The human brain consumes about 20% of the body’s oxygen.",
+"Kenya’s Rift Valley is home to hundreds of species of birds.",
+"Jellyfish have been around for over 500 million years.",
+"The Sun is about 4.6 billion years old.",
+"Otters use rocks to crack open shells.",
+"Some fish can climb waterfalls, like the Hawaiian goby.",
+"The first programmable computer was the Z3, invented in 1941.",
+"A group of owls is called a parliament.",
+"The Nile River flows north for over 6,600 km.",
+"Some spiders can fly using tiny threads of silk in a process called ballooning.",
+"The human body has enough iron to make a small nail.",
+"Kenya has over 60 ethnic groups, each with unique traditions.",
+"An ostrich’s eye is bigger than its brain.",
+"Your stomach lining renews itself every 3-4 days.",
+"Some ants farm fungi and protect them like crops.",
+"Space smells like burnt steak to astronauts.",
+"The tallest tree on Earth is a coast redwood named Hyperion, over 115 meters tall.",
+"The first satellite, Sputnik, was launched in 1957.",
+"A snail can sleep for up to three years.",
+"Bananas are naturally radioactive due to potassium content.",
+"The Sun accounts for 99.86% of the Solar System’s mass.",
+"Some bats can eat up to 1,000 mosquitoes in a night.",
+"The Great Pyramid of Giza was the tallest man-made structure for over 3,800 years.",
+"Kenya’s Tsavo National Park is famous for its 'red elephants'.",
+"The first known use of zero as a number was in India around the 5th century.",
+"A giraffe’s tongue is prehensile and dark-colored to prevent sunburn.",
+"The first recorded marathon was run in 490 BC.",
+"The Earth’s core is as hot as the Sun’s surface.",
+"Some turtles can breathe through their butts.",
+"Humans share about 50% of their DNA with bananas.",
+"The Sahara Desert is expanding at a rate of about 0.5 km per month.",
+"The human eye can distinguish about 10 million colors.",
+"The first person in space was Yuri Gagarin in 1961.",
+"The longest river in the world is the Nile, though some argue for the Amazon.",
+"Kenya is one of the largest producers of tea in the world.",
+"The fastest land animal is the cheetah, reaching 112 km/h.",
+"A day on Venus is longer than its year.",
+"Some fungi can glow in the dark, called bioluminescence.",
+"Sharks are immune to most diseases including cancer.",
+"Octopuses can regrow lost arms.",
+"The tallest mammal is the giraffe, up to 6 meters tall.",
+"The first Olympic Games were held in Olympia, Greece in 776 BC.",
+"The Nile tilapia is one of the most farmed fish in Africa.",
+"Some trees can communicate via underground fungal networks.",
+"The world’s smallest mammal is the bumblebee bat.",
+"Water can boil and freeze at the same time at the triple point.",
+"The average person blinks around 15-20 times per minute.",
+"Some penguins propose with pebbles.",
+"Kenya’s Lamu Old Town is a UNESCO World Heritage Site.",
+"Some spiders can survive underwater for over 30 minutes.",
+"Lightning strikes about 8 million times per day worldwide.",
+"Sea otters hold hands while sleeping to avoid drifting apart.",
+"The first known currency was created in Lydia around 600 BC.",
+"The blue whale’s heart can weigh over 400 kg.",
+"Some plants can sense being eaten and release chemicals in defense.",
+"Sharks existed before trees on Earth.",
+"The oldest known living animal is a quahog clam named Ming, aged 507 years.",
+"Kenya’s Amboseli National Park has stunning views of Mount Kilimanjaro.",
+"A group of crows is called a murder.",
+"The longest recorded flight of a chicken is 13 seconds.",
+"Humans have more than 600 muscles in the body.",
+"A teaspoon of honey represents the lifetime work of 12 bees.",
+"The first known written language was Sumerian cuneiform.",
+"Some frogs can change sex depending on environmental conditions.",
+"Saturn could float on water because it is mostly gas.",
+"Butterflies taste with their feet.",
+"Some lizards can detach their tails to escape predators.",
+"The first vaccine for smallpox was created in 1796.",
+"Kenya’s Nairobi National Park is unique for wildlife near a capital city.",
+"Sea turtles can migrate thousands of kilometers to lay eggs.",
+"The Amazon River discharges about 209,000 cubic meters of water per second.",
+"The fingerprints of a koala are nearly identical to humans.",
+"The average person walks about 150,000 km in a lifetime.",
+"Some birds can mimic human speech, like parrots.",
+"The human body contains enough carbon to produce 900 pencils.",
+"A group of hippos is called a bloat.",
+"The first digital computer was ENIAC, completed in 1945.",
+"The Sun will eventually become a red giant in about 5 billion years.",
+"The Moon is moving away from Earth at about 3.8 cm per year.",
+"Some sharks give live birth instead of laying eggs.",
+"A cat’s whiskers are roughly as wide as its body.",
+"The Sahara Desert was once a green and fertile region.",
+"The fastest-growing plant is bamboo, which can grow up to 1 meter per day.",
+"The Great Wall of China can be seen from low Earth orbit.",
+"Some birds see magnetic fields to navigate during migration.",
+"Kenya’s Mount Longonot is an active stratovolcano.",
+"The Earth’s atmosphere is composed of about 78% nitrogen and 21% oxygen.",
+"A group of ferrets is called a business.",
+"The first satellite to orbit Earth was Sputnik 1.",
+"Sloths can rotate their heads nearly 270 degrees.",
+"The human heart pumps about 7,570 liters of blood per day.",
+"Some spiders can spin silk stronger than steel of the same thickness.",
+"Some frogs can survive being frozen for months.",
+"Kenya has the world’s largest population of giraffes in Africa.",
+"Some plants can communicate via airborne chemicals.",
+"The first electric car was built in 1884 by Thomas Parker.",
+"The tongue of a blue whale can weigh as much as an elephant.",
+"Lightning can strike the same place twice.",
+"Sea cucumbers fight by ejecting their internal organs as defense.",
+"A day on Mercury lasts about 1,408 hours.",
+"Some lizards can squirt blood from their eyes as a defense mechanism.",
+"The largest living organism is a fungus in Oregon covering 2,385 acres.",
+"Kenya’s Maasai people are known for their unique culture and jumping dance.",
+"The human brain contains more connections than there are stars in the Milky Way.",
+"Some sharks can live for hundreds of years.",
+"The Amazon Rainforest is home to over 400 billion trees.",
+"A giraffe’s neck contains the same number of vertebrae as a human neck (7).",
+"The first computer virus was created in 1986.",
+"Some jellyfish can revert to their juvenile stage and potentially live forever.",
+"The fastest bird is the peregrine falcon, reaching speeds over 320 km/h.",
+"Some mushrooms glow in the dark through bioluminescence.",
+"The fingerprints of identical twins are still unique.",
+"Kenya’s tea industry is one of the largest in the world.",
+"The first known use of antibiotics was with mold in 1928 by Alexander Fleming.",
+"Some fish can walk on land, like the mudskipper.",
+"Your liver can regenerate completely even after losing up to 75% of its tissue.",
+"Octopuses have nine brains and three hearts.",
+"Sea lions can dance to a rhythm.",
+"The first telephone call was made by Alexander Graham Bell in 1876.",
+"A group of dolphins is called a pod.",
+"The average person laughs around 15 times per day.",
+"Some bats use echolocation to navigate perfectly in total darkness.",
+"Kenya’s Lake Turkana is the world’s largest desert lake.",
+"Some spiders can detect earthquakes before humans.",
+"The first known map was created over 6,000 years ago in Babylon.",
+"A cat can make over 100 different sounds.",
+"The Amazon River is home to the pink river dolphin.",
+"Some frogs lay eggs on land instead of water.",
+"The human body produces about 1 to 1.5 liters of mucus per day.",
+"A lightning bolt is five times hotter than the surface of the Sun.",
+"The Sahara Desert covers about 9 million square kilometers.",
+"Kenya has over 60 spoken languages and dialects.",
+"The first known telescope was invented in 1608.",
+"A blue whale’s heart beats only about 8-10 times per minute.",
+"Some turtles can live over 100 years.",
+"The fastest mammal in water is the common dolphin, reaching 60 km/h.",
+"Kenya’s Mombasa is the country’s main coastal city and port.",
+"Some birds can sleep while flying.",
+"A human sneeze can travel over 160 km/h.",
+"The first programmable robot was invented in 1954.",
+"Sea otters wrap themselves in kelp to keep from drifting away.",
+"The Moon has water ice in permanently shadowed craters.",
+"The Sahara Desert was once home to prehistoric humans.",
+"Some sharks must keep swimming to breathe.",
+"The tallest building in Africa is The Leonardo in South Africa at 234 meters.",
+"A cat can rotate its ears 180 degrees.",
+"Kenya’s capital, Nairobi, is nicknamed the 'Green City in the Sun'.",
+"The first artificial satellite to send messages was Sputnik 1.",
+"Some plants can close their leaves when touched, like the Mimosa pudica.",
+"Humans and dolphins are among the few species that have sex for pleasure.",
+"The fastest land mammal is the cheetah, capable of 0-100 km/h in 3 seconds.",
+"The Amazon Rainforest spans nine countries in South America.",
+"Kenya’s Mount Elgon is an extinct shield volcano.",
+"The oldest known animal fossil is 558 million years old.",
+"A blue whale’s tongue can weigh as much as an elephant.",
+"Some frogs can survive total decapitation for short periods.",
+"The first video game was created in 1958, called Tennis for Two.",
+"The fingerprints of koalas are nearly identical to humans.",
+"Some spiders can survive underwater for extended periods.",
+"The Sahara Desert receives less than 25 mm of rainfall per year.",
+"Kenya’s Rift Valley lakes are home to flamingos and hippos.",
+"A group of rhinos is called a crash.",
+"Some jellyfish can be immortal.",
+"The first photograph of Earth from space was taken in 1946.",
+"Your brain generates about 20 watts of electrical power.",
+"The first known writing instrument was a reed pen in ancient Egypt.",
+"The tallest waterfall in the world is Angel Falls in Venezuela.",
+"Some plants can grow without soil using hydroponics.",
+"A human hair can support about 100 grams in weight.",
+"Kenya’s tea estates produce over 400,000 tons of tea annually.",
+"The first flight by the Wright brothers was in 1903.",
+"Some lizards can walk on water, like the basilisk lizard.",
+"The Sahara Desert was once covered with lakes and grasslands.",
+"Some dolphins have unique signature whistles like names.",
+"Humans can distinguish over 1 trillion different smells.",
+"A group of ferrets is called a business.",
+"The first rocket to reach space was the V-2 rocket in 1944.",
+"Kenya’s savannahs are home to lions, elephants, and cheetahs.",
+"The average human body has about 37.2 trillion cells.",
+"A giraffe’s tongue is black to prevent sunburn.",
+"Some mushrooms are edible, while others are poisonous.",
+"The Earth’s magnetic field protects us from solar wind.",
+"Sea cucumbers expel their internal organs to scare predators.",
+"The fastest insect is the Australian dragonfly, reaching 60 mph.",
+"Kenya has a population of over 55 million people.",
+"The first nuclear reactor was built in 1942 in Chicago.",
+"The blue whale is the loudest animal on Earth.",
+"Some spiders can detect sound through their legs.",
+"A group of owls is called a parliament.",
+"Lightning can strike water and travel through it.",
+"Kenya’s Lamu Archipelago is famous for its Swahili culture and architecture.",
+"Some plants can live thousands of years, like the Bristlecone pine.",
+"The fastest bird in level flight is the spine-tailed swift.",
+"Some fish can see ultraviolet light.",
+"The Sahara Desert’s sand dunes can reach over 180 meters high.",
+"The first electric light was invented by Humphry Davy in 1802.",
+"Some turtles can survive without food for over a year.",
+"The human heart pumps about 5 liters of blood per minute.",
+"Kenya’s wildlife migration attracts millions of tourists annually.",
+"Some frogs can jump over 20 times their body length.",
+"The first known map of the stars was created in Babylon over 5,000 years ago.",
+"A group of lions is called a pride.",
+"Sharks can sense electrical impulses of prey.",
+"Kenya has over 50 national parks and reserves.",
+"The Amazon River is home to over 2,000 species of fish.",
+"The fingerprints of humans are unique even among identical twins.",
+"Some spiders can survive freezing temperatures.",
+"The Earth rotates at about 1,670 km/h at the equator.",
+"Some plants can grow in deserts with very little water.",
+"Kenya’s Mombasa is a major cultural and trade center.",
+"Some jellyfish can clone themselves.",
+"The first computer programmer was Ada Lovelace.",
+"The Sahara Desert covers about 3.6 million square miles.",
+"A cat can make over 100 different sounds.",
+"The first satellite to send a signal was Sputnik 1.",
+"Some fish can breathe air, like the lungfish.",
+"The human body contains about 60,000 miles of blood vessels.",
+"The tallest mountain in Africa is Mount Kilimanjaro.",
+"Some sharks can detect prey from over 1 km away.",
+"Kenya’s Maasai Mara is famous for the annual wildebeest migration.",
+"A day on Venus is longer than its year.",
+"The fingerprints of a lemur resemble those of humans.",
+"The largest living reptile is the saltwater crocodile.",
+"A group of porcupines is called a prickle.",
+"Some plants can 'hear' predators eating them and release toxins.",
+"The first photograph ever taken was in 1826 by Joseph Nicéphore Niépce.",
+"Kenya’s Mount Kenya is an extinct volcano and second-highest peak in Africa.",
+"Some spiders can survive underwater by trapping air in their silk.",
+"The human body has enough DNA to stretch from the Earth to the Sun and back.",
+"A cheetah can accelerate faster than a Formula 1 car.",
+"The first email was sent in 1971 by Ray Tomlinson.",
+"The Sahara Desert has shifted its dunes for thousands of years.",
+"Kenya’s Lake Victoria is shared with Uganda and Tanzania.",
+"The fastest mammal is the cheetah, capable of speeds up to 112 km/h.",
+"Some birds can see magnetic fields to navigate during migration.",
+"A group of dolphins is called a pod.",
+"The fingerprints of koalas are nearly identical to humans.",
+"The Sahara Desert was once a lush green landscape.",
+"Some plants can communicate through underground fungal networks.",
+"The first known vaccine was developed for smallpox in 1796.",
+"The blue whale is the largest animal ever known.",
+"Kenya’s Amboseli National Park is famous for its elephant herds.",
+"Some sharks can live for hundreds of years.",
+"Lightning can strike the same location multiple times.",
+"The tallest tree in the world is a redwood named Hyperion.",
+"Some frogs can survive being frozen for months.",
+"The first computer was invented in the 1940s.",
+"Some jellyfish are biologically immortal.",
+"Kenya’s Rift Valley lakes attract flamingos and hippos.",
+"A cat’s whiskers are about as wide as its body.",
+"Some plants can grow without soil using hydroponics.",
+"The human tongue has about 10,000 taste buds.",
+"A group of owls is called a parliament.",
+"The first telescope was invented in 1608.",
+"Some lizards can squirt blood from their eyes.",
+"Kenya has over 60 ethnic groups with unique cultures.",
+"The fingerprints of identical twins are different.",
+"Some spiders can detect earthquakes before humans.",
+"The Earth is 4.6 billion years old.",
+"The first artificial satellite was Sputnik 1.",
+"The fastest bird is the peregrine falcon.",
+"Some plants can live thousands of years.",
+"A giraffe’s neck has the same number of vertebrae as a human neck.",
+"Kenya’s Lamu Old Town is a UNESCO World Heritage Site.",
+"The Sahara Desert receives less than 25 mm of rain annually.",
+"Some turtles can breathe through their butts.",
+"The first programmable computer was the Z3 in 1941.",
+"Some birds can sleep while flying.",
+"The Amazon Rainforest produces 20% of the Earth’s oxygen.",
+"A group of lions is called a pride.",
+"Some sharks can sense electrical impulses from prey.",
+"The tallest waterfall in the world is Angel Falls in Venezuela.",
+"Some frogs can jump over 20 times their body length.",
+"Kenya’s tea industry produces over 400,000 tons annually.",
+"The fingerprints of a lemur are almost identical to humans.",
+"Some plants can 'hear' predators eating them.",
+"The first flight by the Wright brothers was in 1903.",
+"A blue whale’s tongue can weigh as much as an elephant.",
+"The Sahara Desert was once home to prehistoric humans.",
+"Some spiders can survive freezing temperatures.",
+"Kenya’s Maasai Mara hosts the annual wildebeest migration.",
+"The first known book was written in ancient Sumeria around 2600 BC.",
+"The fingerprints of humans are unique even among identical twins.",
+"A cheetah can accelerate from 0 to 100 km/h faster than most cars.",
+"Some jellyfish can revert to their juvenile stage.",
+"The fastest insect is the Australian dragonfly, reaching 60 mph.",
+"Some plants can grow in deserts with very little water.",
+"Kenya’s Mombasa is a major coastal city and port.",
+"The Sahara Desert is roughly the size of the United States.",
+"The first known use of zero was in India around the 5th century.",
+"Some bats use echolocation to navigate in total darkness.",
+"The Amazon River is home to over 2,000 fish species.",
+"The first telephone call was made by Alexander Graham Bell in 1876.",
+"A human hair can support about 100 grams in weight.",
+"The fingerprints of koalas and humans are nearly identical.",
+"Kenya’s Mount Elgon is an extinct shield volcano.",
+"Some plants can live thousands of years, like the Bristlecone pine.",
+"Some turtles can live over 100 years.",
+"The first photograph ever taken was in 1826.",
+"Some spiders can fly using tiny threads of silk called ballooning.",
+"Kenya has over 50 national parks and reserves.",
+"The first known map of the stars was created in Babylon over 5,000 years ago.",
+"Some sharks must keep swimming to breathe.",
+"A group of hippos is called a bloat.",
+"The fastest mammal in water is the common dolphin.",
+"Some birds can mimic human speech.",
+"Kenya’s Rift Valley lakes are home to flamingos and hippos.",
+"The Sahara Desert is expanding at a rate of about 0.5 km per month.",
+"Some frogs can survive total decapitation for short periods.",
+"The first computer programmer was Ada Lovelace.",
+"A group of dolphins is called a pod.",
+"The human body has about 37.2 trillion cells.",
+"Some fish can see ultraviolet light.",
+"The fingerprints of identical twins are different.",
+"Kenya’s Nairobi National Park is unique for wildlife near a capital city.",
+"The Sahara Desert was once covered with lakes and grasslands.",
+"The tallest mountain in Africa is Mount Kilimanjaro.",
+"The human heart pumps about 5 liters of blood per minute.",
+"Some turtles can survive without food for over a year.",
+"The fingerprints of a lemur resemble those of humans.",
+"Kenya has a population of over 55 million people.",
+"The Earth rotates at about 1,670 km/h at the equator.",
+"Some plants can communicate via underground fungal networks.",
+"The first video game was created in 1958, called Tennis for Two.",
+"Kenya’s Maasai people are known for their unique culture and jumping dance.",
+"The Amazon Rainforest spans nine countries in South America.",
+"The fastest bird in level flight is the spine-tailed swift.",
+"Some lizards can walk on water, like the basilisk lizard.",
+"The Sahara Desert’s sand dunes can reach over 180 meters high.",
+"The first electric light was invented by Humphry Davy in 1802.",
+"Some plants can grow without soil using hydroponics.",
+"The human tongue has about 10,000 taste buds.",
+"The fingerprints of humans are unique even among identical twins.",
+"A group of lions is called a pride.",
+"The first telescope was invented in 1608.",
+"Some spiders can survive underwater for extended periods.",
+"Kenya’s Lake Turkana is the world’s largest desert lake.",
+"The fingerprints of koalas are nearly identical to humans.",
+"The first artificial satellite to send messages was Sputnik 1.",
+"Some birds can sleep while flying.",
+"A cheetah can reach speeds up to 112 km/h.",
+"The Sahara Desert was once home to prehistoric humans.",
+"Some sharks can detect prey from over 1 km away.",
+"Kenya’s Maasai Mara is famous for the annual wildebeest migration.",
+"The blue whale is the largest animal ever known.",
+"A group of owls is called a parliament.",
+"Some frogs can survive being frozen for months.",
+"The fingerprints of a lemur are almost identical to humans.",
+"Kenya’s Amboseli National Park is famous for its elephant herds.",
+"The fastest land mammal is the cheetah, capable of 0-100 km/h in 3 seconds.",
+"Some plants can 'hear' predators eating them.",
+"The first known book was written in ancient Sumeria around 2600 BC.",
+"Some jellyfish are biologically immortal.",
+"The Sahara Desert receives less than 25 mm of rainfall per year.",
+"Kenya has over 60 ethnic groups with unique cultures."
+
+];
+// animals + birds + butterflies
+const ANIMALS = {
+  dogs: [
+    'https://cdn.pixabay.com/photo/2025/06/20/10/47/dog-9670619_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2018/03/18/18/06/australian-shepherd-3237735_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/09/25/13/12/dog-2785074_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+ 'https://cdn.pixabay.com/photo/2018/04/30/19/16/animal-3363688_640.jpg',
+    'https://cdn.pixabay.com/photo/2014/11/21/15/25/chameleon-540655_1280.jpg',
+    'https://cdn.pixabay.com/photo/2017/05/31/18/38/sea-2361247_640.jpg',
+     'https://cdn.pixabay.com/photo/2019/12/26/02/45/fish-with-lotus-4719551_640.png',
+    'https://cdn.pixabay.com/photo/2013/07/12/18/20/santa-claus-153309_640.png',
+    'https://cdn.pixabay.com/photo/2024/01/24/22/22/knight-8530654_640.jpg',
+    'https://cdn.pixabay.com/photo/2020/10/14/01/40/parrot-5653140_640.jpg',
+    'https://cdn.pixabay.com/photo/2016/05/02/12/58/tiger-1367197_640.jpg',
+    'https://cdn.pixabay.com/photo/2022/03/16/01/52/animal-7071426_640.jpg',
+    'https://cdn.pixabay.com/photo/2021/06/20/15/40/buffalo-6351352_640.jpg',
+    
+  ],
+  cats: [
+    'https://cdn.pixabay.com/photo/2022/03/27/11/23/cat-7094808_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/11/09/21/41/cat-2934720_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2015/11/15/20/21/cat-1044750_640.jpg',
+   'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2023/10/23/08/17/asian-giant-hornet-8335577_640.jpg',
+    'https://cdn.pixabay.com/photo/2020/04/10/07/42/wasp-5024465_640.jpg',
+    'https://cdn.pixabay.com/photo/2013/07/12/16/29/hornet-151003_640.png',
+      'https://cdn.pixabay.com/photo/2022/09/28/17/36/puffer-fish-7485602_640.jpg',
+    'https://cdn.pixabay.com/photo/2015/04/07/21/12/lionfish-711799_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/05/31/00/24/aquarium-2358739_640.jpg',
+     'https://cdn.pixabay.com/photo/2023/06/29/16/10/zebra-8096659_640.png',
+    'https://cdn.pixabay.com/photo/2020/05/04/09/09/giraffe-5128394_1280.jpg',
+    'https://cdn.pixabay.com/photo/2016/04/22/21/07/monkey-1346590_640.jpg'
+  ],
+  birds: [
+    'https://cdn.pixabay.com/photo/2023/07/24/22/07/european-herring-gull-8147941_640.jpg',
+    'https://cdn.pixabay.com/photo/2018/06/22/18/30/seagull-3491309_640.jpg',
+    'https://cdn.pixabay.com/photo/2024/11/22/18/18/mute-swan-9217198_640.jpg',
+    'https://cdn.pixabay.com/photo/2022/08/25/20/44/bird-7411270_640.jpg',
+    'https://cdn.pixabay.com/photo/2016/10/19/13/42/eagle-1753002_640.jpg'
+  ],
+  butterflies: [
+    'https://cdn.pixabay.com/photo/2023/05/30/15/12/blue-butterfuly-8028888_640.jpg',
+    'https://cdn.pixabay.com/photo/2018/06/24/18/46/butterfly-3495224_640.jpg',
+    'https://cdn.pixabay.com/photo/2014/08/28/22/41/speckled-wood-430203_640.jpg',
+    'https://cdn.pixabay.com/photo/2024/12/27/10/28/butterfly-clipart-9293644_640.png',
+    'https://cdn.pixabay.com/photo/2023/01/17/18/26/moth-7725205_640.jpg'
+  ],
+
+exotic: [
+    'https://cdn.pixabay.com/photo/2016/11/29/10/07/parrot-1869315_640.jpg',
+   
+  ],
+  fish: [
+    'https://cdn.pixabay.com/photo/2016/11/18/17/47/fish-1834823_640.jpg',
+    
+  ],
+  cartoons: [
+    'https://cdn.pixabay.com/photo/2020/06/23/18/10/cartoon-5331106_640.png',
+    
+  ],
+  insects: [
+    'https://cdn.pixabay.com/photo/2017/03/27/13/16/bee-2178341_640.jpg',
+   
+  ],
+  reptiles: [
+    'https://cdn.pixabay.com/photo/2016/11/23/14/45/lizard-1850046_640.jpg',
+    
+  ],
+   
+};
+/* ---------- PIXABAY TRACKS (your chosen 4)
+   We use direct mp3 download CDN links (these should stream from Pixabay).
+   If any fail, download them and host them locally and update the URLs.
+*/
+const backgroundMusicList = [
+  'https://elimuconnect.github.io/ELIMU-CONNECT-/music1.mp3',
+   'https://elimuconnect.github.io/ELIMU-CONNECT-/music2.mp3',
+   'https://elimuconnect.github.io/ELIMU-CONNECT-/music3.mp3',
+    'https://elimuconnect.github.io/ELIMU-CONNECT-/music4.mp3',
+];
+/* ---------- Generic shuffler utility (persistent) ---------- */
+/*
+  createShuffler(key, items)
+  - key: unique string to store state in localStorage
+  - items: source array (strings or objects)
+  returns { next(), peek(), reset(), remainingCount() }
+  Behavior:
+  - stores a shuffled list of indices in localStorage and a pointer
+  - if source array length changes, it resets the shuffle
+  - cycles through all items exactly once before reshuffling
+*/
+function createShuffler(key, items) {
+  const storageKey = 'shuffler_' + key;
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) {
+      console.warn('shuffler load failed', e);
+      return null;
+    }
+  }
+  function saveState(state) {
+    try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch (e) { console.warn('shuffler save failed', e); }
+  }
+  function makeOrder(n) {
+    const arr = Array.from({length:n}, (_,i)=>i);
+    // Fisher-Yates shuffle
+    for (let i = arr.length -1; i > 0; i--) {
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  let state = loadState();
+  // if state invalid or length mismatch -> reset
+  if (!state || !Array.isArray(state.order) || state.sourceLength !== items.length) {
+    state = { order: makeOrder(items.length), idx: 0, sourceLength: items.length, createdAt: Date.now() };
+    saveState(state);
+  }
+
+  function ensureFresh() {
+    // if source length changed since creation -> reset
+    if (state.sourceLength !== items.length) {
+      state = { order: makeOrder(items.length), idx: 0, sourceLength: items.length, createdAt: Date.now() };
+      saveState(state);
+    }
+  }
+
+  function next() {
+    ensureFresh();
+    if (state.idx >= state.order.length) {
+      // reshuffle once done
+      state.order = makeOrder(items.length);
+      state.idx = 0;
+      state.sourceLength = items.length;
+    }
+    const resultIndex = state.order[state.idx++];
+    saveState(state);
+    return items[resultIndex];
+  }
+
+  function peek() {
+    ensureFresh();
+    if (state.idx >= state.order.length) return null;
+    return items[state.order[state.idx]];
+  }
+
+  function reset() {
+    state = { order: makeOrder(items.length), idx: 0, sourceLength: items.length, createdAt: Date.now() };
+    saveState(state);
+  }
+
+  function remainingCount() {
+    ensureFresh();
+    return Math.max(0, state.order.length - state.idx);
+  }
+
+  return { next, peek, reset, remainingCount };
+}
+
+/* ---------- Canvas & drawing ---------- */
+const canvas = document.getElementById('canvasPreview');
+const ctx = canvas.getContext('2d', { alpha: false });
+
+// create shufflers for knowledge, backgrounds and animals
+const knowledgeShuffler = createShuffler('knowledge', KNOWLEDGE_ITEMS);
+const backgroundsShuffler = createShuffler('backgrounds', BACKGROUNDS);
+const dogsShuffler = createShuffler('dogs', ANIMALS.dogs);
+const catsShuffler = createShuffler('cats', ANIMALS.cats);
+const birdsShuffler = createShuffler('birds', ANIMALS.birds);
+const butterfliesShuffler = createShuffler('butterflies', ANIMALS.butterflies);
+
+// scene state with flying animals & emojis
+let scene = {
+  backgroundImg: null,
+  bgName: '',
+  clouds: [
+    {x:-200, y:100, w:200, h:90, speed: 0.2},
+    {x:-350, y:240, w:220, h:100, speed: 0.12}
+  ],
+  animalA: {img:null, x:CANVAS_W*0.12, y:CANVAS_H-320, w:180, h:180, bounceTimer:0},
+  animalB: {img:null, x:CANVAS_W*0.62, y:CANVAS_H-300, w:150, h:150, bounceTimer:0},
+  flying: [], // additional flying animals (birds & butterflies)
+  emojis: [], // moving emojis
+  bubble: {text:'Welcome!', x:CANVAS_W*0.5, y:120},
+  subtitle: {text:'', x:CANVAS_W*0.5, y:CANVAS_H - 120}
+};
+
+/* ---------- UI elements ---------- */
+const durationSel = document.getElementById('duration');
+const voiceMethodSel = document.getElementById('voiceMethod');
+const voiceGenderSel = document.getElementById('voiceGender');
+const voiceUploadEl = document.getElementById('voiceUpload');
+const useUploadBtn = document.getElementById('useUploadBtn');
+const genBtn = document.getElementById('genBtn');
+const recordBtn = document.getElementById('recordBtn');
+const statusEl = document.getElementById('status');
+const downloadLink = document.getElementById('downloadLink');
+
+let currentTopic = null;
+let uploadedAudioBuffer = null;
+
+/* ---------- WebAudio: master mix & music loader ---------- */
+const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function ensureAudioCtx(){
+  if(!audioCtx){
+    audioCtx = new AudioContextClass();
+    audioCtx.masterGain = audioCtx.createGain();
+    audioCtx.masterGain.gain.value = 1;
+    audioCtx.masterDest = audioCtx.createMediaStreamDestination();
+    audioCtx.masterGain.connect(audioCtx.masterDest);
+    audioCtx.masterGain.connect(audioCtx.destination);
+  }
+  return audioCtx;
+}
+
+// unlock audio on first gesture and also ensure background music can start
+function unlockAudioOnGesture(){
+  const init = async ()=>{
+    ensureAudioCtx();
+    if(audioCtx.state === 'suspended') try{ await audioCtx.resume(); }catch(e){}
+    document.body.removeEventListener('click', init);
+    document.body.removeEventListener('keydown', init);
+    statusEl.textContent = 'Audio unlocked — ready.';
+  };
+  document.body.addEventListener('click', init);
+  document.body.addEventListener('keydown', init);
+}
+unlockAudioOnGesture();
+
+// BG track handling - load as AudioBuffer for recording capture
+let currentBgSource = null;
+let currentBgGain = null;
+
+
+async function playRandomBackgroundTrack(){
+  const ctx = ensureAudioCtx();
+  // stop previous
+  if(currentBgSource){
+    try{ currentBgSource.stop(); }catch(e){}
+    try{ currentBgSource.disconnect(); }catch(e){}
+    currentBgSource = null;
+  }
+  if(currentBgGain){ try{ currentBgGain.disconnect(); }catch(e){} currentBgGain=null; }
+
+  const url = backgroundMusicList[Math.floor(Math.random()*backgroundMusicList.length)];
+  try{
+    const resp = await fetch(url);
+    const ab = await resp.arrayBuffer();
+    const buf = await ctx.decodeAudioData(ab);
+    const src = ctx.createBufferSource();
+    const gain = ctx.createGain();
+    src.buffer = buf;
+    src.loop = true;
+    gain.gain.value = 0.8;
+    src.connect(gain); gain.connect(ctx.masterGain);
+    try{ src.start(); }catch(err){
+      try{ await ctx.resume(); src.start(); }catch(err){ console.warn('bg start error', err); }
+    }
+    currentBgSource = src; currentBgGain = gain;
+    return {src, gain};
+  }catch(err){
+    console.warn('Failed to load bg track', err);
+    statusEl.textContent = 'Could not load background track (no fallback audio).';
+    return null;
+  }
+}
+
+function stopCurrentBgTrack(){
+  try{ if(currentBgSource){ currentBgSource.stop(); currentBgSource.disconnect(); currentBgSource=null; } }catch(e){}
+  if(currentBgGain){ try{ currentBgGain.disconnect(); }catch(e){} currentBgGain=null; }
+}
+
+/* ---------- Simple synth fallback patterns (kept) ---------- */
+let bgPatternInterval = null, bgOscs = [];
+function startBgPattern(idx){
+  stopBgPattern();
+  const ctx = ensureAudioCtx();
+  if(idx === 0){
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    bgOscs = notes.map(n => {
+      const o = ctx.createOscillator(); const g = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = n; g.gain.value = 0;
+      o.connect(g); g.connect(ctx.masterGain); o.start();
+      return {o,g};
+    });
+    bgPatternInterval = setInterval(()=>{
+      const t = ctx.currentTime;
+      bgOscs.forEach((og,i)=>{
+        og.g.gain.cancelScheduledValues(t);
+        og.g.gain.linearRampToValueAtTime(0.07, t+0.01);
+        og.g.gain.linearRampToValueAtTime(0, t+0.45);
+      });
+    }, 520);
+  } else if(idx === 1){
+    const notes = [392, 523.25, 659.25, 784];
+    bgOscs = notes.map(n => {
+      const o = ctx.createOscillator(); const g = ctx.createGain();
+      o.type = 'square'; o.frequency.value = n; g.gain.value = 0;
+      o.connect(g); g.connect(ctx.masterGain); o.start();
+      return {o,g};
+    });
+    bgPatternInterval = setInterval(()=>{
+      const t = ctx.currentTime;
+      bgOscs.forEach((og,i)=>{
+        og.g.gain.cancelScheduledValues(t);
+        og.g.gain.linearRampToValueAtTime(0.07, t+0.01);
+        og.g.gain.linearRampToValueAtTime(0, t+0.5);
+      });
+    }, 480);
+  } else {
+    bgPatternInterval = setInterval(()=>{
+      const o = ctx.createOscillator(); const g = ctx.createGain();
+      o.type = 'triangle'; o.frequency.value = 600;
+      o.connect(g); g.connect(ctx.masterGain);
+      const t = ctx.currentTime;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.14, t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.001, t+0.5);
+      o.start(); o.stop(t+0.55);
+    }, 700);
+  }
+}
+function stopBgPattern(){ if(bgPatternInterval) { clearInterval(bgPatternInterval); bgPatternInterval = null; } if(bgOscs){ bgOscs.forEach(x=>{ try{x.o.stop()}catch(e){} }); bgOscs = []; } }
+
+/* ---------- Simple SFX (kept) ---------- */
+function playBoing(){ const ctx = ensureAudioCtx(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.type = 'triangle'; o.frequency.value = 520; o.connect(g); g.connect(ctx.masterGain); const t = ctx.currentTime; g.gain.linearRampToValueAtTime(0.12, t+0.01); g.gain.exponentialRampToValueAtTime(0.0001, t+0.6); o.start(); o.stop(t+0.8); }
+function playSparkle(){ const ctx = ensureAudioCtx(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.type = 'sine'; o.frequency.value = 1200; o.connect(g); g.connect(ctx.masterGain); const t = ctx.currentTime; g.gain.linearRampToValueAtTime(0.08, t+0.01); g.gain.exponentialRampToValueAtTime(0.001, t+0.4); o.start(); o.stop(t+0.6); }
+
+/* ---------- Load images helper ---------- */
+function loadImg(url){ return new Promise((res,rej)=>{ const i=new Image(); i.crossOrigin='anonymous'; i.onload=()=>res(i); i.onerror=()=>rej(new Error('Image load error '+url)); i.src=url; }); }
+
+/* ---------- Floating emojis setup ---------- */
+const EMOJIS = [
+  '📚','🧮','🎨','✏️','💡','🔢','🧑‍🏫','🌈',
+  '🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮',
+  '🐷','🐸','🐵','🦄','🐝','🦋','🐌','🐞','🦗','🐢','🐍','🐠','🐟','🐡','🦑','🦐',
+  '🦖','🦕','🐙','🐚','🦜','🐊','🦎','🐉','🐲','🐳','🐋','🦈',
+  '🌟','✨','🎵','🎶','🏫','📝','📖','📎','✂️','🖍️','🖌️','🧪','🔬','🧫',
+  '🌍','🌏','🪐','☀️','🌙','⚡','🔥','💧','🌊','🌳','🎯','🏆','🏅','🎁','🎉','🎈',
+  '🪁','🚀','🚲','🛶'
+];
+
+function spawnEmojis(count = 20) { // more emojis at once
+  scene.emojis = [];
+  for (let i = 0; i < count; i++) {
+    scene.emojis.push({
+      ch: EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
+      x: Math.random() * CANVAS_W,
+      y: Math.random() * CANVAS_H,
+      vx: (Math.random() * 2 - 1) * 0.6,
+      vy: -(0.3 + Math.random() * 0.9),
+      size: 20 + Math.random() * 36,
+      rot: Math.random() * Math.PI * 2,
+      rotV: (Math.random() * 2 - 1) * 0.03
+    });
+  }
+}
+
+
+/* ---------- Flying animals (all visible) ---------- */
+function spawnFlyingAnimals() {
+  scene.flying = [];
+
+  // spawn all birds
+  for (const url of ANIMALS.birds) {
+    scene.flying.push({
+      type: 'bird',
+      imgUrl: url,
+      x: -50 - Math.random() * 300, // start offscreen left
+      y: 50 + Math.random() * (CANVAS_H / 2),
+      vx: 0.5 + Math.random() * 1.5,
+      vy: Math.sin(Math.random() * 2 * Math.PI) * 0.4,
+      size: 50 + Math.random() * 50,
+      img: null
+    });
+  }
+
+  // spawn all butterflies
+  for (const url of ANIMALS.butterflies) {
+    scene.flying.push({
+      type: 'butterfly',
+      imgUrl: url,
+      x: CANVAS_W + 50 + Math.random() * 300, // start offscreen right
+      y: 100 + Math.random() * (CANVAS_H / 2),
+      vx: - (0.4 + Math.random() * 1.2),
+      vy: Math.sin(Math.random() * 2 * Math.PI) * 0.3,
+      size: 40 + Math.random() * 50,
+      img: null
+    });
+  }
+
+  // spawn exotic flying animals (parrots, etc.)
+  for (const url of ANIMALS.exotic) {
+    scene.flying.push({
+      type: 'exotic',
+      imgUrl: url,
+      x: Math.random() > 0.5 ? -50 - Math.random() * 300 : CANVAS_W + 50 + Math.random() * 300,
+      y: 50 + Math.random() * (CANVAS_H / 2),
+      vx: (Math.random() > 0.5 ? 0.5 : -0.5) + Math.random() * 1.5,
+      vy: Math.sin(Math.random() * 2 * Math.PI) * 0.3,
+      size: 50 + Math.random() * 50,
+      img: null
+    });
+  }
+}
+
+
+/* ---------- Randomize & prepare scene (load images & spawn objects) ---------- */
+let assetsLoaded = false;
+
+async function prepareScene() {
+  statusEl.textContent = 'Preparing scene and assets...';
+  assetsLoaded = false;
+
+  // pick background via shuffler (persistent, non-repeating)
+  const bg = backgroundsShuffler.next();
+  scene.bgName = bg.name;
+  try {
+    scene.backgroundImg = await loadImg(bg.url);
+  } catch (e) {
+    console.warn('bg load failed', e);
+    scene.backgroundImg = null;
+  }
+
+  // pick animals and load them using shufflers
+  const dogUrl = dogsShuffler.next();
+  const catUrl = catsShuffler.next();
+  try { scene.animalA.img = await loadImg(dogUrl); } catch (e) { scene.animalA.img = null; }
+  try { scene.animalB.img = await loadImg(catUrl); } catch (e) { scene.animalB.img = null; }
+
+  // load flying animals images
+  spawnFlyingAnimals();
+  for (const f of scene.flying) {
+    try { f.img = await loadImg(f.imgUrl); } catch (e) { f.img = null; }
+  }
+
+  // spawn emojis
+  spawnEmojis(16);
+
+  // **pick knowledge item via shuffler**
+  const knowledge = knowledgeShuffler.next();
+  scene.bubble.text = knowledge;
+  scene.subtitle.text = knowledge;
+
+  // ensure audio unlocked
+  ensureAudioCtx();
+
+  // attempt to load background track (AudioBuffer) and play (loop)
+  try {
+    await playRandomBackgroundTrack();
+  } catch (e) {
+    console.warn('playRandomBackgroundTrack error', e);
+  }
+
+  // small burst to emojis for instant energy
+  for (let e of scene.emojis) {
+    e.vy -= Math.random() * 4 + 2;
+  }
+  playSparkle();
+
+  assetsLoaded = true;
+
+  // power-on visual flash
+  canvas.style.animation = 'flash 0.6s ease-out';
+  setTimeout(() => canvas.style.animation = '', 600);
+
+  statusEl.textContent = `Prepared: ${scene.bgName}`;
+}
+
+/* ---------- Drawing helpers ---------- */
+function drawRoundRect(x,y,w,h,r, fill, stroke, lineWidth=2){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+  if(fill){ ctx.fillStyle = fill; ctx.fill(); }
+  if(stroke){ ctx.lineWidth = lineWidth; ctx.strokeStyle = stroke; ctx.stroke(); }
+}
+
+
+/* ---------- Drawing scene ---------- */
+function drawScene(t){
+  // clear & background
+  ctx.clearRect(0,0,CANVAS_W,CANVAS_H);
+  if(scene.backgroundImg) ctx.drawImage(scene.backgroundImg, 0,0,CANVAS_W,CANVAS_H);
+  else { ctx.fillStyle = '#88d'; ctx.fillRect(0,0,CANVAS_W,CANVAS_H); }
+
+  // clouds
+  for(const c of scene.clouds){
+    c.x += c.speed * (1 + Math.sin(t/200));
+    if(c.x > CANVAS_W + 200) c.x = -250;
+    ctx.save(); ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    ctx.beginPath();
+    ctx.ellipse(c.x, c.y, c.w*0.6, c.h*0.6, 0, 0, Math.PI*2);
+    ctx.ellipse(c.x + c.w*0.4, c.y - 10, c.w*0.5, c.h*0.45, 0,0,Math.PI*2);
+    ctx.ellipse(c.x + c.w*0.7, c.y + 6, c.w*0.35, c.h*0.33, 0,0,Math.PI*2);
+    ctx.fill(); ctx.restore();
+  }
+
+  // flying animals
+  // ---------------- Flying animals animation ----------------
+for (const f of scene.flying) {
+  // update horizontal position
+  f.x += f.vx * (1 + Math.sin((performance.now() + f.y * 0.01) / 600));
+  
+  // add gentle vertical oscillation
+  f.y += Math.sin((performance.now() / 500 + f.x * 0.01)) * 0.5 + f.vy * 0.5;
+  
+  // wrap around canvas edges
+  if (f.vx > 0 && f.x > CANVAS_W + 150) { // moving right
+    f.x = -150;
+    f.y = 50 + Math.random() * (CANVAS_H / 2);
+  }
+  if (f.vx < 0 && f.x < -150) { // moving left
+    f.x = CANVAS_W + 150;
+    f.y = 50 + Math.random() * (CANVAS_H / 2);
+  }
+
+  // optional: keep vertical range within upper half to avoid overlapping bottom animals
+  if (f.y < 30) f.y = 30;
+  if (f.y > CANVAS_H / 2) f.y = CANVAS_H / 2;
+
+  // draw image
+  ctx.save();
+  if (f.img) {
+    // rotate slightly for motion effect
+    ctx.translate(f.x + f.size/2, f.y + f.size/2);
+    const rotAngle = Math.sin(f.x / 50) * 0.15;
+    ctx.rotate(rotAngle);
+    ctx.drawImage(f.img, -f.size/2, -f.size/2, f.size, f.size);
+  }
+  ctx.restore();
+}
+
+
+  // animals (bounce)
+  function drawAnimal(a, tOffset){
+    const bounce = Math.sin((t + (a.bounceTimer||0)) / 300) * 12;
+    const x = a.x; const y = a.y + bounce;
+    ctx.save();
+    ctx.beginPath(); ctx.ellipse(x + a.w/2, y + a.h - 20, a.w*0.3, 12, 0, 0, Math.PI*2); ctx.fillStyle = 'rgba(0,0,0,0.12)'; ctx.fill();
+    if(a.img) ctx.drawImage(a.img, x, y, a.w, a.h);
+    ctx.restore();
+  }
+  scene.animalA.x = CANVAS_W*0.12; scene.animalB.x = CANVAS_W*0.62;
+  drawAnimal(scene.animalA, t); drawAnimal(scene.animalB, t);
+
+  // emojis
+  for(const e of scene.emojis){
+    e.x += e.vx;
+    e.y += e.vy;
+    e.vy += 0.01; // gravity-like slow acceleration
+    e.rot += e.rotV;
+    // reset if gone out of bounds
+    if(e.y < -120 || e.y > CANVAS_H + 120 || e.x < -80 || e.x > CANVAS_W + 80) {
+      e.y = Math.random()*CANVAS_H;
+      e.x = Math.random()*CANVAS_W;
+      e.vy = - (0.3 + Math.random()*0.9);
+      e.vx = (Math.random()*2-1)*0.6;
+    }
+    ctx.save();
+    ctx.translate(e.x, e.y);
+    ctx.rotate(e.rot);
+    ctx.font = `${e.size}px "Patrick Hand", Arial`;
+    ctx.fillText(e.ch, 0, 0);
+    ctx.restore();
+  }
+
+  // TOP text - "Do you Know?"
+ctx.fillStyle = 'rgba(255,255,255,0.9)';
+ctx.font = 'bold 72px "Patrick Hand", Arial';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'top';
+ctx.fillText("Do you Know?", CANVAS_W/2, 40);
+
+// Draw bottom text (current knowledge item)
+const bottomText = scene.subtitle.text || '';
+
+// Set text style
+ctx.font = 'bold 56px "Patrick Hand", Arial';
+ctx.fillStyle = 'yellow';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+
+// Use a unique name to avoid redeclaration
+const wrappedLines = splitText(ctx, bottomText, CANVAS_W - 60);
+const textLineHeight = 60; // renamed from lineHeight
+const totalHeight = wrappedLines.length * textLineHeight;
+let startY = CANVAS_H * 0.5 - totalHeight / 2 + 30;
+
+// Draw each line centered
+for (let i = 0; i < wrappedLines.length; i++) {
+  ctx.fillText(wrappedLines[i], CANVAS_W / 2, startY + i * textLineHeight);
+}
+
+
+
+// Text to split into two lines
+const logoText = '🎓 Get Top Tuition Now!📱Install Elimu Connect App(Kenya), SmartLearn: IGCSE IB CBSE ICSE (global)!';
+ctx.font = '28px "Patrick Hand", Arial'; // larger font
+const paddingX = 20;
+const paddingY = 14;
+
+// Split text roughly in the middle (or by a custom rule)
+const mid = Math.floor(logoText.length / 2);
+let splitIndex = logoText.indexOf(' ', mid); // split at nearest space after middle
+if (splitIndex === -1) splitIndex = mid;
+const logoText1 = logoText.slice(0, splitIndex);
+const logoText2 = logoText.slice(splitIndex + 1);
+
+// Measure widths to determine rectangle width
+const textMetrics1 = ctx.measureText(logoText1);
+const textMetrics2 = ctx.measureText(logoText2);
+const rectW = Math.max(textMetrics1.width, textMetrics2.width) + paddingX * 2;
+
+const lineHeight = 34; // slightly larger than font size for spacing
+const rectH = lineHeight * 2 + paddingY * 2;
+
+const rectX = CANVAS_W - rectW - 20;
+const rectY = CANVAS_H - rectH - 20;
+
+// Draw rounded rectangle
+drawRoundRect(rectX, rectY, rectW, rectH, 20, 'rgba(255,255,255,0.95)', 'rgba(0,0,0,0.08)', 2);
+
+// Draw centered text
+ctx.fillStyle = '#111';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+const centerX = rectX + rectW / 2;
+const centerY = rectY + rectH / 2;
+
+ctx.fillText(logoText1, centerX, centerY - lineHeight / 2); // first line
+ctx.fillText(logoText2, centerX, centerY + lineHeight / 2); // second line
+}
+
+
+/* ---------- Animation loop ---------- */
+let animRunning = false;
+function startAnimation(){
+  if(animRunning) return;
+  animRunning = true;
+  let start = performance.now();
+  function loop(now){
+    const t = now - start;
+    scene.animalA.bounceTimer = t; scene.animalB.bounceTimer = t + 70;
+    drawScene(t);
+    if(animRunning) requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+}
+function stopAnimation(){ animRunning = false; }
+
+/* ---------- Generate/prepare ---------- */
+genBtn.addEventListener('click', async ()=>{
+  statusEl.textContent = 'Preparing scene...';
+  ensureAudioCtx();
+  try{
+    await prepareScene();
+    // Wait small moment to ensure first frames drawn
+    startAnimation();
+    setTimeout(()=> { if(!assetsLoaded) return; statusEl.textContent = 'Preview ready: ' + scene.bgName; }, 350);
+  }catch(e){
+    statusEl.textContent = 'Prepare failed: ' + e.message;
+    console.error(e);
+  }
+});
+
+/* ---------- Voice upload handling (left intact) ---------- */
+voiceUploadEl.addEventListener('change', async (e)=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  statusEl.textContent = 'Decoding uploaded audio...';
+  const ab = await f.arrayBuffer();
+  ensureAudioCtx();
+  uploadedAudioBuffer = await audioCtx.decodeAudioData(ab);
+  statusEl.textContent = 'Uploaded voice ready (will be embedded).';
+});
+useUploadBtn.addEventListener('click', ()=> {
+  if(!uploadedAudioBuffer){ statusEl.textContent = 'No uploaded file. Choose an audio file first.'; return; }
+  voiceMethodSel.value = 'upload';
+  statusEl.textContent = 'Upload selected as narration method.';
+});
+
+/* ---------- Removed speech-synthesis narration entirely ----------
+   (No TTS calls; only background music will play.)
+*/
+
+/* ---------- Recording (canvas capture) ---------- */
+let recordedChunks = [];
+let mediaRecorder = null;
+
+async function startRecordingAuto() {
+  ensureAudioCtx();
+  if (audioCtx.state === 'suspended') {
+    try { await audioCtx.resume(); } catch (e) {}
+  }
+
+  // ✅ get subtitle text directly (no topics)
+  const subtitleText = scene?.subtitle?.text || document.getElementById('subtitleText')?.textContent || '';
+  if (!subtitleText.trim()) {
+    statusEl.textContent = 'Generate preview first.';
+    return;
+  }
+
+  // ✅ ensure background music
+  if (!currentBgSource) await playRandomBackgroundTrack().catch(() => {});
+
+  const dur = parseInt(durationSel.value, 10) || 60;
+  statusEl.textContent = 'Recording: ' + dur + 's — preparing streams...';
+
+  // wait for first frame
+  await new Promise(r => setTimeout(r, 350));
+
+  // capture canvas
+  let videoStream;
+  try {
+    videoStream = canvas.captureStream(30);
+  } catch (err) {
+    statusEl.textContent = 'Canvas capture not supported: ' + err.message;
+    return;
+  }
+
+  // build combined stream
+  const combined = new MediaStream();
+  videoStream.getVideoTracks().forEach(t => combined.addTrack(t));
+
+  // live mic
+  let liveMicStream = null;
+  if (voiceMethodSel.value === 'mic') {
+    try {
+      liveMicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      liveMicStream.getAudioTracks().forEach(t => combined.addTrack(t));
+      statusEl.textContent = '🎙️ Live mic connected — speak during recording.';
+    } catch (err) {
+      statusEl.textContent = 'Mic unavailable. Uploaded narration will be used if present.';
+      console.warn('Mic error', err);
+    }
+  }
+
+  // uploaded narration
+  if (voiceMethodSel.value === 'upload' && uploadedAudioBuffer) {
+    const src = audioCtx.createBufferSource();
+    src.buffer = uploadedAudioBuffer;
+    src.connect(audioCtx.masterGain || audioCtx.destination);
+    src.start();
+  }
+
+  // add background + sfx
+  if (audioCtx.masterDest && audioCtx.masterDest.stream) {
+    audioCtx.masterDest.stream.getAudioTracks().forEach(t => combined.addTrack(t));
+  }
+
+  // start recording
+  recordedChunks = [];
+  try {
+    mediaRecorder = new MediaRecorder(combined, { mimeType: 'video/webm;codecs=vp8,opus' });
+  } catch (err) {
+    statusEl.textContent = 'MediaRecorder failed: ' + err.message;
+    return;
+  }
+
+  mediaRecorder.ondataavailable = e => { if (e.data && e.data.size) recordedChunks.push(e.data); };
+  mediaRecorder.onstart = () => { statusEl.textContent = 'Recording... (auto stops after ' + dur + 's)'; };
+  mediaRecorder.onerror = e => { statusEl.textContent = 'Recording error: ' + e.message; };
+  mediaRecorder.onstop = async () => {
+  if (liveMicStream) liveMicStream.getTracks().forEach(t => t.stop());
+  stopCurrentBgTrack();
+
+  const blob = new Blob(recordedChunks, { type: 'video/mp4' });
+  const url = URL.createObjectURL(blob);
+  downloadLink.href = url;
+  downloadLink.download = `elimu_short_${dur}s_${Date.now()}.mp4`;
+  downloadLink.textContent = '⬇️ Download MP4 (9:16)';
+  downloadLink.classList.remove('hidden');
+  setTimeout(() => { try { downloadLink.click(); } catch (e) {} }, 300);
+  statusEl.textContent = '✅ Recording complete — MP4 file ready.';
+};
+
+
+  mediaRecorder.start(1000);
+
+  // ✅ subtitles and sfx
+  const parts = splitText(subtitleText, 3);
+  parts.forEach((p, i) => {
+    setTimeout(() => {
+      if (scene?.subtitle) scene.subtitle.text = p;
+      playBoing();
+    }, Math.floor((i + 0.5) * (dur / parts.length) * 1000));
+  });
+
+  // auto stop
+  setTimeout(() => {
+    try {
+      if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+    } catch (e) {
+      console.warn('stop error', e);
+    }
+  }, dur * 1000 + 500);
+}
+
+function splitText(ctx, text, maxWidth) {
+  if (!text || typeof text !== "string") return [];
+  const words = text.trim().split(/\s+/);
+  const lines = [];
+  let line = "";
+
+  for (let i = 0; i < words.length; i++) {
+    const testLine = line ? line + " " + words[i] : words[i];
+    const testWidth = ctx.measureText(testLine).width;
+
+    // if the line would exceed max width, push the old one
+    if (testWidth > maxWidth && line !== "") {
+      lines.push(line);
+      line = words[i]; // start a new line
+    } else {
+      line = testLine;
+    }
+  }
+
+  // push any remaining text
+  if (line) lines.push(line);
+
+  return lines;
+}
+
+
+/* ---------- Events ---------- */
+recordBtn.addEventListener('click', async () => {
+  ensureAudioCtx();
+  if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+  // 1️⃣ Prepare scene if not loaded
+  if (!assetsLoaded) {
+    statusEl.textContent = 'Scene not ready. Preparing...';
+    try {
+      await prepareScene();
+      startAnimation();
+    } catch (e) {
+      statusEl.textContent = 'Failed to prepare scene: ' + e.message;
+      console.error(e);
+      return;
+    }
+  }
+
+  // 2️⃣ Request microphone access directly from this click handler
+  if (voiceMethodSel.value === 'mic' && !navigator.mediaDevices.getUserMedia) {
+    statusEl.textContent = 'Mic not supported in this browser.';
+    return;
+  }
+
+  // 3️⃣ Start recording immediately
+  try {
+    await startRecordingAuto();
+  } catch (err) {
+    statusEl.textContent = 'Recording failed: ' + err.message;
+    console.error(err);
+  }
+});
+
+
+window.addEventListener('load', ()=> {
+  // Warm audio context/voices (no TTS used)
+  try { speechSynthesis.getVoices(); } catch(e){}
+  // prepare initial scene quietly
+  (async ()=>{ try{ await prepareScene(); startAnimation(); }catch(e){console.warn(e);} })();
+  statusEl.textContent = 'Ready. Click Generate Preview and then Start & Record.';
+});
+
+/* ---------- Rotate knowledge every 10s using the shuffler order ----------
+   We will cycle by asking the shuffler for the next item (but don't consume it twice
+   when prepareScene already set the current scene.subtitle). To keep rotation consistent
+   we use a rotating index that references the same persistent shuffled order.
+*/
+setInterval(async ()=>{
+  // if scene.subtitle already exists, get the next item from shuffler
+  try{
+    const nextKnowledge = knowledgeShuffler.next();
+    scene.subtitle.text = nextKnowledge;
+  }catch(e){
+    console.warn('knowledge rotate error', e);
+  }
+}, 10000);
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>

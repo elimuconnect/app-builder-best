@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Elimu Connect • ShortsGen v4 (9:16 Canvas) — Edited (Music Only)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #1976d2;
+    --math: #ef6c00;
+    --sci: #2e7d32;
+    --eng: #0d47a1;
+    --bubble-bg: #fff9e6;
+    --subtitle-bg: rgba(10, 25, 90, 0.85);
+  }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    font-family: 'Patrick Hand', ComicSans, Arial;
+    background: linear-gradient(#e6f7ff, #ffffff);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  .app {
+    width: 420px;
+    max-width: 100%;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  h1 {
+    font-size: 1rem;
+    margin: 0;
+    text-align: center;
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0;
+    justify-content: center;
+  }
+
+  select,
+  input[type="file"],
+  button {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-weight: bold;
+  }
+
+  button {
+    background: var(--accent);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+
+  button:hover {
+    transform: scale(1.04);
+  }
+
+  .small {
+    font-size: 0.8rem;
+    color: #444;
+    text-align: center;
+  }
+
+  #stageWrap {
+    width: 360px;
+    height: 640px;
+    margin: 12px auto;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.2);
+    position: relative;
+    background: #222;
+  }
+
+  /* Canvas fits inside stageWrap but actual pixels are 720x1280 (portrait) */
+  #canvasPreview {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: #000;
+  }
+
+  .controls .row {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+  }
+
+  .status {
+    font-size: 0.9rem;
+    margin-top: 8px;
+    text-align: center;
+  }
+
+  a.hidden {
+    display: none;
+  }
+
+  .hint {
+    font-size: 0.8rem;
+    color: #555;
+    margin-top: 6px;
+    text-align: center;
+  }
+
+  @keyframes flash {
+    0% { opacity: 0; filter: brightness(3); }
+    100% { opacity: 1; filter: brightness(1); }
+  }
+
+  header h1 {
+    background: linear-gradient(90deg, #ff9800, #2196f3);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  /* 📱 MOBILE RESPONSIVE ADJUSTMENTS */
+  @media (max-width: 480px) {
+    .app {
+      width: 100%;
+    }
+
+    #stageWrap {
+      width: 100%;
+      height: 80vh;
+      border-radius: 12px;
+    }
+
+    h1 {
+      font-size: 0.9rem;
+    }
+
+    button,
+    select,
+    input[type="file"] {
+      font-size: 0.85rem;
+      padding: 6px 8px;
+    }
+
+    .status,
+    .hint {
+      font-size: 0.8rem;
+    }
+  }
+</style>
+
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Elimu Connect • ShortsGen v4</h1>
+      <div class="small">9:16 Canvas • Cartoon bubble subtitles • Auto WebM</div>
+    </header>
+
+    <div class="controls">
+      <label>Duration:
+        <select id="duration"><option value="30">30s</option><option value="45">45s</option><option value="60" selected>60s</option></select>
+      </label>
+
+      <label>Voice method:
+        <select id="voiceMethod">
+          <option value="mic">Mic live (embed)</option>
+          <option value="upload">Upload voice file (embed)</option>
+          <option value="tts">SpeechSynthesis preview (not embedded)</option>
+        </select>
+      </label>
+
+      <label>Voice gender:
+        <select id="voiceGender"><option value="auto">Auto</option><option value="male">Male</option><option value="female">Female</option></select>
+      </label>
+    </div>
+
+    <div class="controls row">
+      <input type="file" id="voiceUpload" accept="audio/*" />
+      <button id="useUploadBtn">Use Upload</button>
+      <button id="genBtn">🎲 Generate Preview</button>
+      <button id="recordBtn">🔴 Start & Record (auto-stop)</button>
+    </div>
+
+    <div id="stageWrap" title="This box is the recorded 9:16 area">
+      <canvas id="canvasPreview" width="720" height="1280"></canvas>
+    </div>
+
+    <div class="controls">
+      <a id="downloadLink" class="hidden"></a>
+    </div>
+
+    <div class="status" id="status">Click Generate Preview to unlock audio, then press Start & Record.</div>
+    <div class="hint">Tip: if browser prompts to allow mic, allow it. For embedded narration use Upload or Mic. TTS is disabled (no narration).</div>
+  </div>
+
+
+
+<script>
+/* ---------- Configuration & assets ---------- */
+const CANVAS_W = 720, CANVAS_H = 1280; // portrait 9:16
+
+
+
+
+// updated to free catchy backgrounds (Pixabay/Unsplash style)
+const BACKGROUNDS = [
+  {name:'Sunny Schoolyard', url:'https://cdn.pixabay.com/photo/2022/10/07/06/11/verbena-7504222_640.jpg'},
+  {name:'Green Park', url:'https://cdn.pixabay.com/photo/2020/06/21/10/56/flower-5324314_640.jpg'},
+  {name:'Sky & Clouds', url:'https://cdn.pixabay.com/photo/2015/11/10/17/00/still-life-1037378_640.jpg'},
+  {name:'Playground', url:'https://cdn.pixabay.com/photo/2022/05/12/20/59/tulips-7192345_640.jpg'},
+  {name:'Chalkboard Classroom', url:'https://cdn.pixabay.com/photo/2016/11/29/05/08/chalkboard-1866616_1280.jpg'},
+  {name:'Beach', url:'https://cdn.pixabay.com/photo/2024/11/08/13/40/tulips-9183358_640.jpg'},
+  {name:'Space (kids)', url:'https://cdn.pixabay.com/photo/2023/12/08/10/56/mandarins-8437425_640.jpg'},
+  {name:'Forest Glade', url:'https://cdn.pixabay.com/photo/2015/06/19/21/24/avenue-815297_1280.jpg'},
+  {name:'Rainbow Hills', url:'https://cdn.pixabay.com/photo/2016/07/16/16/21/flowers-1522260_640.jpg'},
+  {name:'Science Lab', url:'https://cdn.pixabay.com/photo/2023/04/26/16/01/lighthouse-7952718_640.jpg'},
+
+  {name:'Sunny Schoolyard', url:'https://cdn.pixabay.com/photo/2025/09/24/11/49/ai-9852653_1280.jpg'},
+  {name:'Green Park', url:'https://cdn.pixabay.com/photo/2024/08/29/12/44/images-9006886_960_720.jpg'},
+  {name:'Sky & Clouds', url:'https://cdn.pixabay.com/photo/2017/12/11/15/34/lion-3012515_640.jpg'},
+  {name:'Playground', url:'https://cdn.pixabay.com/photo/2024/08/29/12/36/images-9006863_1280.jpg'},
+  {name:'Chalkboard Classroom', url:'https://cdn.pixabay.com/photo/2016/02/20/20/17/animals-1212716_960_720.png'},
+  {name:'Beach', url:'https://cdn.pixabay.com/photo/2024/08/22/11/59/images-8989212_640.jpg'},
+  {name:'Space (kids)', url:'https://cdn.pixabay.com/photo/2023/08/18/18/19/car-8199052_640.jpg'},
+  {name:'Forest Glade', url:'https://cdn.pixabay.com/photo/2024/08/22/11/58/images-8989205_640.jpg'},
+  {name:'Rainbow Hills', url:'https://cdn.pixabay.com/photo/2024/08/20/13/51/images-8983354_640.jpg'},
+  {name:'Science Lab', url:'https://cdn.pixabay.com/photo/2024/08/20/13/51/images-8983354_640.jpg'},
+  { name: 'Sunset', url: 'https://cdn.pixabay.com/photo/2022/04/15/07/58/sunset-7133867_640.jpg' },
+  { name: 'Landscape', url: 'https://cdn.pixabay.com/photo/2022/08/08/19/36/landscape-7373484_1280.jpg' },
+  { name: 'Forest Avenue', url: 'https://cdn.pixabay.com/photo/2015/06/19/21/24/avenue-815297_640.jpg' },
+  { name: 'Glacier', url: 'https://cdn.pixabay.com/photo/2022/05/10/14/37/glacier-7187291_640.jpg' },
+  { name: 'Lonely Tree', url: 'https://cdn.pixabay.com/photo/2022/11/27/13/22/tree-7619791_640.jpg' },
+  { name: 'Field', url: 'https://cdn.pixabay.com/photo/2024/12/28/03/39/field-9295186_640.jpg' },
+  { name: 'Styggkarret Lake', url: 'https://cdn.pixabay.com/photo/2014/09/02/15/28/styggkarret-433688_640.jpg' },
+  { name: 'Bachalpsee Lake', url: 'https://cdn.pixabay.com/photo/2022/11/05/19/56/bachalpsee-7572681_640.jpg' },
+  { name: 'Windsurfing', url: 'https://cdn.pixabay.com/photo/2022/06/04/01/35/windsurfing-7241074_640.jpg' },
+  { name: 'Snow Mountain', url: 'https://cdn.pixabay.com/photo/2025/05/21/15/34/snow-mountain-9614087_640.jpg' },
+  { name: 'Sailboat', url: 'https://cdn.pixabay.com/photo/2025/05/13/12/40/sailboat-9597523_640.jpg' },
+  { name: 'Chilli Plant', url: 'https://cdn.pixabay.com/photo/2024/11/17/04/52/chilli-9202873_640.jpg' },
+  { name: 'Dolomites', url: 'https://cdn.pixabay.com/photo/2020/04/22/08/06/dolomites-5076487_640.jpg' },
+  { name: 'Desert', url: 'https://cdn.pixabay.com/photo/2017/08/16/01/23/desert-2646209_640.jpg' },
+  { name: 'Cape', url: 'https://cdn.pixabay.com/photo/2022/08/23/01/10/cape-7404790_640.jpg' },
+  { name: 'Forest', url: 'https://cdn.pixabay.com/photo/2018/11/23/14/19/forest-3833973_640.jpg' },
+  { name: 'Owl', url: 'https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg' },
+  { name: 'Water', url: 'https://cdn.pixabay.com/photo/2021/08/27/18/50/water-6579313_640.jpg' },
+  { name: 'Lynx', url: 'https://cdn.pixabay.com/photo/2023/12/11/12/51/lynx-8443540_640.jpg' },
+  { name: 'River', url: 'https://cdn.pixabay.com/photo/2022/08/25/20/34/river-7411236_640.jpg' },
+  { name: 'Bird', url: 'https://cdn.pixabay.com/photo/2023/05/03/11/20/bird-7967356_640.jpg' },
+  { name: 'Strawberries', url: 'https://cdn.pixabay.com/photo/2022/04/14/20/59/strawberries-7133242_640.jpg' },
+  { name: 'Dog', url: 'https://cdn.pixabay.com/photo/2013/10/02/23/03/dog-190056_640.jpg' },
+  { name: 'Bird Flying', url: 'https://cdn.pixabay.com/photo/2023/04/05/21/09/bird-7902319_640.jpg' },
+  { name: 'Landscape Sunset', url: 'https://cdn.pixabay.com/photo/2025/04/08/10/42/landscape-9521261_640.jpg' },
+  { name: 'Lighthouse', url: 'https://cdn.pixabay.com/photo/2022/07/07/09/08/lighthouse-7306839_640.jpg' },
+  { name: 'Pine Cones', url: 'https://cdn.pixabay.com/photo/2025/09/25/17/56/pine-cones-9855502_640.jpg' },
+  { name: 'Fisherman', url: 'https://cdn.pixabay.com/photo/2017/09/11/14/11/fisherman-2739115_640.jpg' },
+  { name: 'Squirrel', url: 'https://cdn.pixabay.com/photo/2025/08/02/03/27/squirrel-9749860_640.jpg' },
+  { name: 'Fly', url: 'https://cdn.pixabay.com/photo/2015/02/16/06/11/fly-637949_640.jpg' },
+  { name: 'Rain', url: 'https://cdn.pixabay.com/photo/2017/08/02/21/15/rain-2573488_640.jpg' },
+  { name: 'Sleeve', url: 'https://cdn.pixabay.com/photo/2024/01/18/13/05/sleeve-8516924_640.jpg' },
+  { name: 'Spoonbill', url: 'https://cdn.pixabay.com/photo/2024/11/07/18/01/spoonbill-9181508_640.jpg' },
+  { name: 'Hill', url: 'https://cdn.pixabay.com/photo/2020/06/21/09/48/hill-5324149_640.jpg' },
+  { name: 'Waterfall', url: 'https://cdn.pixabay.com/photo/2020/05/28/04/42/waterfall-5229807_640.jpg' },
+  { name: 'Sunset 2', url: 'https://cdn.pixabay.com/photo/2024/01/18/10/07/sunset-8516639_640.jpg' },
+  { name: 'Flower', url: 'https://cdn.pixabay.com/photo/2022/10/24/09/31/flower-7543035_640.jpg' },
+  { name: 'Flycatcher', url: 'https://cdn.pixabay.com/photo/2024/07/01/10/50/flycatcher-8864922_640.jpg' },
+  { name: 'Pamir', url: 'https://cdn.pixabay.com/photo/2025/10/09/15/17/pamir-9883842_640.jpg' },
+  { name: 'Tram', url: 'https://cdn.pixabay.com/photo/2024/12/28/13/28/tram-9296118_640.jpg' },
+  { name: 'Animals', url: 'https://cdn.pixabay.com/photo/2025/04/14/16/31/animals-9533774_640.jpg' },
+  { name: 'Leaves', url: 'https://cdn.pixabay.com/photo/2024/12/04/15/37/leaves-9244714_640.jpg' },
+  { name: 'Blossoms', url: 'https://cdn.pixabay.com/photo/2022/02/03/18/49/blossoms-6991112_640.jpg' },
+  { name: 'Leaves 2', url: 'https://cdn.pixabay.com/photo/2023/07/08/19/28/leaves-8115077_640.jpg' },
+  { name: 'Sunset 3', url: 'https://cdn.pixabay.com/photo/2023/10/21/11/46/sunset-8331285_640.jpg' },
+  { name: 'Altai Mountains', url: 'https://cdn.pixabay.com/photo/2022/01/17/06/38/altai-6943982_640.jpg' },
+  { name: 'Spider', url: 'https://cdn.pixabay.com/photo/2018/07/12/11/46/spider-3533177_640.jpg' },
+  { name: 'City Sunset', url: 'https://cdn.pixabay.com/photo/2024/11/02/17/29/city-9169729_640.jpg' },
+  { name: 'Giraffe', url: 'https://cdn.pixabay.com/photo/2020/05/04/09/09/giraffe-5128394_640.jpg' },
+  { name: 'Mountains', url: 'https://cdn.pixabay.com/photo/2016/05/24/16/48/mountains-1412683_640.png' },
+  { name: 'Leaf', url: 'https://cdn.pixabay.com/photo/2021/04/22/18/35/leaf-6199807_640.jpg' },
+  { name: 'Dorset', url: 'https://cdn.pixabay.com/photo/2024/10/23/09/00/dorset-9141987_640.jpg' },
+  { name: 'Bridge', url: 'https://cdn.pixabay.com/photo/2025/05/14/10/09/bridge-9599215_640.jpg' },
+  { name: 'Elephant', url: 'https://cdn.pixabay.com/photo/2024/08/24/14/42/elephant-8994442_640.jpg' },
+  { name: 'Plant', url: 'https://cdn.pixabay.com/photo/2020/03/10/05/40/plant-4917877_640.jpg' },
+  { name: 'Fly Agaric', url: 'https://cdn.pixabay.com/photo/2014/11/27/10/04/fly-agaric-547324_640.jpg' },
+  { name: 'Forest 2', url: 'https://cdn.pixabay.com/photo/2018/05/11/23/33/forest-3392077_640.jpg' },
+  { name: 'Insect', url: 'https://cdn.pixabay.com/photo/2023/08/10/14/17/insect-8181775_640.jpg' },
+  { name: 'Branch', url: 'https://cdn.pixabay.com/photo/2022/12/12/03/13/branch-7650059_640.jpg' },
+  { name: 'Animal', url: 'https://cdn.pixabay.com/photo/2020/02/17/06/06/animal-4855514_640.jpg' },
+  { name: 'Elephants', url: 'https://cdn.pixabay.com/photo/2022/12/12/17/05/elephants-7651446_640.jpg' },
+  { name: 'Peacock', url: 'https://cdn.pixabay.com/photo/2018/08/19/19/56/peacock-3617474_640.jpg' },
+  { name: 'Wood', url: 'https://cdn.pixabay.com/photo/2022/12/03/22/15/wood-7633457_640.jpg' },
+  { name: 'Mountain', url: 'https://cdn.pixabay.com/photo/2024/11/03/17/49/mountain-9172053_640.jpg' },
+  { name: 'Mushroom', url: 'https://cdn.pixabay.com/photo/2023/11/16/18/46/mushroom-8392883_640.jpg' },
+  { name: 'Plant 2', url: 'https://cdn.pixabay.com/photo/2022/10/17/18/19/plant-7528416_640.jpg' },
+  { name: 'Bavarian Forest', url: 'https://cdn.pixabay.com/photo/2018/05/09/19/31/bavarian-forest-3385966_640.jpg' },
+  { name: 'Cat', url: 'https://cdn.pixabay.com/photo/2021/09/28/13/14/cat-6664412_640.jpg' },
+  { name: 'Drops', url: 'https://cdn.pixabay.com/photo/2023/03/27/06/06/drops-7879899_640.jpg' },
+  { name: 'Path', url: 'https://cdn.pixabay.com/photo/2021/08/01/17/31/path-6514885_640.jpg' },
+  { name: 'Landscape 2', url: 'https://cdn.pixabay.com/photo/2019/10/29/14/46/landscape-4587079_640.jpg' },
+  { name: 'Dog 2', url: 'https://cdn.pixabay.com/photo/2020/03/31/19/20/dog-4988985_640.jpg' },
+  { name: 'Animal 2', url: 'https://cdn.pixabay.com/photo/2020/02/17/06/06/animal-4855514_640.jpg' },
+  { name: 'Costa Rica', url: 'https://cdn.pixabay.com/photo/2024/12/31/01/02/costa-rica-9301364_640.jpg' },
+  { name: 'Fish', url: 'https://cdn.pixabay.com/photo/2018/04/15/17/45/fish-3322230_640.jpg' },
+  { name: 'Dog 2', url: 'https://cdn.pixabay.com/photo/2020/03/31/19/20/dog-4988985_640.jpg' },
+  { name: 'Meerkat', url: 'https://cdn.pixabay.com/photo/2018/07/09/11/53/meerkat-3525978_640.jpg' },
+  { name: 'Tree', url: 'https://cdn.pixabay.com/photo/2018/03/15/21/10/tree-3229512_640.jpg' },
+  { name: 'Fox', url: 'https://cdn.pixabay.com/photo/2015/04/10/01/41/fox-715588_640.jpg' },
+  { name: 'Caterpillar', url: 'https://cdn.pixabay.com/photo/2023/08/07/14/08/caterpillar-8175147_640.jpg' },
+  { name: 'Foliage', url: 'https://cdn.pixabay.com/photo/2023/11/28/16/10/foliage-8417776_640.jpg' },
+  { name: 'Animal 3', url: 'https://cdn.pixabay.com/photo/2021/10/31/08/34/animal-6756619_640.jpg' },
+  { name: 'Cascade', url: 'https://cdn.pixabay.com/photo/2022/04/23/17/16/cascade-7152189_640.jpg' },
+  { name: 'Puddle', url: 'https://cdn.pixabay.com/photo/2017/08/05/15/19/puddle-2584378_640.jpg' },
+  { name: 'Herons', url: 'https://cdn.pixabay.com/photo/2023/03/27/19/18/herons-7881512_640.png' },
+  { name: 'Nature', url: 'https://cdn.pixabay.com/photo/2023/04/16/10/55/nature-7929920_640.jpg' },
+  { name: 'Water Bird', url: 'https://cdn.pixabay.com/photo/2023/11/11/16/07/water-bird-8381451_640.jpg' },
+  { name: 'Squirrel 2', url: 'https://cdn.pixabay.com/photo/2015/02/01/18/05/squirrel-619968_640.jpg' },
+  { name: 'Rain 2', url: 'https://cdn.pixabay.com/photo/2022/04/25/05/48/rain-7155121_640.jpg' },
+  { name: 'Palm Trees', url: 'https://cdn.pixabay.com/photo/2018/08/20/15/31/palm-trees-3619180_640.jpg' },
+  { name: 'Hut', url: 'https://cdn.pixabay.com/photo/2025/photo/2023/03/14/00/30/plant-7851213_640.jpg' },
+  { name: 'Landscape 3', url: 'https://cdn.pixabay.com/photo/2020/03/13/15/38/landscape-4928266_640.jpg' },
+  { name: 'Grapes', url: 'https://cdn.pixabay.com/photo/2021/10/01/18/27/grapes-6673291_640.jpg' },
+  { name: 'Mountains 2', url: 'https://cdn.pixabay.com/photo/2023/08/07/21/37/mountains-8175997_640.png' },
+  { name: 'Deer', url: 'https://cdn.pixabay.com/photo/2018/12/25/11/10/deer-3894103_640.png' },
+  { name: 'Sea Bird', url: 'https://cdn.pixabay.com/photo/2020/03/12/19/55/sea-bird-4926108_640.jpg' },
+  { name: 'Cat 2', url: 'https://cdn.pixabay.com/photo/2022/06/06/10/55/cat-7245850_640.jpg' },
+  { name: 'Grasshopper', url: 'https://cdn.pixabay.com/photo/2023/09/03/12/52/grasshopper-8230682_640.jpg' },
+  { name: 'Animal 4', url: 'https://cdn.pixabay.com/photo/2021/10/31/09/25/animal-6756751_640.jpg' }
+];
+
+
+// 🎓 Mixed Knowledge Items + Interactive Prompts
+const KNOWLEDGE_ITEMS = [
+  // --- General Knowledge ---
+  { text: "The first known book was written in ancient Sumeria around 2600 BC.", category: "History", duration: 10, askComment: false },
+  { text: "Some jellyfish are biologically immortal.", category: "Science", duration: 9, askComment: false },
+  { text: "Kenya has over 60 ethnic groups with unique cultures.", category: "Geography", duration: 9, askComment: false },
+
+  // --- Creative / Interactive Prompts ---
+  { text: "If you could invent one learning gadget for schools, what would it be?", category: "Creative", duration: 12, askComment: true },
+  { text: "Imagine plants could talk — what question would you ask them?", category: "Fun Science", duration: 12, askComment: true },
+  { text: "How would the world change if everyone had free internet?", category: "ICT & Society", duration: 12, askComment: true },
+  { text: "In maths, zero was first used in India. What would life be without it?", category: "Maths", duration: 10, askComment: true },
+  { text: "Why do some animals migrate thousands of kilometers each year?", category: "Biology", duration: 11, askComment: true },
+  { text: "If you had to teach your younger self one subject, which would it be?", category: "Life Skills", duration: 13, askComment: true },
+
+  // --- Factual Additions ---
+  { text: "The Milky Way is so wide that light takes 100,000 years to cross it.", category: "Astronomy", duration: 10, askComment: false },
+  { text: "Your brain uses about 20% of your body’s total energy.", category: "Science", duration: 8, askComment: false },
+];
+
+
+// animals + birds + butterflies
+const ANIMALS = {
+  dogs: [
+    'https://cdn.pixabay.com/photo/2025/06/20/10/47/dog-9670619_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2018/03/18/18/06/australian-shepherd-3237735_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/09/25/13/12/dog-2785074_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+ 'https://cdn.pixabay.com/photo/2018/04/30/19/16/animal-3363688_640.jpg',
+    'https://cdn.pixabay.com/photo/2014/11/21/15/25/chameleon-540655_1280.jpg',
+    'https://cdn.pixabay.com/photo/2017/05/31/18/38/sea-2361247_640.jpg',
+     'https://cdn.pixabay.com/photo/2019/12/26/02/45/fish-with-lotus-4719551_640.png',
+    'https://cdn.pixabay.com/photo/2013/07/12/18/20/santa-claus-153309_640.png',
+    'https://cdn.pixabay.com/photo/2024/01/24/22/22/knight-8530654_640.jpg',
+    'https://cdn.pixabay.com/photo/2020/10/14/01/40/parrot-5653140_640.jpg',
+    'https://cdn.pixabay.com/photo/2016/05/02/12/58/tiger-1367197_640.jpg',
+    'https://cdn.pixabay.com/photo/2022/03/16/01/52/animal-7071426_640.jpg',
+    'https://cdn.pixabay.com/photo/2021/06/20/15/40/buffalo-6351352_640.jpg',
+    
+  ],
+  cats: [
+    'https://cdn.pixabay.com/photo/2022/03/27/11/23/cat-7094808_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/11/09/21/41/cat-2934720_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2015/11/15/20/21/cat-1044750_640.jpg',
+   'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2023/10/23/08/17/asian-giant-hornet-8335577_640.jpg',
+    'https://cdn.pixabay.com/photo/2020/04/10/07/42/wasp-5024465_640.jpg',
+    'https://cdn.pixabay.com/photo/2013/07/12/16/29/hornet-151003_640.png',
+      'https://cdn.pixabay.com/photo/2022/09/28/17/36/puffer-fish-7485602_640.jpg',
+    'https://cdn.pixabay.com/photo/2015/04/07/21/12/lionfish-711799_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/05/31/00/24/aquarium-2358739_640.jpg',
+     'https://cdn.pixabay.com/photo/2023/06/29/16/10/zebra-8096659_640.png',
+    'https://cdn.pixabay.com/photo/2020/05/04/09/09/giraffe-5128394_1280.jpg',
+    'https://cdn.pixabay.com/photo/2016/04/22/21/07/monkey-1346590_640.jpg'
+  ],
+  birds: [
+    'https://cdn.pixabay.com/photo/2023/07/24/22/07/european-herring-gull-8147941_640.jpg',
+    'https://cdn.pixabay.com/photo/2018/06/22/18/30/seagull-3491309_640.jpg',
+    'https://cdn.pixabay.com/photo/2024/11/22/18/18/mute-swan-9217198_640.jpg',
+    'https://cdn.pixabay.com/photo/2022/08/25/20/44/bird-7411270_640.jpg',
+    'https://cdn.pixabay.com/photo/2016/10/19/13/42/eagle-1753002_640.jpg'
+  ],
+  butterflies: [
+    'https://cdn.pixabay.com/photo/2023/05/30/15/12/blue-butterfuly-8028888_640.jpg',
+    'https://cdn.pixabay.com/photo/2018/06/24/18/46/butterfly-3495224_640.jpg',
+    'https://cdn.pixabay.com/photo/2014/08/28/22/41/speckled-wood-430203_640.jpg',
+    'https://cdn.pixabay.com/photo/2024/12/27/10/28/butterfly-clipart-9293644_640.png',
+    'https://cdn.pixabay.com/photo/2023/01/17/18/26/moth-7725205_640.jpg'
+  ],
+
+exotic: [
+    'https://cdn.pixabay.com/photo/2016/11/29/10/07/parrot-1869315_640.jpg',
+   
+  ],
+  fish: [
+    'https://cdn.pixabay.com/photo/2016/11/18/17/47/fish-1834823_640.jpg',
+    
+  ],
+  cartoons: [
+    'https://cdn.pixabay.com/photo/2020/06/23/18/10/cartoon-5331106_640.png',
+    
+  ],
+  insects: [
+    'https://cdn.pixabay.com/photo/2017/03/27/13/16/bee-2178341_640.jpg',
+   
+  ],
+  reptiles: [
+    'https://cdn.pixabay.com/photo/2016/11/23/14/45/lizard-1850046_640.jpg',
+    
+  ],
+   
+};
+/* ---------- PIXABAY TRACKS (your chosen 4)
+   We use direct mp3 download CDN links (these should stream from Pixabay).
+   If any fail, download them and host them locally and update the URLs.
+*/
+const backgroundMusicList = [
+  'https://elimuconnect.github.io/ELIMU-CONNECT-/music1.mp3',
+   'https://elimuconnect.github.io/ELIMU-CONNECT-/music2.mp3',
+   'https://elimuconnect.github.io/ELIMU-CONNECT-/music3.mp3',
+    'https://elimuconnect.github.io/ELIMU-CONNECT-/music4.mp3',
+];
+/* ---------- Generic shuffler utility (persistent) ---------- */
+/*
+  createShuffler(key, items)
+  - key: unique string to store state in localStorage
+  - items: source array (strings or objects)
+  returns { next(), peek(), reset(), remainingCount() }
+  Behavior:
+  - stores a shuffled list of indices in localStorage and a pointer
+  - if source array length changes, it resets the shuffle
+  - cycles through all items exactly once before reshuffling
+*/
+function createShuffler(key, items) {
+  const storageKey = 'shuffler_' + key;
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) {
+      console.warn('shuffler load failed', e);
+      return null;
+    }
+  }
+  function saveState(state) {
+    try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch (e) { console.warn('shuffler save failed', e); }
+  }
+  function makeOrder(n) {
+    const arr = Array.from({length:n}, (_,i)=>i);
+    // Fisher-Yates shuffle
+    for (let i = arr.length -1; i > 0; i--) {
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  let state = loadState();
+  // if state invalid or length mismatch -> reset
+  if (!state || !Array.isArray(state.order) || state.sourceLength !== items.length) {
+    state = { order: makeOrder(items.length), idx: 0, sourceLength: items.length, createdAt: Date.now() };
+    saveState(state);
+  }
+
+  function ensureFresh() {
+    // if source length changed since creation -> reset
+    if (state.sourceLength !== items.length) {
+      state = { order: makeOrder(items.length), idx: 0, sourceLength: items.length, createdAt: Date.now() };
+      saveState(state);
+    }
+  }
+
+  function next() {
+    ensureFresh();
+    if (state.idx >= state.order.length) {
+      // reshuffle once done
+      state.order = makeOrder(items.length);
+      state.idx = 0;
+      state.sourceLength = items.length;
+    }
+    const resultIndex = state.order[state.idx++];
+    saveState(state);
+    return items[resultIndex];
+  }
+
+  function peek() {
+    ensureFresh();
+    if (state.idx >= state.order.length) return null;
+    return items[state.order[state.idx]];
+  }
+
+  function reset() {
+    state = { order: makeOrder(items.length), idx: 0, sourceLength: items.length, createdAt: Date.now() };
+    saveState(state);
+  }
+
+  function remainingCount() {
+    ensureFresh();
+    return Math.max(0, state.order.length - state.idx);
+  }
+
+  return { next, peek, reset, remainingCount };
+}
+
+/* ---------- Canvas & drawing ---------- */
+const canvas = document.getElementById('canvasPreview');
+const ctx = canvas.getContext('2d', { alpha: false });
+
+
+function getRandomKnowledgeItem() {
+  return knowledgeShuffler.next();
+}
+
+const backgroundsShuffler = createShuffler('backgrounds', BACKGROUNDS);
+const dogsShuffler = createShuffler('dogs', ANIMALS.dogs);
+const catsShuffler = createShuffler('cats', ANIMALS.cats);
+const birdsShuffler = createShuffler('birds', ANIMALS.birds);
+const butterfliesShuffler = createShuffler('butterflies', ANIMALS.butterflies);
+const knowledgeShuffler = createShuffler('knowledge', KNOWLEDGE_ITEMS);
+
+
+// ---------------------
+// Global canvas & scene
+// ---------------------
+canvas.width = CANVAS_W;
+canvas.height = CANVAS_H;
+
+let activeTimer = null;
+let timerValue = 10; 
+let timerProgress = 1;
+
+let scene = {
+  backgroundImg: null,
+  bgName: '',
+  clouds: [
+    {x:-200, y:100, w:200, h:90, speed: 0.2},
+    {x:-350, y:240, w:220, h:100, speed: 0.12}
+  ],
+  animalA: {img:null, x:CANVAS_W*0.12, y:CANVAS_H-320, w:180, h:180, bounceTimer:0},
+  animalB: {img:null, x:CANVAS_W*0.62, y:CANVAS_H-300, w:150, h:150, bounceTimer:0},
+  flying: [],
+  emojis: [],
+  bubble: {text:'Welcome!', x:CANVAS_W*0.5, y:120},
+  subtitle: {text:'', x:CANVAS_W*0.5, y:CANVAS_H - 120}
+};
+
+function drawTimerArc(progress){
+  const cx = CANVAS_W - 150, cy = 150, r = 80;
+  const start = -Math.PI/2;
+  const end = start + progress * 2 * Math.PI;
+
+  // background
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2*Math.PI); 
+  ctx.strokeStyle = "#ddd"; ctx.lineWidth = 10; ctx.stroke();
+
+  // countdown
+  ctx.beginPath(); ctx.arc(cx, cy, r, end, start, true);
+  ctx.strokeStyle = "#1976d2"; ctx.lineWidth = 10; ctx.stroke();
+
+  // text
+  ctx.font = "48px Arial"; ctx.fillStyle = "#1976d2"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(Math.ceil(progress*timerValue), cx, cy);
+}
+
+function animateTimer(duration){
+  const startTime = performance.now();
+  function step(now){
+    const elapsed = (now - startTime)/1000;
+    timerProgress = Math.max(1 - elapsed/duration, 0);
+    drawScene();
+    drawTimerArc(timerProgress);
+
+    if(timerProgress>0) requestAnimationFrame(step);
+    else { playSparkle(); nextKnowledgeItem(); }
+  }
+  requestAnimationFrame(step);
+}
+
+// ---------------------
+// Sparkle Effect
+// ---------------------
+function playSparkle(){
+  try{
+    const ctxAudio = new (window.AudioContext||window.webkitAudioContext)();
+    const osc = ctxAudio.createOscillator();
+    osc.type = "sine"; osc.frequency.value = 880; osc.connect(ctxAudio.destination); osc.start();
+    osc.stop(ctxAudio.currentTime + 0.15);
+
+    const flash = document.createElement("div");
+    flash.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.5);z-index:99999;pointer-events:none";
+    document.body.appendChild(flash);
+    setTimeout(()=>flash.remove(),150);
+  } catch(e){ console.warn("Sparkle skipped:",e); }
+}
+
+
+
+
+
+
+
+
+scene = {
+  backgroundImg: null,
+  bgName: '',
+  clouds: [
+    {x:-200, y:100, w:200, h:90, speed: 0.2},
+    {x:-350, y:240, w:220, h:100, speed: 0.12}
+  ],
+  animalA: {img:null, x:CANVAS_W*0.12, y:CANVAS_H-320, w:180, h:180, bounceTimer:0},
+  animalB: {img:null, x:CANVAS_W*0.62, y:CANVAS_H-300, w:150, h:150, bounceTimer:0},
+  flying: [], // additional flying animals (birds & butterflies)
+  emojis: [], // moving emojis
+  bubble: {text:'Welcome!', x:CANVAS_W*0.5, y:120},
+  subtitle: {text:'', x:CANVAS_W*0.5, y:CANVAS_H - 120}
+};
+
+/* ---------- UI elements ---------- */
+const durationSel = document.getElementById('duration');
+const voiceMethodSel = document.getElementById('voiceMethod');
+const voiceGenderSel = document.getElementById('voiceGender');
+const voiceUploadEl = document.getElementById('voiceUpload');
+const useUploadBtn = document.getElementById('useUploadBtn');
+const genBtn = document.getElementById('genBtn');
+const recordBtn = document.getElementById('recordBtn');
+const statusEl = document.getElementById('status');
+const downloadLink = document.getElementById('downloadLink');
+
+let currentTopic = null;
+let uploadedAudioBuffer = null;
+
+/* ---------- WebAudio: master mix & music loader ---------- */
+const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function ensureAudioCtx(){
+  if(!audioCtx){
+    audioCtx = new AudioContextClass();
+    audioCtx.masterGain = audioCtx.createGain();
+    audioCtx.masterGain.gain.value = 1;
+    audioCtx.masterDest = audioCtx.createMediaStreamDestination();
+    audioCtx.masterGain.connect(audioCtx.masterDest);
+    audioCtx.masterGain.connect(audioCtx.destination);
+  }
+  return audioCtx;
+}
+
+// unlock audio on first gesture and also ensure background music can start
+function unlockAudioOnGesture(){
+  const init = async ()=>{
+    ensureAudioCtx();
+    if(audioCtx.state === 'suspended') try{ await audioCtx.resume(); }catch(e){}
+    document.body.removeEventListener('click', init);
+    document.body.removeEventListener('keydown', init);
+    statusEl.textContent = 'Audio unlocked — ready.';
+  };
+  document.body.addEventListener('click', init);
+  document.body.addEventListener('keydown', init);
+}
+unlockAudioOnGesture();
+
+// BG track handling - load as AudioBuffer for recording capture
+let currentBgSource = null;
+let currentBgGain = null;
+
+
+async function playRandomBackgroundTrack(){
+  const ctx = ensureAudioCtx();
+  // stop previous
+  if(currentBgSource){
+    try{ currentBgSource.stop(); }catch(e){}
+    try{ currentBgSource.disconnect(); }catch(e){}
+    currentBgSource = null;
+  }
+  if(currentBgGain){ try{ currentBgGain.disconnect(); }catch(e){} currentBgGain=null; }
+
+  const url = backgroundMusicList[Math.floor(Math.random()*backgroundMusicList.length)];
+  try{
+    const resp = await fetch(url);
+    const ab = await resp.arrayBuffer();
+    const buf = await ctx.decodeAudioData(ab);
+    const src = ctx.createBufferSource();
+    const gain = ctx.createGain();
+    src.buffer = buf;
+    src.loop = true;
+    gain.gain.value = 0.8;
+    src.connect(gain); gain.connect(ctx.masterGain);
+    try{ src.start(); }catch(err){
+      try{ await ctx.resume(); src.start(); }catch(err){ console.warn('bg start error', err); }
+    }
+    currentBgSource = src; currentBgGain = gain;
+    return {src, gain};
+  }catch(err){
+    console.warn('Failed to load bg track', err);
+    statusEl.textContent = 'Could not load background track (no fallback audio).';
+    return null;
+  }
+}
+
+function stopCurrentBgTrack(){
+  try{ if(currentBgSource){ currentBgSource.stop(); currentBgSource.disconnect(); currentBgSource=null; } }catch(e){}
+  if(currentBgGain){ try{ currentBgGain.disconnect(); }catch(e){} currentBgGain=null; }
+}
+
+/* ---------- Simple synth fallback patterns (kept) ---------- */
+let bgPatternInterval = null, bgOscs = [];
+function startBgPattern(idx){
+  stopBgPattern();
+  const ctx = ensureAudioCtx();
+  if(idx === 0){
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    bgOscs = notes.map(n => {
+      const o = ctx.createOscillator(); const g = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = n; g.gain.value = 0;
+      o.connect(g); g.connect(ctx.masterGain); o.start();
+      return {o,g};
+    });
+    bgPatternInterval = setInterval(()=>{
+      const t = ctx.currentTime;
+      bgOscs.forEach((og,i)=>{
+        og.g.gain.cancelScheduledValues(t);
+        og.g.gain.linearRampToValueAtTime(0.07, t+0.01);
+        og.g.gain.linearRampToValueAtTime(0, t+0.45);
+      });
+    }, 520);
+  } else if(idx === 1){
+    const notes = [392, 523.25, 659.25, 784];
+    bgOscs = notes.map(n => {
+      const o = ctx.createOscillator(); const g = ctx.createGain();
+      o.type = 'square'; o.frequency.value = n; g.gain.value = 0;
+      o.connect(g); g.connect(ctx.masterGain); o.start();
+      return {o,g};
+    });
+    bgPatternInterval = setInterval(()=>{
+      const t = ctx.currentTime;
+      bgOscs.forEach((og,i)=>{
+        og.g.gain.cancelScheduledValues(t);
+        og.g.gain.linearRampToValueAtTime(0.07, t+0.01);
+        og.g.gain.linearRampToValueAtTime(0, t+0.5);
+      });
+    }, 480);
+  } else {
+    bgPatternInterval = setInterval(()=>{
+      const o = ctx.createOscillator(); const g = ctx.createGain();
+      o.type = 'triangle'; o.frequency.value = 600;
+      o.connect(g); g.connect(ctx.masterGain);
+      const t = ctx.currentTime;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.14, t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.001, t+0.5);
+      o.start(); o.stop(t+0.55);
+    }, 700);
+  }
+}
+function stopBgPattern(){ if(bgPatternInterval) { clearInterval(bgPatternInterval); bgPatternInterval = null; } if(bgOscs){ bgOscs.forEach(x=>{ try{x.o.stop()}catch(e){} }); bgOscs = []; } }
+
+/* ---------- Simple SFX (kept) ---------- */
+function playBoing(){ const ctx = ensureAudioCtx(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.type = 'triangle'; o.frequency.value = 520; o.connect(g); g.connect(ctx.masterGain); const t = ctx.currentTime; g.gain.linearRampToValueAtTime(0.12, t+0.01); g.gain.exponentialRampToValueAtTime(0.0001, t+0.6); o.start(); o.stop(t+0.8); }
+function playSparkle(){ const ctx = ensureAudioCtx(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.type = 'sine'; o.frequency.value = 1200; o.connect(g); g.connect(ctx.masterGain); const t = ctx.currentTime; g.gain.linearRampToValueAtTime(0.08, t+0.01); g.gain.exponentialRampToValueAtTime(0.001, t+0.4); o.start(); o.stop(t+0.6); }
+
+/* ---------- Load images helper ---------- */
+function loadImg(url){ return new Promise((res,rej)=>{ const i=new Image(); i.crossOrigin='anonymous'; i.onload=()=>res(i); i.onerror=()=>rej(new Error('Image load error '+url)); i.src=url; }); }
+
+/* ---------- Floating emojis setup ---------- */
+const EMOJIS = [
+  '📚','🧮','🎨','✏️','💡','🔢','🧑‍🏫','🌈',
+  '🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮',
+  '🐷','🐸','🐵','🦄','🐝','🦋','🐌','🐞','🦗','🐢','🐍','🐠','🐟','🐡','🦑','🦐',
+  '🦖','🦕','🐙','🐚','🦜','🐊','🦎','🐉','🐲','🐳','🐋','🦈',
+  '🌟','✨','🎵','🎶','🏫','📝','📖','📎','✂️','🖍️','🖌️','🧪','🔬','🧫',
+  '🌍','🌏','🪐','☀️','🌙','⚡','🔥','💧','🌊','🌳','🎯','🏆','🏅','🎁','🎉','🎈',
+  '🪁','🚀','🚲','🛶'
+];
+
+function spawnEmojis(count = 20) { // more emojis at once
+  scene.emojis = [];
+  for (let i = 0; i < count; i++) {
+    scene.emojis.push({
+      ch: EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
+      x: Math.random() * CANVAS_W,
+      y: Math.random() * CANVAS_H,
+      vx: (Math.random() * 2 - 1) * 0.6,
+      vy: -(0.3 + Math.random() * 0.9),
+      size: 20 + Math.random() * 36,
+      rot: Math.random() * Math.PI * 2,
+      rotV: (Math.random() * 2 - 1) * 0.03
+    });
+  }
+}
+
+
+/* ---------- Flying animals (all visible) ---------- */
+function spawnFlyingAnimals() {
+  scene.flying = [];
+
+  // spawn all birds
+  for (const url of ANIMALS.birds) {
+    scene.flying.push({
+      type: 'bird',
+      imgUrl: url,
+      x: -50 - Math.random() * 300, // start offscreen left
+      y: 50 + Math.random() * (CANVAS_H / 2),
+      vx: 0.5 + Math.random() * 1.5,
+      vy: Math.sin(Math.random() * 2 * Math.PI) * 0.4,
+      size: 50 + Math.random() * 50,
+      img: null
+    });
+  }
+
+  // spawn all butterflies
+  for (const url of ANIMALS.butterflies) {
+    scene.flying.push({
+      type: 'butterfly',
+      imgUrl: url,
+      x: CANVAS_W + 50 + Math.random() * 300, // start offscreen right
+      y: 100 + Math.random() * (CANVAS_H / 2),
+      vx: - (0.4 + Math.random() * 1.2),
+      vy: Math.sin(Math.random() * 2 * Math.PI) * 0.3,
+      size: 40 + Math.random() * 50,
+      img: null
+    });
+  }
+
+  // spawn exotic flying animals (parrots, etc.)
+  for (const url of ANIMALS.exotic) {
+    scene.flying.push({
+      type: 'exotic',
+      imgUrl: url,
+      x: Math.random() > 0.5 ? -50 - Math.random() * 300 : CANVAS_W + 50 + Math.random() * 300,
+      y: 50 + Math.random() * (CANVAS_H / 2),
+      vx: (Math.random() > 0.5 ? 0.5 : -0.5) + Math.random() * 1.5,
+      vy: Math.sin(Math.random() * 2 * Math.PI) * 0.3,
+      size: 50 + Math.random() * 50,
+      img: null
+    });
+  }
+}
+
+/* ---------- Get random knowledge item ---------- */
+function getRandomKnowledgeItem() {
+  return knowledgeShuffler.next();
+}
+
+/* ---------- Randomize & prepare scene ---------- */
+let assetsLoaded = false;
+async function prepareScene() {
+  statusEl.textContent = 'Preparing scene and assets...';
+  assetsLoaded = false;
+
+  // --- Background ---
+  const bg = backgroundsShuffler.next();
+  scene.bgName = bg.name;
+  try { scene.backgroundImg = await loadImg(bg.url); } catch { scene.backgroundImg = null; }
+
+  // --- Animals ---
+  try { scene.animalA.img = await loadImg(dogsShuffler.next()); } catch { scene.animalA.img = null; }
+  try { scene.animalB.img = await loadImg(catsShuffler.next()); } catch { scene.animalB.img = null; }
+
+  // --- Flying animals ---
+  spawnFlyingAnimals();
+  for (const f of scene.flying) {
+    try { f.img = await loadImg(f.imgUrl); } catch { f.img = null; }
+  }
+
+  // --- Clouds ---
+  scene.clouds = [];
+  const NUM_CLOUDS = 6;
+  for (let i = 0; i < NUM_CLOUDS; i++) {
+    scene.clouds.push({
+      x: Math.random() * CANVAS_W,
+      y: Math.random() * (CANVAS_H/2),
+      w: 100 + Math.random()*150,
+      h: 40 + Math.random()*30,
+      speed: 0.2 + Math.random()*0.3
+    });
+  }
+
+  // --- Emojis ---
+  spawnEmojis(16);
+
+  // --- Knowledge item ---
+  const firstItem = getRandomKnowledgeItem();
+  scene.subtitle.item = firstItem;
+  scene.bubble.item = firstItem;
+  scene.subtitle.text = firstItem.askComment ? "💬 What do you think?" : firstItem.text;
+  scene.bubble.text = firstItem.text;
+
+  // --- Audio ---
+  ensureAudioCtx();
+  try { await playRandomBackgroundTrack(); } catch (e) { console.warn(e); }
+
+  // --- Emoji burst ---
+  for (let e of scene.emojis) e.vy -= Math.random()*4+2;
+  playSparkle();
+
+  assetsLoaded = true;
+
+  // --- Flash ---
+  canvas.style.animation = 'flash 0.6s ease-out';
+  setTimeout(()=>canvas.style.animation='', 600);
+
+  statusEl.textContent = `Prepared: ${scene.bgName}`;
+}
+
+function drawRoundRect(x, y, width, height, radius, fillColor, strokeColor, lineWidth) {
+  if (!ctx) return; // ensure ctx exists
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+
+  if (fillColor) {
+    ctx.fillStyle = fillColor;
+    ctx.fill();
+  }
+  if (strokeColor) {
+    ctx.strokeStyle = strokeColor;
+    ctx.lineWidth = lineWidth || 1;
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+
+
+/* ---------- Drawing scene ---------- */
+function drawScene(t) {
+  ctx.clearRect(0,0,CANVAS_W,CANVAS_H);
+
+  // --- Background ---
+  if(scene.backgroundImg) ctx.drawImage(scene.backgroundImg,0,0,CANVAS_W,CANVAS_H);
+  else { ctx.fillStyle='#88d'; ctx.fillRect(0,0,CANVAS_W,CANVAS_H); }
+
+  // --- Clouds ---
+  for(const c of scene.clouds){
+    c.x += c.speed * (1 + Math.sin(t/200));
+    if(c.x > CANVAS_W + 200) c.x = -250;
+    ctx.save(); ctx.fillStyle='rgba(255,255,255,0.95)';
+    ctx.beginPath();
+    ctx.ellipse(c.x, c.y, c.w*0.6, c.h*0.6, 0,0,2*Math.PI);
+    ctx.ellipse(c.x + c.w*0.4, c.y - 10, c.w*0.5, c.h*0.45, 0,0,2*Math.PI);
+    ctx.ellipse(c.x + c.w*0.7, c.y + 6, c.w*0.35, c.h*0.33, 0,0,2*Math.PI);
+    ctx.fill(); ctx.restore();
+  }
+
+  // --- Flying animals ---
+  for(const f of scene.flying){
+    f.x += f.vx*(1+Math.sin((performance.now()+f.y*0.01)/600));
+    f.y += Math.sin((performance.now()/500+f.x*0.01))*0.5 + f.vy*0.5;
+    if(f.vx>0 && f.x>CANVAS_W+150){ f.x=-150; f.y=50+Math.random()*(CANVAS_H/2);}
+    if(f.vx<0 && f.x<-150){ f.x=CANVAS_W+150; f.y=50+Math.random()*(CANVAS_H/2);}
+    if(f.y<30) f.y=30; if(f.y>CANVAS_H/2) f.y=CANVAS_H/2;
+    if(f.img){ ctx.save(); ctx.translate(f.x+f.size/2,f.y+f.size/2); ctx.rotate(Math.sin(f.x/50)*0.15); ctx.drawImage(f.img,-f.size/2,-f.size/2,f.size,f.size); ctx.restore(); }
+  }
+
+  // --- Animals ---
+  function drawAnimal(a){
+    const bounce=Math.sin((t+(a.bounceTimer||0))/300)*12;
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(a.x + a.w/2, a.y+bounce + a.h - 20, a.w*0.3, 12, 0,0,2*Math.PI);
+    ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.fill();
+    if(a.img) ctx.drawImage(a.img, a.x, a.y+bounce, a.w, a.h);
+    ctx.restore();
+  }
+  scene.animalA.x=CANVAS_W*0.12; scene.animalB.x=CANVAS_W*0.62;
+  drawAnimal(scene.animalA); drawAnimal(scene.animalB);
+
+  // --- Emojis ---
+  for(const e of scene.emojis){
+    e.x+=e.vx; e.y+=e.vy; e.vy+=0.01; e.rot+=e.rotV;
+    if(e.y<-120||e.y>CANVAS_H+120||e.x<-80||e.x>CANVAS_W+80){
+      e.y=Math.random()*CANVAS_H; e.x=Math.random()*CANVAS_W; e.vy=-0.3-Math.random()*0.9; e.vx=(Math.random()*2-1)*0.6;
+    }
+    ctx.save(); ctx.translate(e.x,e.y); ctx.rotate(e.rot); ctx.font=`${e.size}px "Patrick Hand", Arial`; ctx.fillText(e.ch,0,0); ctx.restore();
+  }
+
+  // --- Top text ---
+  ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.font='bold 72px "Patrick Hand", Arial'; ctx.textAlign='center'; ctx.textBaseline='top';
+  ctx.fillText("Do you Know?", CANVAS_W/2,40);
+
+  // --- Subtitle / bubble text ---
+  const subtitleText = (scene.subtitle.item && scene.subtitle.item.text) || '';
+  ctx.font='bold 56px "Patrick Hand", Arial'; ctx.fillStyle='yellow'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  const wrapped=splitText(ctx, subtitleText, CANVAS_W-60); const lineH=60; const totalH=wrapped.length*lineH;
+  let startY=CANVAS_H*0.5 - totalH/2 + 30;
+  for(let i=0;i<wrapped.length;i++) ctx.fillText(wrapped[i], CANVAS_W/2, startY+i*lineH);
+
+  // --- Bubble (optional) ---
+  if(scene.bubble.item){
+    const bubbleText = scene.bubble.item.text||'';
+    const wrappedBubble=splitText(ctx,bubbleText,CANVAS_W-80);
+    const bubbleY=120; ctx.font='48px "Patrick Hand", Arial'; ctx.fillStyle='#333';
+    for(let i=0;i<wrappedBubble.length;i++) ctx.fillText(wrappedBubble[i], CANVAS_W/2, bubbleY+i*50);
+  }
+
+  // --- Bottom-right logo ---
+  const logoText='🎓 Get Top Tuition Now!📱Install Elimu Connect App(Kenya), SmartLearn: IGCSE IB CBSE ICSE (global)!';
+  ctx.font='28px "Patrick Hand", Arial'; const padX=20,padY=14;
+  const mid=Math.floor(logoText.length/2); let splitIndex=logoText.indexOf(' ',mid); if(splitIndex==-1) splitIndex=mid;
+  const logoText1=logoText.slice(0,splitIndex); const logoText2=logoText.slice(splitIndex+1);
+  const m1=ctx.measureText(logoText1), m2=ctx.measureText(logoText2); const rectW=Math.max(m1.width,m2.width)+padX*2;
+  const rectH=lineH*2+padY*2; const rectX=CANVAS_W-rectW-20; const rectY=CANVAS_H-rectH-20;
+  drawRoundRect(rectX,rectY,rectW,rectH,20,'rgba(255,255,255,0.95)','rgba(0,0,0,0.08)',2);
+  ctx.fillStyle='#111'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(logoText1, rectX+rectW/2, rectY+lineH/2); ctx.fillText(logoText2, rectX+rectW/2, rectY+lineH/2+lineH);
+}
+
+/* ---------- Voice upload handling (left intact) ---------- */
+voiceUploadEl.addEventListener('change', async (e)=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  statusEl.textContent = 'Decoding uploaded audio...';
+  const ab = await f.arrayBuffer();
+  ensureAudioCtx();
+  uploadedAudioBuffer = await audioCtx.decodeAudioData(ab);
+  statusEl.textContent = 'Uploaded voice ready (will be embedded).';
+});
+useUploadBtn.addEventListener('click', ()=> {
+  if(!uploadedAudioBuffer){ statusEl.textContent = 'No uploaded file. Choose an audio file first.'; return; }
+  voiceMethodSel.value = 'upload';
+  statusEl.textContent = 'Upload selected as narration method.';
+});
+
+/* ---------- Removed speech-synthesis narration entirely ----------
+   (No TTS calls; only background music will play.)
+*/
+
+/* ---------- Recording (canvas capture) ---------- */
+let recordedChunks = [];
+let mediaRecorder = null;
+
+async function startRecordingAuto() {
+  ensureAudioCtx();
+  if (audioCtx.state === 'suspended') {
+    try { await audioCtx.resume(); } catch (e) {}
+  }
+
+  // ✅ get subtitle text directly (no topics)
+  const subtitleText = scene?.subtitle?.text || document.getElementById('subtitleText')?.textContent || '';
+  if (!subtitleText.trim()) {
+    statusEl.textContent = 'Generate preview first.';
+    return;
+  }
+
+  // ✅ ensure background music
+  if (!currentBgSource) await playRandomBackgroundTrack().catch(() => {});
+
+  const dur = parseInt(durationSel.value, 10) || 60;
+  statusEl.textContent = 'Recording: ' + dur + 's — preparing streams...';
+
+  // wait for first frame
+  await new Promise(r => setTimeout(r, 350));
+
+  // capture canvas
+  let videoStream;
+  try {
+    videoStream = canvas.captureStream(30);
+  } catch (err) {
+    statusEl.textContent = 'Canvas capture not supported: ' + err.message;
+    return;
+  }
+
+  // build combined stream
+  const combined = new MediaStream();
+  videoStream.getVideoTracks().forEach(t => combined.addTrack(t));
+
+  // live mic
+  let liveMicStream = null;
+  if (voiceMethodSel.value === 'mic') {
+    try {
+      liveMicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      liveMicStream.getAudioTracks().forEach(t => combined.addTrack(t));
+      statusEl.textContent = '🎙️ Live mic connected — speak during recording.';
+    } catch (err) {
+      statusEl.textContent = 'Mic unavailable. Uploaded narration will be used if present.';
+      console.warn('Mic error', err);
+    }
+  }
+
+  // uploaded narration
+  if (voiceMethodSel.value === 'upload' && uploadedAudioBuffer) {
+    const src = audioCtx.createBufferSource();
+    src.buffer = uploadedAudioBuffer;
+    src.connect(audioCtx.masterGain || audioCtx.destination);
+    src.start();
+  }
+
+  // add background + sfx
+  if (audioCtx.masterDest && audioCtx.masterDest.stream) {
+    audioCtx.masterDest.stream.getAudioTracks().forEach(t => combined.addTrack(t));
+  }
+
+  // start recording
+  recordedChunks = [];
+  try {
+    mediaRecorder = new MediaRecorder(combined, { mimeType: 'video/webm;codecs=vp8,opus' });
+  } catch (err) {
+    statusEl.textContent = 'MediaRecorder failed: ' + err.message;
+    return;
+  }
+
+  mediaRecorder.ondataavailable = e => { if (e.data && e.data.size) recordedChunks.push(e.data); };
+  mediaRecorder.onstart = () => { statusEl.textContent = 'Recording... (auto stops after ' + dur + 's)'; };
+  mediaRecorder.onerror = e => { statusEl.textContent = 'Recording error: ' + e.message; };
+  mediaRecorder.onstop = async () => {
+  if (liveMicStream) liveMicStream.getTracks().forEach(t => t.stop());
+  stopCurrentBgTrack();
+
+  const blob = new Blob(recordedChunks, { type: 'video/mp4' });
+  const url = URL.createObjectURL(blob);
+  downloadLink.href = url;
+  downloadLink.download = `elimu_short_${dur}s_${Date.now()}.mp4`;
+  downloadLink.textContent = '⬇️ Download MP4 (9:16)';
+  downloadLink.classList.remove('hidden');
+  setTimeout(() => { try { downloadLink.click(); } catch (e) {} }, 300);
+  statusEl.textContent = '✅ Recording complete — MP4 file ready.';
+};
+
+
+  mediaRecorder.start(1000);
+
+  // ✅ subtitles and sfx
+  const parts = splitText(subtitleText, 3);
+  parts.forEach((p, i) => {
+    setTimeout(() => {
+      if (scene?.subtitle) scene.subtitle.text = p;
+      playBoing();
+    }, Math.floor((i + 0.5) * (dur / parts.length) * 1000));
+  });
+
+  // auto stop
+  setTimeout(() => {
+    try {
+      if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+    } catch (e) {
+      console.warn('stop error', e);
+    }
+  }, dur * 1000 + 500);
+}
+
+function splitText(ctx, text, maxWidth) {
+  if (!text || typeof text !== "string") return [];
+  const words = text.trim().split(/\s+/);
+  const lines = [];
+  let line = "";
+
+  for (let i = 0; i < words.length; i++) {
+    const testLine = line ? line + " " + words[i] : words[i];
+    const testWidth = ctx.measureText(testLine).width;
+
+    // if the line would exceed max width, push the old one
+    if (testWidth > maxWidth && line !== "") {
+      lines.push(line);
+      line = words[i]; // start a new line
+    } else {
+      line = testLine;
+    }
+  }
+
+  // push any remaining text
+  if (line) lines.push(line);
+
+  return lines;
+}
+
+
+/* ---------- Events ---------- */
+recordBtn.addEventListener('click', async () => {
+  ensureAudioCtx();
+  if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+  // 1️⃣ Prepare scene if not loaded
+  if (!assetsLoaded) {
+    statusEl.textContent = 'Scene not ready. Preparing...';
+    try {
+      await prepareScene();
+      startAnimation();
+    } catch (e) {
+      statusEl.textContent = 'Failed to prepare scene: ' + e.message;
+      console.error(e);
+      return;
+    }
+  }
+
+  // 2️⃣ Request microphone access directly from this click handler
+  if (voiceMethodSel.value === 'mic' && !navigator.mediaDevices.getUserMedia) {
+    statusEl.textContent = 'Mic not supported in this browser.';
+    return;
+  }
+
+  // 3️⃣ Start recording immediately
+  try {
+    await startRecordingAuto();
+  } catch (err) {
+    statusEl.textContent = 'Recording failed: ' + err.message;
+    console.error(err);
+  }
+});
+
+
+window.addEventListener('load', ()=> {
+  // Warm audio context/voices (no TTS used)
+  try { speechSynthesis.getVoices(); } catch(e){}
+  // prepare initial scene quietly
+  (async ()=>{ try{ await prepareScene(); startAnimation(); }catch(e){console.warn(e);} })();
+  statusEl.textContent = 'Ready. Click Generate Preview and then Start & Record.';
+});
+
+/* ---------- Rotate knowledge every 10s using the shuffler order ----------
+   We will cycle by asking the shuffler for the next item (but don't consume it twice
+   when prepareScene already set the current scene.subtitle). To keep rotation consistent
+   we use a rotating index that references the same persistent shuffled order.
+*/
+
+
+
+// Now it's safe to use
+function getRandomKnowledgeItem() {
+  return knowledgeShuffler.next();
+}
+
+/* ---------- Animation loop ---------- */
+let animRunning = false;
+
+function startAnimation() {
+  if (animRunning) return;
+  animRunning = true;
+  let start = performance.now();
+  function loop(now) {
+    const t = now - start;
+    scene.animalA.bounceTimer = t;
+    scene.animalB.bounceTimer = t + 70;
+    drawScene(t);
+    if (animRunning) requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+}
+
+function stopAnimation() {
+  animRunning = false;
+}
+
+/* ---------- Start knowledge cycle after scene is ready ---------- */
+async function startKnowledgeCycle() {
+  try {
+    if (!assetsLoaded) {
+      await prepareScene();  // prepares all assets first
+      startAnimation();      // draw loop starts safely
+    }
+  } catch (e) {
+    console.warn('prepareScene failed in startKnowledgeCycle', e);
+  }
+
+  nextKnowledgeItem(); // start first knowledge item
+}
+
+/* ---------- Show next knowledge item ---------- */
+function nextKnowledgeItem() {
+  try {
+    if (!knowledgeShuffler) {
+      console.warn('knowledgeShuffler is not defined!');
+      return;
+    }
+    const item = knowledgeShuffler.next(); // always an object
+    if (item) showKnowledgeItem(item);
+  } catch (e) {
+    console.warn('nextKnowledgeItem error', e);
+  }
+}
+function showKnowledgeItem(item) {
+  if (!item) return;
+
+  // Stop any previous timers
+  if (activeTimer) cancelAnimationFrame(activeTimer);
+
+  // store object in bubble & subtitle
+  scene.subtitle.item = item;
+  scene.bubble.item = item;
+  scene.subtitle.text = item.askComment ? "💬 What do you think?" : item.text;
+  scene.bubble.text = item.text;
+
+  // timer setup
+  timerValue = item.duration || 10;
+  const startTime = performance.now();
+
+  function step(now) {
+    const elapsed = (now - startTime) / 1000;
+    timerProgress = Math.max(1 - elapsed / timerValue, 0);
+
+    drawScene(now);
+    drawTimerArc(timerProgress);
+
+    if (timerProgress > 0) {
+      activeTimer = requestAnimationFrame(step);
+    } else {
+      playSparkle();
+      nextKnowledgeItem();
+    }
+  }
+
+  activeTimer = requestAnimationFrame(step);
+}
+
+
+// Initialize on page load
+window.addEventListener("load", () => {
+  startKnowledgeCycle();
+});
+
+
+</script>
+</body> 
+</html>

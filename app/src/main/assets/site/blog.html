@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google-site-verification" content="U5XTc52kcwPqUunl-p9uagUoK3-O9wwGZhr7G1fL2bo" />
+
+<title>Smart Elimu Connect Blog - Online Learning, CBC, KCSE, IGCSE, CBSE, ICSE, IB, JET & SAT Study Tips & Smart Tools</title>
+
+<!-- SEO Meta Tags -->
+<meta name="description" content="Smart Elimu Connect Blog: Explore top study hacks, digital learning tools, ICT integration, STEM education, KCSE, CBC, IGCSE, CBSE, ICSE, IB, JET, and SAT exam resources. Access online tuition, smart study tools, and career guidance for learners in Kenya and globally.">
+<meta name="keywords" content="Smart Elimu Connect, online learning Kenya, KCSE study resources, CBC tools, IGCSE tips, CBSE preparation, ICSE exams, IB learning, JET, SAT, global e-learning, online tuition, STEM education, digital education tools, virtual tutor, homework help, past papers, lesson plans, revision guides, school dashboards, academic success, education technology, tutoring Kenya, international study, blended learning">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Smart Elimu Connect">
+
+<!-- Open Graph / Social Sharing -->
+<meta property="og:title" content="Smart Elimu Connect Blog - Online Learning, Study Tips & Smart Tools">
+<meta property="og:description" content="Discover smart study hacks, AI-powered learning tools, STEM resources, and exam prep for CBC, KCSE, IGCSE, CBSE, ICSE, IB, JET, and SAT. Perfect for students, tutors, and schools in Kenya and worldwide.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://elimuconnect.github.io/ELIMU-CONNECT-/blog">
+<meta property="og:image" content="https://elimuconnect.github.io/ELIMU-CONNECT-/assets/og-image.png">
+
+<!-- Canonical Link -->
+<link rel="canonical" href="./blog.html">
+
+<!-- Favicon -->
+<link rel="icon" href="https://elimuconnect.github.io/ELIMU-CONNECT-/assets/favicon.ico" type="image/x-icon">
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+
+<body style="font-family: Arial, sans-serif; background:#f9f9f9; margin:0; padding:0;">
+
+  <!-- Header -->
+  <header style="background:#0066cc; color:#fff; padding:20px; text-align:center;">
+    <img src="https://static.wixstatic.com/media/9ba186_61b351de3531446995b426f1c49950ed~mv2.png" alt="Smart Elimu Connect Logo" style="width:80px; height:auto; margin-bottom:10px;">
+    <h1 style="margin:0; font-size:28px;">Smart Elimu Connect - Education Blog</h1>
+    <p style="margin:5px 0 0; font-size:16px;">Smart Learning • Smart Tools • Smart Future</p>
+  </header>
+
+  <!-- Search & Filters -->
+  <section style="max-width:900px; margin:20px auto; padding:10px; text-align:center;">
+    <input id="searchBox" type="text" placeholder="🔍 Search articles..." 
+      style="width:60%; padding:10px; border:1px solid #ccc; border-radius:5px;">
+    
+	<div style="margin-top:10px; text-align:center;">
+  <!-- General -->
+  <button onclick="filterByCategory('all')" style="padding:8px 15px; margin:5px; border:none; background:#333; color:#fff; border-radius:5px;">All</button>
+  
+  <!-- Students -->
+  <button onclick="filterByCategory('students')" style="padding:8px 15px; margin:5px; border:none; background:#0066cc; color:#fff; border-radius:5px;">Students</button>
+  
+  <!-- Schools -->
+  <button onclick="filterByCategory('schools')" style="padding:8px 15px; margin:5px; border:none; background:#009933; color:#fff; border-radius:5px;">Schools</button>
+  
+  <!-- Study Tips -->
+  <button onclick="filterByCategory('tips')" style="padding:8px 15px; margin:5px; border:none; background:#cc6600; color:#fff; border-radius:5px;">Study Tips</button>
+  
+  <!-- Career Guidance -->
+  <button onclick="filterByCategory('career')" style="padding:8px 15px; margin:5px; border:none; background:#9900cc; color:#fff; border-radius:5px;">Career Guidance</button>
+  
+  <!-- Technology in Learning -->
+  <button onclick="filterByCategory('tech')" style="padding:8px 15px; margin:5px; border:none; background:#ff0066; color:#fff; border-radius:5px;">EdTech</button>
+  
+  <!-- Parents -->
+  <button onclick="filterByCategory('parents')" style="padding:8px 15px; margin:5px; border:none; background:#cc0000; color:#fff; border-radius:5px;">Parents</button>
+<button onclick="filterByCategory('tuition')" style="padding:8px 15px; margin:5px; border:none; background:#009933; color:#fff; border-radius:5px;">Tuition Centre</button>
+	<button onclick="filterByCategory('resources')" style="padding:8px 15px; margin:5px; border:none; background:#cc6600; color:#fff; border-radius:5px;">Past papers and schemes</button>
+</div>
+
+
+	
+	
+  </section>
+
+  <!-- Blog Content -->
+  <main id="blog-content" style="max-width:900px; margin:30px auto; padding:20px;">
+    <div id="post-list"></div>
+  </main>
+
+  <!-- Footer -->
+  <footer style="background:#333; color:#fff; text-align:center; padding:15px; margin-top:40px;">
+    <p>&copy; 2025 SMART ELIMU CONNECT. All Rights Reserved.</p>
+  </footer>
+
+<script>
+  // ✅ Firebase config (replace with your own)
+  const firebaseConfig = {
+    apiKey: "AIzaSyAYztz7z8L3SFOZgCpbwthzTXeuhojDisM",
+  authDomain: "lead-tracker-a2181.firebaseapp.com",
+  databaseURL: "https://lead-tracker-a2181-default-rtdb.firebaseio.com",
+  projectId: "lead-tracker-a2181",
+  storageBucket: "lead-tracker-a2181.firebasestorage.app",
+  messagingSenderId: "601818438359",
+  appId: "1:601818438359:web:44f4c05db3d732d29dee92"
+};
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // ✅ Blog posts
+  const posts = [
+   {
+ 
+  
+  id: 1,
+  title: "Why Smart Online Learning Is the Future of Global Education",
+  preview: "Smart Elimu Connect empowers schools, tutors, and learners globally with websites, interactive tools, and personalized online tutoring. Enjoy a 7-day free trial today.",
+  full: `
+    <h2>Why Smart Online Learning Is the Future of Global Education</h2>
+    <p>The education landscape is changing rapidly. With technology reshaping how students learn, <strong>Smart Elimu Connect</strong> stands out as an innovative platform designed for <strong>Kenyan and international learners</strong> — supporting <strong>CBC, IGCSE, CBSE, ICSE, IB, JET, and SAT exams</strong>. It empowers <strong>students, tutors, parents, and schools</strong> with flexible, smart, and affordable learning tools that bridge the gap between classrooms and the digital future.</p>
+
+    <h3>1. Affordable and Flexible Online Tuition</h3>
+    <p>Traditional tutoring can be expensive and limited. <strong>Smart Elimu Connect</strong> connects learners to verified tutors across Kenya and beyond, offering <strong>affordable, high-quality online tuition</strong> in all major curriculums. Students enjoy a <strong>7-day free trial</strong> before subscribing at low rates — enabling quality education anywhere, anytime.</p>
+
+    <h3>2. Smart Websites and Digital Presence for Schools</h3>
+    <p>Every modern school deserves a professional online presence. <strong>Smart Elimu Connect</strong> builds <strong>custom school websites</strong> to help institutions showcase programs, handle admissions, and improve online visibility. Schools can also access <strong>parent portals</strong> for reporting, communication, and real-time updates — bringing transparency and trust into the learning experience.</p>
+
+    <h3>3. Intelligent Digital Tools for Schools</h3>
+    <p>Smart Elimu Connect equips schools with cutting-edge tools for:</p>
+    <ul>
+      <li>📊 Performance dashboards, analytics & competency trackers</li>
+      <li>📝 Smart registers and automated attendance tracking</li>
+      <li>🏫 Digital homework assignment and grading systems</li>
+      <li>🎓 CBC Project Generator – auto-creates compliant activities & portfolios</li>
+      <li>🚍 Real-time school bus tracking for parents & drivers</li>
+      <li>💻 ICT & smart classroom integration</li>
+      <li>🔬 STEMLA Clubs (STEM + Languages)</li>
+      <li>🌳 Eco-learning: tree planting & CSR projects</li>
+      <li>🖥️ Coding programs (web & app development for students & teachers)</li>
+      <li>📱 Bulk subscriptions for e-learning tools and digital libraries</li>
+    </ul>
+
+    <h3>4. Empowering Tutors Worldwide</h3>
+    <ul>
+      <li>👨‍🏫 Connect with students globally for both online and in-person lessons</li>
+      <li>🏫 Join verified tutoring programs and school partnerships</li>
+      <li>📂 Get listed in the <strong>Global Tutor Directory</strong> for visibility</li>
+      <li>🎮 Participate in international Math & Science challenges</li>
+      <li>🔄 Access to verified teacher exchange and swap programs</li>
+      <li>📁 Share and download ready-made teaching materials</li>
+      <li>📝 Access to lesson plans, schemes of work, and assessments</li>
+      <li>📊 Performance tracking & remedial lesson records</li>
+      <li>🌍 Apply for verified international teaching opportunities</li>
+    </ul>
+
+    <h3>5. Smart Learning Tools for Students</h3>
+    <p>Students can access a range of powerful study and revision tools such as:</p>
+    <ul>
+      <li>📊 Interactive Statistics Calculators (Mean, Median, Variance, SD)</li>
+      <li>📐 Vector, Matrix & Surveying tools for CBC, IGCSE & A-levels</li>
+      <li>⚡ Step-by-step Math, Science & ICT concept explainer tools</li>
+      <li>📱 Mobile-friendly quizzes, games & revision videos</li>
+      <li>🎯 AI-Powered Study Timetable & Smart Notebook</li>
+      <li>🧮 Graph plotting & Scientific Calculator tools</li>
+      <li>🧪 Physics, Chemistry & Biology formula solvers</li>
+      <li>🧬 3D Human, Plant & Fish anatomy simulators</li>
+      <li>📖 Digital dictionary & <em>Kiswahili Kamusi</em></li>
+      <li>📝 Smart English tools for similes, metaphors, methali & nahau</li>
+    </ul>
+
+    <h3>6. Referral Program – Earn 40% Commission</h3>
+    <p>Smart Elimu Connect rewards the community. Students, tutors, parents, and schools earn a <strong>40% referral commission</strong> for every successful referral — making education not only accessible but also rewarding.</p>
+
+    <h3>7. Preparing Global Learners for the Future</h3>
+    <p>Smart Elimu Connect breaks geographical and economic barriers. Learners gain access to international tutors, AI-powered resources, and future-ready skills in <strong>technology, creativity, and innovation</strong>. Schools that adopt these solutions today are preparing students for tomorrow’s global opportunities.</p>
+
+    <h3>Why Choose Smart Elimu Connect?</h3>
+    <ul>
+      <li>✅ <strong>7-day free trial</strong> for students, tutors, and schools</li>
+      <li>✅ Affordable subscriptions for every learner</li>
+      <li>✅ Professional school websites & parent portals</li>
+      <li>✅ Smart learning & management tools for schools</li>
+      <li>✅ Support for CBC, IGCSE, CBSE, ICSE, IB, JET & SAT</li>
+      <li>✅ Interactive quizzes, past papers, and study planners</li>
+      <li>✅ Teacher directory & verified international job access</li>
+      <li>✅ STEMLA clubs, coding programs & CSR initiatives</li>
+      <li>✅ 40% referral reward for every user</li>
+      <li>✅ Simple, mobile-friendly platform with global access</li>
+      <li>✅ Real-time parent engagement & learner tracking</li>
+    </ul>
+
+    <p><strong>Smart Elimu Connect — the future of digital learning in Kenya and beyond, where schools grow smarter, tutors thrive, and students excel globally.</strong></p>
+
+    <p>👉 Visit: <a href="./elimu.html" target="_blank">Smart Elimu Connect</a><br>
+    📲 Download: <a href="https://play.google.com/store/apps/details?id=elimuconnect.tuitioncentre" target="_blank">Get the App on Google Play</a></p>
+   `,
+  category: "schools"
+},
+
+
+
+
+
+{
+  id: 2,
+  title: "Top 5 Smart Study Hacks for Global Students",
+  preview: "From AI-powered timetables to digital learning tools, discover proven ways to study smarter and perform better with Smart Elimu Connect.",
+  full: `
+    <h2>Top 5 Smart Study Hacks for Global Students</h2>
+    <p>Today’s learners face unique challenges balancing <strong>schoolwork, home life, and digital distractions</strong>. Whether you’re preparing for <strong>CBC, KCSE, IGCSE, CBSE, ICSE, IB, JET, or SAT</strong> exams, one truth remains—success comes from studying smarter, not harder. 
+    <a href="./appaccessdaily.html" target="_blank">Smart Elimu Connect</a> offers <strong>AI-powered study tools, online tuition, and smart learning systems</strong> to help every student reach their full potential. 
+    Here are 5 proven study hacks that actually work:</p>
+
+    <h3>1. Leverage Digital Study Tools</h3>
+    <p>Why waste hours flipping through notes when you can use <strong>interactive learning tools</strong>? 
+    <strong>Smart Elimu Connect</strong> provides smart, easy-to-use tools for <strong>mathematics, science, and ICT</strong> concepts — including quadratics, vectors, matrices, statistics, motion, and chemical equations. 
+    These tools are designed for CBC, IGCSE, CBSE, IB, and other international learners to master topics faster and more effectively.</p>
+
+    <h3>2. Use the 25-Minute Pomodoro Study Technique</h3>
+    <p>Long study hours can drain focus. The <strong>Pomodoro method</strong> helps you stay sharp: study for 25 minutes, rest for 5 minutes, and after 4 cycles, take a longer 15–20-minute break. 
+    This keeps your brain active and prevents fatigue, improving both retention and productivity.</p>
+
+    <h3>3. Practice with Real Exam Papers</h3>
+    <p>Past papers remain the best preparation tool for any curriculum — from CBC to SATs. They help you identify exam trends, question formats, and timing. 
+    <strong>Smart Elimu Connect</strong> gives access to over <strong>30,000+ past papers with solutions</strong> for CBC, KCSE, IGCSE, and more, plus <strong>weekly national and global challenge tests</strong> that come with digital certificates.</p>
+
+    <h3>4. Form or Join Virtual Study Groups</h3>
+    <p>Learning together is powerful. Forming or joining small study groups allows students to <strong>share knowledge, challenge each other, and stay motivated</strong>. 
+    With <strong>Smart Elimu Connect’s online discussion hubs</strong>, learners from Kenya, India, the UK, or anywhere in the world can collaborate instantly and share ideas across subjects.</p>
+
+    <h3>5. Take Mindful Breaks</h3>
+    <p>Studying for hours without rest lowers comprehension. Take regular, healthy breaks—stretch, hydrate, or walk for 10 minutes. 
+    Balanced study habits lead to better performance and long-term understanding of concepts.</p>
+
+    <h3>More Smart Tools for Students</h3>
+    <ul>
+      <li>💻 <strong>Live Online Lessons</strong> – From as low as $1.6/hour</li>
+      <li>🤖 <strong>AI Virtual Tutor (Free)</strong> – 24/7 homework & revision support</li>
+      <li>👨‍🏫 <strong>Find Verified Tutors</strong> – Filter by subject or location</li>
+      <li>🏫 <strong>Hybrid Tuition Programs</strong> – For Grades 4–12 and A-Levels</li>
+      <li>📚 <strong>Instant Homework Help</strong> – AI + real tutors on demand</li>
+      <li>🎥 <strong>2,000+ Video Lessons</strong> & 5,000+ Quizzes</li>
+      <li>🏅 <strong>Weekly Global Tests</strong> & Digital Certificates</li>
+      <li>📝 <strong>1,000+ Solved Q&A Pairs</strong> from past exams</li>
+      <li>📖 <strong>200+ Free Ebooks</strong> for secondary & advanced learners</li>
+      <li>🎮 <strong>Educational Games</strong> – Math + Language learning fun</li>
+      <li>💬 <strong>Interactive Forums</strong> – Connect with other students globally</li>
+      <li>🎯 <strong>Career Discovery Tools</strong> for teens & young adults</li>
+      <li>🕒 <strong>AI Study Timetable Generator</strong> for smart time management</li>
+      <li>📓 <strong>Digital Notebook</strong> & Smart Revision Organizer</li>
+      <li>🔢 <strong>Scientific Calculator</strong> & Graph Plotting Tools</li>
+      <li>⚗️ <strong>Math, Chemistry & Physics Solvers</strong></li>
+      <li>📘 <strong>Online Dictionary & Kiswahili Kamusi</strong></li>
+      <li>📝 <strong>Similes, Metaphors, Methali & Nahau</strong> Library</li>
+      <li>🧬 <strong>3D Anatomy Models</strong> (Human, Plant, Fish)</li>
+      <li>🧪 <strong>Digital Periodic Table</strong> & Chemistry Simulators</li>
+      <li>📐 <strong>Geometry & Algebra Tools</strong> – Area, Volume, Logarithms</li>
+      <li>💰 <strong>Financial Math Tools</strong> – Tax, Interest, Profit & Loss</li>
+      <li>🌍 <strong>Geography Tools</strong> – Maps, Coordinates, and Data Skills</li>
+      <li>📊 <strong>Advanced Statistics & Matrix Solvers</strong></li>
+      <li>➗ <strong>Calculus Calculators</strong> – Differentiation & Integration</li>
+    </ul>
+
+    <h3>Why Smart Elimu Connect Is the Ultimate Study Partner</h3>
+    <ul>
+      <li>✅ <strong>7-day free trial</strong> for all learners</li>
+      <li>✅ Free peer learning chats and forums</li>
+      <li>✅ Access to <strong>digital study tools</strong> for multiple curriculums</li>
+      <li>✅ <strong>40% referral commission</strong> for inviting friends</li>
+      <li>✅ User-friendly mobile app available on Google Play</li>
+    </ul>
+
+    <p><strong>Success doesn’t come from studying harder — it comes from studying smarter with Smart Elimu Connect.</strong></p>
+
+    <p>👉 Visit our website: <a href="./elimu.html" target="_blank">Smart Elimu Connect</a><br>
+    📲 Download our app: <a href="https://play.google.com/store/apps/details?id=elimuconnect.tuitioncentre" target="_blank">Install on Google Play</a></p>
+   `,
+  category: "students"
+},
+
+
+
+
+{
+  id: 3,
+  title: "Maximizing the Power of Digital Tools in Modern Schools",
+  preview: "Smart Elimu Connect helps schools in Kenya and globally adopt ICT, STEM, and digital tools to boost learning outcomes and student engagement.",
+  full: `
+    <h2>Maximizing the Power of Digital Tools in Modern Schools</h2>
+    <p>Schools in Kenya and around the world that adopt <strong>smart digital solutions</strong> report <strong>higher academic achievement</strong>, improved engagement, and better management efficiency. Integrating ICT and STEM not only modernizes classrooms but also builds the digital competencies needed for the future.</p>
+
+    <h3>1. Real-Time Academic Insights</h3>
+    <p>Teachers can now track student progress using <strong>digital dashboards, smart registers, and performance analytics</strong>. Struggling learners are quickly identified and supported, while parents remain connected through <strong>Parent Connect portals</strong> — receiving live updates on attendance, homework, and grades.</p>
+
+    <h3>2. Smarter Homework & Project Systems</h3>
+    <ul>
+      <li>Assign and assess homework digitally through <strong>Smart Homework Tools</strong></li>
+      <li>Auto-generate <strong>CBC-compliant tasks and project portfolios</strong> for learners</li>
+      <li>Teachers can access structured lesson plans and editable schemes of work instantly</li>
+    </ul>
+
+    <h3>3. Integrating STEM & ICT Learning</h3>
+    <ul>
+      <li>Launch <strong>STEMLA clubs</strong> to blend science, technology, and language learning</li>
+      <li>Introduce <strong>coding and robotics</strong> for both students and teachers</li>
+      <li>Incorporate interactive simulations for science, mathematics, and technology subjects</li>
+      <li>Utilize <strong>3D anatomy tools, virtual chemistry labs, and physics concept solvers</strong></li>
+    </ul>
+
+    <h3>4. Teacher Collaboration & Support</h3>
+    <ul>
+      <li>Join online forums and file-sharing spaces for global educators</li>
+      <li>Participate in <strong>teacher exchanges</strong> and professional training sessions</li>
+      <li>Download lesson resources, past papers, and study notes with one click</li>
+      <li>Digitally record and track remedial sessions for personalized student support</li>
+    </ul>
+
+    <h3>5. Smarter School Operations</h3>
+    <ul>
+      <li>Enhance safety with <strong>GPS-tracked school transport systems</strong></li>
+      <li>Equip ICT labs with <strong>smart classroom tools</strong> for live interaction</li>
+      <li>Monitor environmental impact projects like <strong>green learning initiatives</strong></li>
+      <li>Centralize app subscriptions and manage student access efficiently</li>
+    </ul>
+
+    <h3>6. Empowering Learners</h3>
+    <ul>
+      <li>Access over <strong>2,000 video lessons</strong> and <strong>5,000 interactive quizzes</strong></li>
+      <li>Generate personalized study plans using <strong>AI-powered tools</strong></li>
+      <li>Play educational games across Math, English, and Kiswahili</li>
+      <li>Collaborate through online discussion boards and peer study forums</li>
+      <li>Explore career paths and exam prep tools for <strong>KCSE, IGCSE, IB, CBSE, ICSE, JET, and SAT</strong></li>
+    </ul>
+
+    <p><strong>By embracing digital learning, Smart Elimu Connect empowers schools to deliver quality education, optimize operations, and nurture globally competitive learners.</strong></p>
+
+    <p>👉 Visit <a href="./elimu.html" target="_blank">Smart Elimu Connect</a> to explore innovative digital tools for students, teachers, and schools.<br>
+    📲 Get the app on <a href="https://play.google.com/store/apps/details?id=elimuconnect.tuitioncentre" target="_blank">Google Play</a></p>
+ `,
+  category: "schools"
+},
+
+
+
+   
+  {
+  id: 4,
+  title: "Smart Study Hacks for KCSE, CBC, IGCSE, and Global Learners",
+  preview: "Boost your performance with powerful study strategies for KCSE, CBC, IGCSE, IB, CBSE, ICSE, JET, and SAT students in Kenya and beyond.",
+  full: `
+    <h2>Smart Study Hacks for KCSE, CBC, IGCSE, and Global Learners</h2>
+    <p>Academic success comes from <strong>effective study habits</strong> — not just hard work. Whether you're studying under <strong>CBC, KCSE, IGCSE, IB, CBSE, ICSE, JET, or SAT systems</strong>, these proven techniques will help you learn smarter, remember longer, and perform better in exams.</p>
+
+    <h3>📚 General Study Strategies</h3>
+    <ul>
+      <li>✅ Build a <strong>weekly and monthly timetable</strong> with realistic study goals</li>
+      <li>✅ Use <strong>short, focused revision blocks</strong> instead of long, tiring sessions</li>
+      <li>✅ Test your understanding regularly using past papers and online quizzes</li>
+      <li>✅ Create <strong>visual summaries</strong> — mind maps, flowcharts, and flashcards</li>
+      <li>✅ Stay consistent with your <strong>assignments, notes, and review schedules</strong></li>
+      <li>✅ Reward yourself after completing milestones to stay motivated</li>
+    </ul>
+
+    <h3>📖 CBC (Competency-Based Curriculum) Learners</h3>
+    <ul>
+      <li>✅ Focus on <strong>competencies and skills</strong> rather than rote memorization</li>
+      <li>✅ Engage in <strong>projects, experiments, and teamwork activities</strong></li>
+      <li>✅ Use <strong>interactive digital platforms</strong> to strengthen problem-solving</li>
+      <li>✅ Practice <strong>oral communication and creative expression</strong></li>
+      <li>✅ Reflect on your learning through <strong>portfolios and performance tasks</strong></li>
+    </ul>
+
+    <h3>✏️ KCSE Candidates</h3>
+    <ul>
+      <li>✅ Work through <strong>past papers and marking schemes</strong> consistently</li>
+      <li>✅ Prioritize <strong>core subjects</strong>: Mathematics, English, Kiswahili, and Sciences</li>
+      <li>✅ Track your progress using <strong>revision charts and mock tests</strong></li>
+      <li>✅ Simplify difficult concepts into <strong>summary notes and formula sheets</strong></li>
+      <li>✅ Join <strong>peer study circles and virtual revision groups</strong></li>
+    </ul>
+
+    <h3>🌍 IGCSE, IB, CBSE, ICSE, JET & SAT Students</h3>
+    <ul>
+      <li>✅ Understand <strong>exam objectives, rubrics, and grading standards</strong></li>
+      <li>✅ Practice <strong>timed papers</strong> to improve speed and accuracy</li>
+      <li>✅ Apply theories to <strong>real-world problem-solving scenarios</strong></li>
+      <li>✅ Use <strong>smart e-learning tools</strong> and online simulations</li>
+      <li>✅ Engage in <strong>interactive labs, virtual experiments, and discussion boards</strong></li>
+    </ul>
+
+    <h3>💡 Digital Learning Tools You Can Use</h3>
+    <ul>
+      <li>AI-driven <strong>study planner and timetable generators</strong></li>
+      <li>Personalized <strong>digital notebooks and revision dashboards</strong></li>
+      <li>Thousands of <strong>interactive quizzes, flashcards, and lessons</strong></li>
+      <li>Math, Chemistry, and Physics <strong>formula calculators</strong></li>
+      <li>Collaborative <strong>student forums and peer discussion spaces</strong></li>
+      <li>Career and <strong>university guidance resources</strong> for global learners</li>
+      <li>Access to <strong>30,000+ past papers</strong> and <strong>2,000+ video tutorials</strong></li>
+      <li>Engaging <strong>educational games</strong> for Math, English, and Kiswahili</li>
+    </ul>
+
+    <p><strong>By adopting these smart study strategies and tools, Smart Elimu Connect learners gain confidence, master concepts faster, and perform better across KCSE, CBC, and international curricula.</strong></p>
+
+    <p>👉 Visit <a href="./elimu.html" target="_blank">Smart Elimu Connect</a> to access global learning tools, AI tutors, and interactive exam prep.<br>
+    📲 Get our mobile app: <a href="https://play.google.com/store/apps/details?id=elimuconnect.tuitioncentre" target="_blank">Install on Google Play</a></p>
+ `,
+  category: "tips"
+},
+
+	
+	
+	{
+  id: 5,
+  title: "Shape Your Dream Career with Smart Elimu Connect (Kenya & Global)",
+  preview: "Discover how Smart Elimu Connect helps learners choose subjects wisely, excel in CBC, KCSE, IGCSE, IB, and CBSE, and build future-ready careers.",
+  full: `
+    <h2>Shape Your Dream Career with Smart Elimu Connect (Kenya & Global)</h2>
+    <p>Choosing the right subjects early determines your academic and professional path. <a href="./appaccessdaily.html" target="_blank"><strong>Smart Elimu Connect</strong></a> equips students with the knowledge, digital tools, and mentorship they need to make smart subject choices, perform better in school, and transition smoothly into rewarding global careers.</p>
+
+    <h3>1. Smarter Subject Selection & Guidance</h3>
+    <ul>
+      <li>✅ Discover which subjects open doors to top careers like <strong>Medicine, Engineering, ICT, Law, Accounting, and Business</strong></li>
+      <li>✅ Get <strong>personalized academic guidance</strong> for CBC, KCSE, IGCSE, IB, and CBSE systems</li>
+      <li>✅ Explore <strong>Science, Arts, and Technical tracks</strong> that align with your university or vocational goals</li>
+      <li>✅ Receive <strong>AI-based subject recommendations</strong> based on your interests and performance data</li>
+    </ul>
+
+    <h3>2. Preparing for High-Demand Global Careers</h3>
+    <p>Smart Elimu Connect bridges classroom learning and employability by guiding students toward fast-growing global careers.</p>
+    <ul>
+      <li>✅ <strong>Medicine & Health Sciences</strong> – Focus on Biology, Chemistry, and Physics</li>
+      <li>✅ <strong>Engineering & Technology</strong> – Strengthen Math, Physics, and ICT</li>
+      <li>✅ <strong>Finance & Business</strong> – Master Mathematics, Accounting, and Economics</li>
+      <li>✅ <strong>Law & Social Sciences</strong> – Build on History, English, and Literature</li>
+      <li>✅ <strong>Digital & Creative Careers</strong> – Learn Coding, Media Design, and Entrepreneurship</li>
+      <li>✅ <strong>Vocational & Technical Skills</strong> – Excel in Agriculture, Mechanics, and Hospitality</li>
+    </ul>
+
+    <h3>3. Academic Tools That Support Career Goals</h3>
+    <ul>
+      <li>✅ Affordable <strong>live and recorded online lessons</strong> for all major subjects</li>
+      <li>✅ 24/7 <strong>AI homework and revision assistant</strong></li>
+      <li>✅ Interactive <strong>quizzes, progress trackers, and past papers</strong></li>
+      <li>✅ 30,000+ <strong>exam resources</strong> for CBC, KCSE, IGCSE, and IB</li>
+      <li>✅ Peer <strong>forums and collaboration spaces</strong> for group learning</li>
+    </ul>
+
+    <h3>4. Building Career-Ready Skills</h3>
+    <ul>
+      <li>✅ Learn <strong>coding, robotics, and digital literacy</strong> for the modern workforce</li>
+      <li>✅ Develop <strong>entrepreneurship and leadership</strong> skills</li>
+      <li>✅ Strengthen <strong>communication and critical thinking</strong> through debates and group tasks</li>
+      <li>✅ Access <strong>internships, mentorships, and scholarship programs</strong></li>
+      <li>✅ Learn <strong>problem-solving and innovation</strong> for global STEM careers</li>
+    </ul>
+
+    <h3>5. Connecting Learning to Real-World Careers</h3>
+    <ul>
+      <li>✅ Get <strong>personalized subject and career pathways</strong></li>
+      <li>✅ Access <strong>AI-guided study tools and live tutoring</strong></li>
+      <li>✅ Experience <strong>career-based simulations, challenges, and projects</strong></li>
+      <li>✅ Join <strong>national and international competitions</strong></li>
+      <li>✅ Prepare for <strong>university, internships, and job placements</strong></li>
+    </ul>
+
+    <h3>Why Smart Elimu Connect is the Ultimate Career Partner</h3>
+    <ul>
+      <li>✅ Aligns learning with real-world job skills</li>
+      <li>✅ Combines human tutors and AI mentors for all-round support</li>
+      <li>✅ Builds <strong>academic excellence and employability</strong></li>
+      <li>✅ Offers tools for <strong>lifelong learning and entrepreneurship</strong></li>
+      <li>✅ Helps students transition smoothly from school to career success</li>
+    </ul>
+
+    <p><strong>With Smart Elimu Connect, students in Kenya and around the world can confidently plan their studies, pass their exams, and pursue successful careers in Medicine, ICT, Engineering, Law, and more.</strong></p>
+
+    <p>👉 Learn more: <a href="./elimu.html" target="_blank">Smart Elimu Connect</a><br>
+    📲 Download our app: <a href="https://play.google.com/store/apps/details?id=elimuconnect.tuitioncentre" target="_blank">Install on Google Play</a></p>
+  `,
+  category: "career"
+},
+
+	
+	{
+  id: 6,
+  title: "Transform Learning with ICT and SmartElimu Smart Tools",
+  preview: "Discover how SmartElimu Connect’s ICT-driven tools are revolutionizing classrooms — making learning more interactive, efficient, and engaging for teachers and students.",
+  full: `
+    <h2>Transform Learning with ICT and SmartElimu Smart Tools</h2>
+    <p>Technology is reshaping education, turning traditional classrooms into dynamic, connected spaces. By integrating ICT into teaching, schools can enhance engagement, simplify assessments, and personalize learning experiences. <a href="./appaccessdaily.html" target="_blank"><strong>SmartElimu Connect</strong></a> offers an advanced suite of digital tools designed to empower teachers, students, and schools under KCSE, CBC, and IGCSE systems.</p>
+
+    <h3>1. Modern ICT Integration for Schools</h3>
+    <ul>
+      <li>✅ Use interactive whiteboards and multimedia content for engaging lessons</li>
+      <li>✅ Adopt school-based LMS for assignments, grading, and learner analytics</li>
+      <li>✅ Integrate audio-visual lessons into STEM, Languages, and Creative Arts</li>
+      <li>✅ Support hybrid and fully remote learning environments</li>
+      <li>✅ Monitor student progress and competencies instantly via smart dashboards</li>
+    </ul>
+
+    <h3>2. Smart Digital Tools for Teachers & Schools</h3>
+    <ul>
+      <li>✅ <strong>Smart Register</strong> – Automate attendance and analyze participation trends</li>
+      <li>✅ <strong>Projects & CBL Portfolio</strong> – Manage learner projects and CBC-based portfolios</li>
+      <li>✅ <strong>Activities/Projects Generator</strong> – Generate curriculum-aligned assignments easily</li>
+      <li>✅ <strong>Homework Smart System</strong> – Assign, collect, and grade work digitally</li>
+      <li>✅ <strong>School Bus Tracker</strong> – Real-time GPS monitoring for safety and transparency</li>
+      <li>✅ <strong>Competency Tracker</strong> – View progress and performance metrics for each learner</li>
+      <li>✅ <strong>Parent Connect</strong> – Strengthen home–school communication in real-time</li>
+      <li>✅ Connect and collaborate with teachers nationwide for mentorships or TSC swaps</li>
+    </ul>
+
+    <h3>3. Student Smart Tools for Better Learning</h3>
+    <ul>
+      <li>✅ Interactive tools for Math, Science, and Languages</li>
+      <li>✅ 24/7 AI tutor for instant homework help and exam preparation</li>
+      <li>✅ Access 2,000+ learning videos and 5,000+ interactive quizzes</li>
+      <li>✅ Smart notebooks, notes organizer, and revision planners</li>
+      <li>✅ Science simulations — Physics, Chemistry, Biology, and 3D anatomy</li>
+      <li>✅ Educational games in English and Kiswahili for fun, engaging learning</li>
+    </ul>
+
+    <h3>4. Why ICT & SmartElimu Tools Matter</h3>
+    <ul>
+      <li>✅ Simplifies lesson planning, grading, and school management</li>
+      <li>✅ Makes learning more engaging and effective through interactivity</li>
+      <li>✅ Enhances academic results using smart quizzes and digital tests</li>
+      <li>✅ Prepares students thoroughly for KCSE, CBC, and IGCSE exams</li>
+      <li>✅ Builds future-ready skills — coding, digital literacy, and innovation</li>
+      <li>✅ Promotes strong collaboration between parents, teachers, and learners</li>
+      <li>✅ Digitizes school operations with analytics and data insights</li>
+    </ul>
+
+    <p><strong>With SmartElimu Connect, schools in Kenya can modernize teaching, students can learn smarter, and teachers can work more efficiently — preparing every learner for a tech-powered future.</strong></p>
+
+    <p>👉 Learn more: <a href="./elimu.html" target="_blank">Visit SmartElimu Connect</a><br>
+    📲 Download the app: <a href="https://play.google.com/store/apps/details?id=elimuconnect.tuitioncentre" target="_blank">Get it on Google Play</a></p>
+  `,
+  category: "tech"
+},
+
+	
+	{
+  id: 7,
+  title: "Smart Parenting for Academic Success",
+  preview: "Learn how parents can actively support their child’s learning journey and boost academic performance using SmartElimu Connect tools.",
+  full: `
+    <h2>Smart Parenting for Academic Success</h2>
+    <p>Parents are the foundation of a child’s academic journey. Consistent support, encouragement, and monitoring help students excel in CBC, KCSE, and IGCSE systems. With <a href="./appaccessdaily.html" target="_blank"><strong>SmartElimu Connect</strong></a>, parents can now stay actively involved in their child’s progress through real-time tools and smart insights.</p>
+
+    <h3>1. Practical Parenting Tips for Academic Growth</h3>
+    <ul>
+      <li>✅ Establish a structured study timetable and maintain consistent routines</li>
+      <li>✅ Provide a calm, distraction-free study space at home</li>
+      <li>✅ Review assignments and schoolwork regularly</li>
+      <li>✅ Encourage curiosity, creativity, and critical thinking through discussions</li>
+      <li>✅ Track progress in exams, tests, and classwork continuously</li>
+      <li>✅ Recognize and reward small milestones to build confidence</li>
+      <li>✅ Keep in touch with teachers to understand your child’s learning needs</li>
+      <li>✅ Help your child select subjects and activities aligned with their interests and future goals</li>
+    </ul>
+
+    <h3>2. How SmartElimu Connect Empowers Parents</h3>
+    <ul>
+      <li>✅ <strong>Parent Connect</strong> – Monitor attendance, homework, projects, and class updates in real-time</li>
+      <li>✅ View <strong>live performance dashboards</strong> across subjects and competencies</li>
+      <li>✅ Receive alerts for assignments, tests, and important school events</li>
+      <li>✅ Access past papers, quizzes, and digital learning materials to support at home</li>
+      <li>✅ Directly message teachers for feedback and progress discussions</li>
+      <li>✅ Track transport with <strong>Smart Bus Monitoring</strong> for student safety</li>
+      <li>✅ Encourage use of digital study tools for Math, Science, and Languages</li>
+      <li>✅ Support participation in projects, CBL portfolios, and co-curricular activities</li>
+    </ul>
+
+    <h3>3. Why Active Parenting Matters</h3>
+    <ul>
+      <li>✅ Leads to improved academic results and stronger discipline</li>
+      <li>✅ Increases motivation and active engagement in learning</li>
+      <li>✅ Detects and addresses learning gaps early</li>
+      <li>✅ Builds effective communication between parents and teachers</li>
+      <li>✅ Fosters digital literacy and independent learning habits</li>
+      <li>✅ Prepares students for KCSE, CBC, and IGCSE excellence</li>
+    </ul>
+
+    <p><strong>Through SmartElimu Connect, parents can transform how they support education — creating confident, motivated, and high-performing learners ready for success in Kenya and globally.</strong></p>
+
+    <p>👉 Learn more: <a href="./elimu.html" target="_blank">Visit SmartElimu Connect</a><br>
+    📲 Download our app: <a href="https://play.google.com/store/apps/details?id=elimuconnect.tuitioncentre" target="_blank">Get it on Google Play</a></p>
+  `,
+  category: "parents"
+},
+	  {
+  id: 8,
+  title: "SmartElimu Connect – Kenya’s Leading Online & Physical Tuition Platform",
+  preview: "SmartElimu Connect offers Kenya’s most advanced online and physical tuition for KCSE, CBC, and IGCSE learners, featuring digital libraries, AI tutors, and experienced teachers.",
+  full: `
+    <h2>SmartElimu Connect – Online and Physical Tuition in Kenya</h2>
+    <p><strong>SmartElimu Connect</strong> is Kenya’s most trusted online and physical tuition platform designed to help students excel in KCPE, KCSE, CBC, and IGCSE. With our interactive lessons, expert tutors, AI-driven tools, and a rich <strong>digital library</strong>, learners can achieve better grades and a deeper understanding of all subjects. The platform supports both <strong>home-based online learning</strong> and <strong>in-school physical tuition</strong> for flexible learning experiences.</p>
+
+    <h3>1. Why Choose SmartElimu Connect?</h3>
+    <ul>
+      <li>✅ Affordable online tuition starting from only Ksh 200 per hour</li>
+      <li>✅ Physical tuition programs in schools for Classes 4–12</li>
+      <li>✅ A rich <strong>digital library</strong> with eBooks, past papers, and notes</li>
+      <li>✅ Over 2,000 video lessons and 5,000 interactive quizzes</li>
+      <li>✅ AI-powered virtual tutor for instant homework and exam assistance</li>
+      <li>✅ Customized study timetables and progress tracking</li>
+      <li>✅ Weekly national online tests and digital certificates</li>
+      <li>✅ Access to 1,000+ exam-style Q&A resources</li>
+      <li>✅ Fun, gamified learning activities to boost retention</li>
+      <li>✅ Peer-to-peer student communities and discussion forums</li>
+    </ul>
+
+    <h3>2. Subjects Offered</h3>
+    <ul>
+      <li>✅ <strong>Mathematics:</strong> Algebra, Geometry, Trigonometry, Calculus, Statistics</li>
+      <li>✅ <strong>Physics:</strong> Waves, Mechanics, Electricity, Thermodynamics</li>
+      <li>✅ <strong>Chemistry:</strong> Organic, Inorganic, Equations, and Mole Concepts</li>
+      <li>✅ <strong>Biology:</strong> Human, Plant, and Animal Systems, Genetics</li>
+      <li>✅ <strong>English:</strong> Grammar, Composition, Literature, Comprehension</li>
+      <li>✅ <strong>Kiswahili:</strong> Sarufi, Insha, Fasihi</li>
+      <li>✅ <strong>Geography:</strong> Mapwork, Environment, and Global Studies</li>
+      <li>✅ <strong>ICT/Computer Studies:</strong> Coding, Programming, Excel, and Digital Skills</li>
+      <li>✅ <strong>Business Studies:</strong> Accounting, Economics, Entrepreneurship</li>
+      <li>✅ <strong>CRE/IRE:</strong> Religious and moral development</li>
+    </ul>
+
+    <h3>3. Smart Learning Tools & Features</h3>
+    <ul>
+      <li>✅ Smart notebooks, progress trackers, and revision planners</li>
+      <li>✅ Digital competency registers and performance dashboards</li>
+      <li>✅ AI homework solver and automated activity/project generator</li>
+      <li>✅ Interactive science and math simulations</li>
+      <li>✅ School transport tracking for parents and drivers</li>
+      <li>✅ Career mentorship and academic guidance modules</li>
+      <li>✅ Intelligent timetable generator powered by AI</li>
+      <li>✅ Built-in English Dictionary and Kiswahili Kamusi</li>
+      <li>✅ Step-by-step exam tutorials and problem-solving walkthroughs</li>
+      <li>✅ Real-time analytics for students, parents, and teachers</li>
+    </ul>
+
+    <h3>4. Benefits of Learning with SmartElimu Connect</h3>
+    <ul>
+      <li>✅ Boosts KCPE, KCSE, CBC, and IGCSE performance</li>
+      <li>✅ Enables flexible, self-paced, and personalized learning</li>
+      <li>✅ Enhances parent involvement in learners’ progress</li>
+      <li>✅ Builds digital literacy, STEM, and ICT proficiency</li>
+      <li>✅ Prepares students for global and national exams</li>
+      <li>✅ Combines the convenience of online learning with school-based tuition</li>
+      <li>✅ Offers affordable, comprehensive, and accessible education</li>
+      <li>✅ Encourages collaborative peer learning and mentorship</li>
+      <li>✅ Provides unlimited access to digital notes and revision materials</li>
+      <li>✅ Trusted nationwide by students, teachers, and parents</li>
+    </ul>
+
+    <p><strong>SmartElimu Connect</strong> is redefining education in Kenya — blending technology, expert tutoring, and interactive tools into one powerful platform that transforms how students learn, revise, and succeed.</p>
+
+    <p>👉 Explore more: <a href="./elimu.html" target="_blank">SmartElimu Connect Website</a><br>
+    📲 Download the app: <a href="https://play.google.com/store/apps/details?id=elimuconnect.tuitioncentre" target="_blank">Get it on Google Play</a></p>
+   `,
+  category: "tuition"
+},
+	  
+{
+  id: 9,
+  title: "Free Past Papers, Lesson Plans & Schemes of Work – SmartElimu Connect",
+  preview: "Download free KCSE, IGCSE, and CBC past papers, detailed lesson plans, and ready-to-use schemes of work for students and teachers with SmartElimu Connect.",
+  full: `
+    <h2>Free Past Papers, Lesson Plans, and Schemes of Work – SmartElimu Connect</h2>
+    <p><strong>SmartElimu Connect</strong> offers an extensive collection of <strong>free educational resources</strong> for both teachers and students in Kenya. Gain instant access to thousands of <strong>KNEC, CBC, and IGCSE past papers</strong>, expertly prepared <strong>schemes of work</strong>, and <strong>lesson plans</strong> for every subject. These materials are designed to promote effective teaching, improve exam performance, and simplify classroom preparation.</p>
+
+    <h3>1. Past Papers for Students</h3>
+    <ul>
+      <li>✅ Access KCSE past papers with answers for Math, Physics, Chemistry, Biology, English, Kiswahili, Geography, History, CRE/IRE, and more</li>
+      <li>✅ IGCSE question papers and marking guides for both core and optional subjects</li>
+      <li>✅ CBC assessment and practice papers for all grades</li>
+      <li>✅ Step-by-step worked solutions and examiner-style marking schemes</li>
+      <li>✅ Downloadable and printable versions for online and offline revision</li>
+    </ul>
+
+    <h3>2. Resources for Teachers</h3>
+    <ul>
+      <li>✅ Professionally prepared <strong>schemes of work</strong> aligned to CBC, KCSE, and IGCSE curriculums</li>
+      <li>✅ Ready-made <strong>lesson plans</strong> covering Mathematics, Science, Languages, ICT, and Humanities</li>
+      <li>✅ Engaging classroom activities, projects, and continuous assessment tools</li>
+      <li>✅ Editable templates for grading, tracking competencies, and managing performance records</li>
+      <li>✅ Resources that support blended learning, ICT integration, and digital classrooms</li>
+    </ul>
+
+    <h3>3. Benefits of Using SmartElimu Connect Resources</h3>
+    <ul>
+      <li>✅ 100% free access to thousands of verified past papers and answers</li>
+      <li>✅ Enhances student readiness for CBC, KCSE, and IGCSE examinations</li>
+      <li>✅ Saves teachers hours of planning and documentation work</li>
+      <li>✅ Encourages self-learning, group study, and exam confidence</li>
+      <li>✅ Promotes digital literacy and personalized learning approaches</li>
+      <li>✅ Works perfectly on phones, tablets, and computers for convenience</li>
+      <li>✅ Improves collaboration between teachers, parents, and students</li>
+      <li>✅ Boosts academic excellence across all subjects and levels</li>
+      <li>✅ Supports STEM, ICT, languages, and humanities development</li>
+      <li>✅ Ideal for school-based projects and competency tracking</li>
+    </ul>
+
+    <h3>4. Subjects Covered</h3>
+    <ul>
+      <li>✅ Mathematics – Algebra, Geometry, Trigonometry, Calculus, Statistics, Probability</li>
+      <li>✅ Physics – Mechanics, Electricity, Thermodynamics, Waves, Optics</li>
+      <li>✅ Chemistry – Inorganic, Organic, Chemical Equations, Mole Concepts</li>
+      <li>✅ Biology – Human, Plant, and Animal Physiology, Genetics, Ecology</li>
+      <li>✅ English – Grammar, Literature, Essay Writing, Comprehension</li>
+      <li>✅ Kiswahili – Sarufi, Fasihi, Insha</li>
+      <li>✅ Geography, History, CRE/IRE, Business Studies, and ICT/Computer Studies</li>
+      <li>✅ Additional subjects – Life Skills, Environmental Studies, STEM, and Languages</li>
+    </ul>
+
+    <p><strong>All SmartElimu Connect resources are completely free</strong>, giving students, teachers, and schools the tools they need to teach, learn, and achieve academic excellence with ease.</p>
+
+    <p>👉 Access resources:<a href="./elimu.html" target="_blank">SmartElimu Connect</a><br>
+    📲 Download our app: <a href="https://play.google.com/store/apps/details?id=elimuconnect.tuitioncentre" target="_blank">Get it on Google Play</a></p>
+  `,
+  category: "resources"
+}
+
+
+	
+  ];
+
+  const postList = document.getElementById("post-list");
+
+  // ✅ Render blog previews
+  function renderPosts(filterCategory = "all", searchText = "") {
+    postList.innerHTML = "";
+    let filtered = posts;
+
+    if (filterCategory !== "all") {
+      filtered = filtered.filter(p => p.category === filterCategory);
+    }
+
+    if (searchText.trim() !== "") {
+      filtered = filtered.filter(p =>
+        p.title.toLowerCase().includes(searchText.toLowerCase()) ||
+        p.preview.toLowerCase().includes(searchText.toLowerCase())
+      );
+    }
+
+    if (filtered.length === 0) {
+      postList.innerHTML = `<p style="text-align:center; color:#888;">No articles found.</p>`;
+    } else {
+      filtered.forEach(post => {
+        const article = document.createElement("article");
+        article.style.cssText = "background:#fff; padding:20px; margin:20px 0; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1);";
+        article.innerHTML = `
+          <h3 style="color:#0066cc;">${post.title}</h3>
+          <p style="color:#555;">${post.preview}</p>
+          <span style="display:inline-block; margin-bottom:10px; padding:5px 10px; background:#eee; border-radius:5px; font-size:12px; color:#333;">${post.category}</span>
+          <br>
+          <button onclick="openFullPost(${post.id})" style="margin-top:10px; padding:8px 15px; border:none; background:#0066cc; color:#fff; border-radius:5px; cursor:pointer;">Read More →</button>
+        `;
+        postList.appendChild(article);
+      });
+    }
+  }
+
+  // ✅ Open full post at bottom
+  function openFullPost(id) {
+  const post = posts.find(p => p.id === id);
+  if (post) {
+    postList.innerHTML = `
+      <article id="full-post" style="background:#fff; padding:20px; margin:20px 0; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+        <h2 style="color:#0066cc;">${post.title}</h2>
+        <p style="color:#888; font-size:14px;">Published on ${new Date().toDateString()}</p>
+        ${post.full}
+        <p style="margin-top:30px;">
+          <button onclick="renderPosts()" style="padding:8px 15px; border:none; background:#333; color:#fff; border-radius:5px; cursor:pointer;">← Back to Blog</button>
+        </p>
+      </article>
+
+      <!-- Comments Section -->
+      <div id="comments-section" style="margin-top:40px;">
+        <h3>💬 Comments</h3>
+        <div id="comment-list" style="margin-bottom:20px;"></div>
+        <textarea id="comment-input" placeholder="Write a comment..." style="width:100%; height:80px; padding:10px;"></textarea><br>
+        <button onclick="addComment(${post.id})" style="margin-top:10px; padding:8px 15px; background:#0066cc; color:white; border:none; border-radius:5px;">Post Comment</button>
+      </div>
+    `;
+    loadComments(post.id);
+
+    // ✅ Scroll smoothly to the full post title instead of bottom
+    document.getElementById("full-post").scrollIntoView({ behavior: "smooth" });
+  }
+}
+
+
+  // ✅ Filter by category
+  function filterByCategory(cat) {
+    renderPosts(cat, document.getElementById("searchBox").value);
+  }
+
+  // ✅ Search listener
+  document.getElementById("searchBox").addEventListener("input", function() {
+    renderPosts("all", this.value);
+  });
+
+  // ✅ Comments Functions
+   function loadComments(postId) {
+    const commentsRef = db.ref("comments/" + postId);
+    commentsRef.on("value", snapshot => {
+      const list = document.getElementById("comment-list");
+      list.innerHTML = "";
+      if (!snapshot.exists()) {
+        list.innerHTML = `<p style="color:#888;">No comments yet. Be the first!</p>`;
+        return;
+      }
+      snapshot.forEach(child => {
+        const comment = child.val();
+        const key = child.key;
+        const div = document.createElement("div");
+        div.style.cssText = "background:#fff; border:1px solid #ccc; padding:10px; margin-bottom:10px; border-radius:5px;";
+        div.innerHTML = `
+          <p><strong>${comment.author || "Anonymous"}:</strong> ${comment.text}</p>
+          <button onclick="replyComment(${postId}, '${key}')" style="background:none; border:none; color:#0066cc; cursor:pointer;">↩ Reply</button>
+          <div id="replies-${key}" style="margin-left:20px; margin-top:5px;"></div>
+        `;
+        list.appendChild(div);
+
+        // ✅ Show replies
+        if (comment.replies) {
+          const repliesDiv = div.querySelector(`#replies-${key}`);
+          Object.values(comment.replies).forEach(reply => {
+            const r = document.createElement("p");
+            r.style.cssText = "background:#f1f1f1; padding:5px; border-radius:3px;";
+            r.innerHTML = `<strong>Reply:</strong> ${reply}`;
+            repliesDiv.appendChild(r);
+          });
+        }
+      });
+    });
+  }
+
+  function addComment(postId) {
+    const input = document.getElementById("comment-input");
+    const text = input.value.trim();
+    if (text !== "") {
+      const newCommentRef = db.ref("comments/" + postId).push();
+      newCommentRef.set({
+        text: text,
+        author: "User",   // you can later change this to logged-in user
+        timestamp: Date.now(),
+        replies: {}
+      }).then(() => {
+        input.value = "";
+        // ✅ Show success message
+        const status = document.createElement("p");
+        status.style.color = "green";
+        status.innerText = "✅ Posted successfully!";
+        input.parentNode.insertBefore(status, input.nextSibling);
+        setTimeout(() => status.remove(), 2000);
+      });
+    }
+  }
+
+  function replyComment(postId, commentId) {
+    const reply = prompt("Enter your reply:");
+    if (reply && reply.trim() !== "") {
+      db.ref("comments/" + postId + "/" + commentId + "/replies").push(reply);
+    }
+  }
+
+  // Initial render
+  renderPosts();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,219 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Elimu Connect Tools</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            font-size: 30px;
+        }
+        .dropdown {
+            margin: 10px;
+            font-size: 20px; /* Adjust font size here */
+            padding: 15px;   /* Adjust padding for more space */
+            width: 80%;      /* Make dropdown width 80% of screen */
+            max-width: 500px; /* Set a maximum width */
+        }
+        .category {
+            display: none;
+        }
+        .category select {
+            width: 500px;
+            padding: 10px;
+            font-size: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1>ELIMU CONNECT TOOLS & RESOURCES</h1>
+
+    <select id="mainDropdown" class="dropdown" onchange="showCategory()">
+        <option value="">Select a category...</option>
+        <option value="resources">Past papers, videos lessons, and ebooks</option>
+        <option value="quizes">QUIZZES</option>
+        <option value="math">Mathematics Tools</option>
+        <option value="chemistry">Chemistry Tools</option>
+        <option value="biology">Biology Tools</option>
+        <option value="physics">Physics Tools</option>
+        <option value="kiswahili">Kiswahili Tools</option>
+        <option value="english">English Tools</option>
+    </select>
+</body>
+</html>
+
+    <div id="math" class="category">
+        <select onchange="openLink(this)">
+            <option value="">Select a math tool...</option>
+            <option value="mathformulars.html">Math Formulas</option>
+            <option value="mathgraphs.html">Math Graphs</option>
+            <option value="transformation.html">Transformation</option>
+            <option value=" https://elimuconnect.github.io/ELIMU-CONNECT-/tables">Use of math tables</option>
+            <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/trigonometry">Trigonometry(Unit circle)</option>
+             <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/sohcahtoa">Trigonometry(SOHCAHTOA)</option>
+            <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/areas">AREA</option>
+            <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/volumes">VOLUME</option>
+                <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/quadraticsolver">Quadratic solver</option>
+           <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/statistics">STATISTICS</option>
+                <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/vectors">VECTORS</option>
+             <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/matrix1">MATRIX 1</option>
+             <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/matrix2">MATRIX 2</option>
+                <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/long&lat">LONG&LAT</option>
+              <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/differentiate&integrate">Differentiate&Integrate</option>
+           <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/area%20approximation">MID-ORDINATE & TRAPEZIUM RULES</option>
+             <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/integrationarea">INTEGRATION-AREA APPROXIMATION)</option>
+              
+
+
+
+
+
+
+
+          
+             <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/error">ERROR</option>
+                <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/logs">LOGARITHMS</option>
+              <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/commercial1">SIMPLE/COMPOUND INTEREST</option>
+           <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/incometax">INCOME TAX</option>
+             <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/variations">VARIATIONS</option>
+            <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/binomial">BINOMIAL EXPANSION</option>
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
+            
+        </select>
+    </div>
+
+<div id="resources" class="category">
+        <select onchange="openLink(this)">
+            <option value="">Select resources...</option>
+            <option value="https://www.socialcreator.com/pastpapersandquizes">ALL RESOURCES</option>
+            
+        </select>
+    </div>
+
+    <div id="quizes" class="category">
+        <select onchange="openLink(this)">
+            <option value="">Select A QUIZ...</option>
+            <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/quizes">ALL QUIZES</option>
+            
+        </select>
+    </div>
+
+
+    <div id="chemistry" class="category">
+        <select onchange="openLink(this)">
+            <option value="">Select a chemistry tool...</option>
+            <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/chemformulars">Chem Formulas</option>
+            <option value="chemgraphs.html">Chem Graphs</option>
+            <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/chemicalformula&quations">Chemical Formula & Equations</option>
+            <option value="chemreactions.html">Chem Reactions</option>
+            <option value="moleconcept.html">Mole Concept</option>
+            <option value="organicchem.html">Organic Chemistry</option>
+            <option value="periodictable.html">Periodic Table</option>
+            <option value="commongases.html">Common Gases</option>
+        <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/gaslaws">GAS LAWS</option>
+        <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/diffusionlaw">DIFFUSION LAW</option>
+
+
+<option value="https://elimuconnect.github.io/ELIMU-CONNECT-/ram">R.A.M</option>
+        <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/molesmassmm">MOLES,MASS,MOLAR MASS</option>
+<option value="https://elimuconnect.github.io/ELIMU-CONNECT-/empiricalmolecular">EMPIRICAL & MOLECULAR FORMULAR</option>
+        <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/titrations">DIRECT & BACK TITRATIONS</option>
+<option value="https://elimuconnect.github.io/ELIMU-CONNECT-/radioactivity">RADIOACTIVITY</option>
+        <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/solubility">SOLUBILITY</option>
+<option value="https://elimuconnect.github.io/ELIMU-CONNECT-/bondenergies">BOND ENERGIES</option>
+        <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/thermochemistry">THERMOCHEMISTRY, mc delta T</option>
+
+
+
+
+
+
+
+
+
+
+
+
+            
+            
+        </select>
+    </div>
+
+    <div id="biology" class="category">
+        <select onchange="openLink(this)">
+            <option value="">Select a biology tool...</option>
+            <option value="bones.html">Bones</option>
+            <option value="humanandfishanatomy.html">Human and Fish Anatomy</option>
+            <option value="plantantomy.html">Plant Anatomy</option>
+        </select>
+    </div>
+
+    <div id="physics" class="category">
+        <select onchange="openLink(this)">
+            <option value="">Select a physics tool...</option>
+            <option value="physicsformulars.html">Physics Formulas</option>
+            <option value="physicsprinciplesexplorer.html">Physics Principles Explorer</option>
+            <option value="unitconverter.html">Unit Converter</option>
+        </select>
+    </div>
+
+    <div id="kiswahili" class="category">
+        <select onchange="openLink(this)">
+            <option value="">Select a Kiswahili tool...</option>
+            <option value="kamusi.html">Kamusi</option>
+            <option value="methali.html">Methali</option>
+            <option value="nahaunamisema.html">Nahau na Misemo</option>
+        </select>
+    </div>
+
+    <div id="english" class="category">
+        <select onchange="openLink(this)">
+            <option value="">Select an English tool...</option>
+            <option value="dictionary.html">Dictionary</option>
+            <option value="ideoms.html">Idioms</option>
+            <option value="proverbs.html">Proverbs</option>
+            <option value="similiesandmetaphors.html">Similes and Metaphors</option>
+        </select>
+    </div>
+
+    <script>
+        function showCategory() {
+            let selectedCategory = document.getElementById("mainDropdown").value;
+            let categories = document.querySelectorAll(".category");
+            
+            categories.forEach(category => {
+                category.style.display = "none";
+            });
+
+            if (selectedCategory) {
+                document.getElementById(selectedCategory).style.display = "block";
+            }
+        }
+
+        function openLink(select) {
+            let selectedValue = select.value;
+            if (selectedValue) {
+                window.open(selectedValue, "_blank");
+            }
+        }
+    </script>
+</body>
+</html>

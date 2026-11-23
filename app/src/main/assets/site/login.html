@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ELIMU CONNECT website - Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #4CAF50, #81C784);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .login-container {
+      background-color: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .login-container h2 {
+      margin-bottom: 20px;
+      color: #4CAF50;
+    }
+
+    .login-form select {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    .login-form button {
+      width: 100%;
+      padding: 12px;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .login-form button:hover {
+      background-color: #45a049;
+    }
+
+    .footer-note {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #888;
+    }
+
+#chatbox-body {
+  margin-top: 20px;
+  text-align: left;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+.chat-message {
+  margin-bottom: 10px;
+}
+
+
+
+
+
+
+
+/* Style the entire bot message clearly */
+.bot-message {
+  text-align: left;
+  background-color: #eef4ff;
+  padding: 12px;
+  border-radius: 8px;
+  color: #222;  /* Clear dark text */
+  font-size: 15px;
+  line-height: 1.6;
+  font-family: Arial, sans-serif;
+}
+
+/* Style all links inside messages */
+.bot-message a {
+  color: #007BFF; /* Clear blue link */
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.bot-message a:hover {
+  text-decoration: underline;
+  color: #0056b3; /* Slightly darker blue on hover */
+}
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+a {
+  color: #007BFF; /* Bootstrap-like blue */
+  text-decoration: none;
+  font-weight: bold;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: #0056b3; /* Darker blue on hover */
+}
+
+
+
+
+
+    
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <h2>Welcome to ELIMU CONNECT APP</h2>
+    <form class="login-form" onsubmit="event.preventDefault(); sendMessage();">
+      <select id="role-select" required>
+        <option value="" disabled selected>Select your role</option>
+        <option value="student-paid">Student Paid Features</option>
+        <option value="tutor-paid">Tutor Paid Features</option>
+      </select>
+      <button type="submit">Continue</button>
+    </form>
+<div id="chatbox-body" class="messages"></div>
+
+    <div class="footer-note">Choose your role to continue</div>
+  </div>
+
+    <script>
+        let chatboxBody = document.getElementById("chatbox-body");
+        let countdownMessageDisplayed = false;  // Track if countdown message has been displayed
+        let countdownMessageElement = null; // Store the countdown message element for later updates
+
+        // Array of 100 passwords (can be extended with actual passwords)
+        const passwords = [
+             "pS9hJk!hPmD0bF7T", "Qw4$KiH6dFg8L2Zn", "M5a#Hq9oLpD1g0Fj", "R!3hP8LsE6kZyTf7",
+            "Xj2zU!hYqW8mK9Rn", "ZnD5oFq#XlT1hHs7", "P@0xWq2yLoS3tGb8", "Ym9bZqJk!5R2fX7Tc", "7Vq#9tE0yPjKn3Gs",
+            "B2FpZ#6dSk8CwLJ9", "WmR1!Yd9q8TzJ7p5", "N2xL5rPv@z6oK7iF", "QeJ8iP1#FzR2tCw0", "YpW5L7sT2h3Xo9kG",
+            "O4b6jQsN@r9V3YwT", "R#7yX9sTz0J4wKvG", "i2Xy6D$LqY7CmFvR", "P8yK0sZf9w6N3H2iL", "S3QzT9x5aX7pW!2v",
+            "zT3X1y4Mv#Ls7q0P", "iD7T6H2rX3kVbW9G", "fYz9p0B4ZxK8@W6t", "K5PqX9cL2V3#hYt7", "P9Lm#vF0Q8gR2tJ3",
+            "uZ6fM9jY8t0p5W2S", "F3vPz9hJ7B0Yx2R1", "wG7D5kX2lZ8F1rQj", "q5J7kL0xS3yFz1pY", "A8wQ9P7fK2R1!zTx",
+            "v9H0G7Uq2Z#5nL3F", "Kp2J4tQyR8wV5mF1", "Z3vN6kF2T9Xr4sB0", "wL2vY1X9Z7fTpG3M", "j6sQ8W5P1Fz0iR2C",
+            "bF9Y3kL1Rz5vH2oT", "Q3K7T9vN1g6pFz0m", "s8Yq3oR1V9pLz7gD", "F2mV6iW9zX1P0rT7", "N4g9X3L2sQk7vWzJ",
+            "vR5pY1G2mZ7s9B0W", "Q9X1tK0L2y5mF7Pz", "k8WzN2V7yF3jL0X1", "Y2tM9P1gL6X0vF7R", "f4T3JbK7h9Z2N0pV",
+            "V1m5zP9L8rY3Kj0X", "G6V9oQ2Z1p8XyR3T", "w9Y1gF4Tz2P7H0mL", "L9P7tX2Bq6vY1Wz3", "V1X2L5Tz9rF0b3Y7",
+            "Q7X6t1zP9f3yV2J5", "rP5zK2W8Q1F7yL0t", "v9X2F4T3k7J1Y0Qm", "sR1P7zF6L2X0y9jT", "B2t8kF6X5Zq1V0m7",
+            "Q9W6tL5y1G2s0X3J", "F3z0R7m5B2X8t9Y1", "K6Q4zP7f5R1Xy9T0", "F1T9W7p2Y6kXrL0m", "D9g7B6v1J2F0tX3P",
+            "m8L9F3V1X2pY4W0t", "j0T6X3K9L1B5vP2Y", "Y3R2tP7F1X6L9v0W", "sT5X9yP0F2K1L7Qm", "J2F7vT8P1X5L9Y0k",
+            "B4X2F7W1t9mL3R6p", "L9Y0vX5t2P3J1F6k", "R7B9zF2L1X6P3t0Y", "F5X2mR9Y1pL7V3tK", "K9Y6pR7L3z2F1X0t",
+            "Z4F7T1P9X3Y8L5m0", "V2kX5T1L3F9pY0R7", "qB8R9Y1mX2L5P3F0", "B9F2X1Y5L7T3v0mP", "V1L7X9p2R0Y6B3tF",
+            "L5X2F1T9Y0R6pK3m", "F1R7T6X0P3Y9L2B5", "Y7B2X5L9T1F6m3P0", "Q3X1F7Y5R2L0T9K8", "K9P1X2Y5F3L6R7t0",
+            "T7X9F1L3Y0R2B5k6", "Q1X9T2Y7F3P6L0R5", "Z3T9L2F5Y0X6P1B7", "X5Y9F7L0T2K3R1P6", "B9T1X0Y7L3F5K2R6",
+            "P7Y9X3L2T0F5R6K1", "L2X9Y0P5T6R1F7K3", "Y1L9F7X2T0R5P3K6", "K3X7P1Y0T2F9L6R5", 
+        ];
+
+        // Function to display messages in chatbox
+        function displayMessage(message, sender, id = '') {
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("chat-message", `${sender}-message`);
+            messageDiv.innerHTML = message;
+            if (id) messageDiv.id = id;  // Assign a unique id if provided
+            chatboxBody.appendChild(messageDiv);
+            chatboxBody.scrollTop = chatboxBody.scrollHeight;  // Scroll to the bottom
+        }
+
+
+        // Function to validate paid student password
+function validatePassword(password) {
+    return passwords.includes(password);  // Check if password is in the array
+}
+
+function sendMessage() {
+    let role = document.getElementById("role-select").value;
+    if (!role) {
+        alert("Please select your role.");
+        return;
+    }
+
+    let response = "";
+
+    // Check if the password has already been validated
+    const passwordValidated = localStorage.getItem('passwordValidated');
+
+    if (role === "student-paid" || role === "tutor-paid") {
+        if (!passwordValidated) {
+            // Ask for password only if password hasn't been validated before
+            const inputPassword = prompt("Enter your password:");
+
+            // Check if the entered password is valid
+            if (validatePassword(inputPassword)) {
+                response = `You now have access to PAID features.<br>
+    Click here: <a href='./tools.html' target='_blank'>Student/tutors paid Features</a>`;
+
+                displayMessage(response, "bot");
+
+                response = "Enjoy advanced features and tools to enhance your experience!";
+                displayMessage(response, "bot");
+
+                // Start countdown for paid features
+                startPaidFeaturesCountdown();
+
+                // Store a flag indicating that the password is validated
+                localStorage.setItem('passwordValidated', 'true');
+            } else {
+                response = "Invalid or expired password. Please check your password or subscribe.";
+                displayMessage(response, "bot");
+            }
+        } else {
+            // If password has already been validated
+           response = `You already have access to the PAID features.<br>
+    Click here: <a href='./tools.html' target='_blank'>Student/Teacher paid Features</a>`;
+
+            displayMessage(response, "bot");
+
+            startPaidFeaturesCountdown();  // Start countdown for paid features
+        }
+    } else if (role === "student-free-trial" || role === "tutor-free-trial") {
+        response = `You can access the Free Trial for 7 days.<br>
+            Click here to start: <a href='go:trial1' target='_blank'>Start Students Free Trial</a> or 
+            <a href='go:trial2' target='_blank'>Tutors Free Trial</a>`;
+        displayMessage(response, "bot");
+        updateTrialCountdown();  // Start countdown for free trial
+    } else if (role === "student-free" || role === "tutor-free") {
+        response = `You have access to basic features.<br>
+            Click here: <a href='go:free' target='_blank'>Student Free Features</a> or 
+            <a href='go:tutorfree' target='_blank'>Tutor Free Features</a>`;
+        displayMessage(response, "bot");
+    }
+}
+
+// Function to clear the password validation on logout or similar action
+function clearPasswordValidation() {
+    localStorage.removeItem('passwordValidated');
+}
+ // Function to update trial countdown every second
+        function updateTrialCountdown() {
+            const trialKey = "student-free-trial-trialStart";
+            let trialStart = localStorage.getItem(trialKey);
+
+            // If trialStart doesn't exist, it's the first time so initialize it
+            if (!trialStart) {
+                trialStart = Date.now(); // Set trial start to the current time
+                localStorage.setItem(trialKey, trialStart);
+            }
+
+            const trialDuration = 7 * 24 * 60 * 60 * 1000; // 90 days in milliseconds
+            const trialEnd = parseInt(trialStart) + trialDuration;
+            const now = Date.now();
+
+            // Check if the trial is still active
+            if (now < trialEnd) {
+                const remainingTime = trialEnd - now;
+                const days = Math.floor(remainingTime / (24 * 60 * 60 * 1000));
+                const hours = Math.floor((remainingTime % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+                const minutes = Math.floor((remainingTime % (60 * 60 * 1000)) / (60 * 1000));
+                const seconds = Math.floor((remainingTime % (60 * 1000)) / 1000);
+
+                const countdownMessage = `Your free trial ends in: <b>${days} days, ${hours} hours, ${minutes} minutes, and ${seconds} seconds</b>`;
+                
+                // Update the trial message only once
+                let existingMessage = document.getElementById("trial-message");
+                if (existingMessage) {
+                    existingMessage.innerHTML = countdownMessage;
+                } else {
+                    displayMessage(countdownMessage, "bot", "trial-message");
+                }
+
+                // Update every second
+                setTimeout(updateTrialCountdown, 1000);
+            } else {
+                // Show the expiry message once when trial ends
+                const expiryMessage = "Your free trial has ended. Please pay to request for  a password <a href='./tools.html' target='_blank'>Student/Teacher paid Features</a>";
+                let existingMessage = document.getElementById("trial-message");
+                if (!existingMessage) {
+                    displayMessage(expiryMessage, "bot", "trial-message");
+                }
+            }
+        }
+
+        // Function to handle countdown for paid features
+// Function to start the paid features countdown
+function startPaidFeaturesCountdown() {
+    const paidAccessKey = "student-paid-access-start"; // Key to store the paid access start time
+    const paidDuration = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+    let paidAccessStart = localStorage.getItem(paidAccessKey);
+
+    // If not already stored, initialize the start time
+    if (!paidAccessStart) {
+        paidAccessStart = Date.now(); // Set current time as the start time
+        localStorage.setItem(paidAccessKey, paidAccessStart);
+    }
+
+    const paidAccessEnd = parseInt(paidAccessStart) + paidDuration; // Calculate the end time
+    const now = Date.now();
+
+    // Function to update the countdown every second
+    function updateCountdown() {
+        const now = Date.now();
+        const remainingTime = paidAccessEnd - now;
+
+        if (remainingTime <= 0) {
+            // When the countdown ends
+            const expiryMessage = "Your paid features have expired. Please pay/subscribe <a href='./tools.html' target='_blank'>Student/Teacher paid Features</a>";
+            const existingMessage = document.getElementById("paid-countdown");
+            if (!existingMessage) {
+                displayMessage(expiryMessage, "bot", "paid-countdown");
+            } else {
+                existingMessage.innerHTML = expiryMessage;
+            }
+            clearInterval(countdownInterval);
+            return;
+        }
+
+        // Calculate days, hours, minutes, and seconds
+        const days = Math.floor(remainingTime / (24 * 60 * 60 * 1000));
+        const hours = Math.floor((remainingTime % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+        const minutes = Math.floor((remainingTime % (60 * 60 * 1000)) / (60 * 1000));
+        const seconds = Math.floor((remainingTime % (60 * 1000)) / 1000);
+
+        const countdownMessage = `Your paid features expire in: <b>${days} days, ${hours} hours, ${minutes} minutes, and ${seconds} seconds</b>.`;
+
+        // Update or create the countdown message
+        let existingMessage = document.getElementById("paid-countdown");
+        if (existingMessage) {
+            existingMessage.innerHTML = countdownMessage;
+        } else {
+            displayMessage(countdownMessage, "bot", "paid-countdown");
+        }
+    }
+
+    // Start the countdown interval
+    updateCountdown(); // Initial call to display countdown immediately
+    const countdownInterval = setInterval(updateCountdown, 1000);
+}
+    </script>
+</body>
+</html>

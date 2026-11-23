@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REMEDIAL LESSON TRACKER</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        header {
+            background-color: #0073e6;
+            color: white;
+            padding: 20px;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+        .form-container {
+            margin: 20px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            max-width: 600px;
+            margin: 20px auto;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+        .form-container input, .form-container select, .form-container button {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px 10px 20px 10px;
+            font-size: 1rem;
+        }
+        .form-container button {
+            background-color: #0073e6;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .form-container button:hover {
+            background-color: #005bb5;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        footer {
+            margin-top: 30px;
+            color: gray;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>REMEDIAL LESSON TRACKER</h1>
+    </header>
+
+    <div class="form-container">
+        <form id="lesson-form">
+            <label for="day">Day:</label>
+            <select id="day" required>
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+                <option value="Saturday">Saturday</option>
+                <option value="Sunday">Sunday</option>
+            </select>
+            <label for="date">Date:</label>
+            <input type="date" id="date" required>
+            <label for="time-from">From:</label>
+            <input type="time" id="time-from" required>
+            <label for="time-to">To:</label>
+            <input type="time" id="time-to" required>
+            <label for="status">Lesson Status:</label>
+            <select id="status" required>
+                <option value="Attended">Attended</option>
+                <option value="Not Attended">Not Attended</option>
+                <option value="Recovered">Recovered</option>
+            </select>
+            <button type="submit">Add Lesson</button>
+        </form>
+    </div>
+
+    <h3>Lesson Timetable</h3>
+    <table id="lesson-table">
+        <thead>
+            <tr>
+                <th>Day</th>
+                <th>Date</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dynamic rows will be appended here -->
+        </tbody>
+    </table>
+
+    <footer>
+        © 2024 Lesson Management
+    </footer>
+
+    <script>
+	
+	const MAIN_LINK = "https://elimuconnect.github.io/ELIMU-CONNECT-/schooladmin2";
+
+// Helper: get base URL without query string
+function getBaseURL(url){
+    return url.split('?')[0];
+}
+
+// Check if this is main link access (ignore query parameters)
+const isMainLink = getBaseURL(window.location.href) === MAIN_LINK;
+
+// Check if we came from main link redirect (ignore query)
+const fromMainLink = getBaseURL(document.referrer) === MAIN_LINK;
+
+if(isMainLink || fromMainLink){
+    // ✅ Access allowed – do nothing
+} else {
+    // ❌ Block access
+    document.body.innerHTML = `
+        <div style="text-align:center; padding:50px; font-family:sans-serif;">
+            <h2>Access Restricted</h2>
+            <p>You cannot open this tool directly.</p>
+            <p>Please open it from the main link(school Tools).</p>
+
+            <a href="${MAIN_LINK}"
+               style="font-size:1.2rem; color:#0078D7;">
+               Open from Main School Tools
+            </a>
+        </div>
+    `;
+    throw new Error("Access blocked until opened from main link.");
+}
+
+	
+	
+	
+	
+        // Initialize lessons from localStorage
+        window.onload = function() {
+            const savedLessons = localStorage.getItem('lessons');
+            if (savedLessons) {
+                JSON.parse(savedLessons).forEach(addRowToTable);
+            }
+        };
+
+        // Form submission handler
+        document.getElementById('lesson-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const day = document.getElementById('day').value;
+            const date = document.getElementById('date').value;
+            const timeFrom = document.getElementById('time-from').value;
+            const timeTo = document.getElementById('time-to').value;
+            const status = document.getElementById('status').value;
+
+            const lesson = { day, date, timeFrom, timeTo, status };
+
+            addRowToTable(lesson);
+            saveLesson(lesson);
+            this.reset();
+        });
+
+        // Add row to the table
+        function addRowToTable({ day, date, timeFrom, timeTo, status }) {
+            const tableBody = document.querySelector('#lesson-table tbody');
+            const row = document.createElement('tr');
+
+            row.innerHTML = `
+                <td>${day}</td>
+                <td>${date}</td>
+                <td>${timeFrom}</td>
+                <td>${timeTo}</td>
+                <td>${status}</td>
+                <td><button onclick="removeLesson(this)">Remove</button></td>
+            `;
+
+            tableBody.appendChild(row);
+        }
+
+        // Save lesson to localStorage
+        function saveLesson(lesson) {
+            const lessons = JSON.parse(localStorage.getItem('lessons')) || [];
+            lessons.push(lesson);
+            localStorage.setItem('lessons', JSON.stringify(lessons));
+        }
+
+        // Remove lesson with confirmation
+        function removeLesson(button) {
+            const confirmation = confirm("Are you sure you want to remove this lesson?");
+            if (!confirmation) return;
+
+            const row = button.parentElement.parentElement;
+            const day = row.children[0].textContent;
+            const date = row.children[1].textContent;
+            const timeFrom = row.children[2].textContent;
+            const timeTo = row.children[3].textContent;
+            const status = row.children[4].textContent;
+
+            row.remove();
+
+            const lessons = JSON.parse(localStorage.getItem('lessons')).filter(
+                lesson => !(lesson.day === day && lesson.date === date && lesson.timeFrom === timeFrom && lesson.timeTo === timeTo && lesson.status === status)
+            );
+
+            localStorage.setItem('lessons', JSON.stringify(lessons));
+        }
+    </script>
+</body>
+</html>

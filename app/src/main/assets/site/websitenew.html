@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ELIMU CONNECT LTD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          montserrat: ['Montserrat', 'sans-serif'],
+        },
+      },
+    }
+  }
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
+
+
+
+
+<style>
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideInRight {
+      0% { opacity: 0; transform: translateX(50px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes zoomIn {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-fade-in {
+      animation: fadeIn 1s ease-out forwards;
+    }
+    .animate-slide-in-right {
+      animation: slideInRight 1s ease-out forwards;
+    }
+    .animate-zoom-in {
+      animation: zoomIn 1s ease-out forwards;
+    }
+    /* Initially hide all images with animation */
+    img[data-animate] {
+      opacity: 0;
+      transform-style: preserve-3d;
+    }
+	
+	
+	
+	
+	
+	
+	/* Animation classes */
+  .slide-in {
+    animation: slideInFade 4s ease-in-out infinite;
+  }
+  .slide-left {
+    animation: slideLeftFade 4s ease-in-out infinite;
+    animation-delay: 1.33s;
+  }
+  .slide-right {
+    animation: slideRightFade 4s ease-in-out infinite;
+    animation-delay: 2.66s;
+  }
+  .zoom-in {
+    animation: zoomFade 4s ease-in-out infinite;
+    animation-delay: 0s;
+  }
+
+  @keyframes slideInFade {
+    0%, 33% {opacity: 1; transform: translateX(0);}
+    40%, 100% {opacity: 0; transform: translateX(-20px);}
+  }
+  @keyframes slideLeftFade {
+    0%, 33% {opacity: 0; transform: translateX(20px);}
+    40%, 73% {opacity: 1; transform: translateX(0);}
+    80%, 100% {opacity: 0; transform: translateX(-20px);}
+  }
+  @keyframes slideRightFade {
+    0%, 66% {opacity: 0; transform: translateX(-20px);}
+    73%, 100% {opacity: 1; transform: translateX(0);}
+  }
+  @keyframes zoomFade {
+    0%, 33% {opacity: 1; transform: scale(1);}
+    40%, 100% {opacity: 0; transform: scale(1.2);}
+  }
+	
+	
+	
+	.carousel-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+  }
+
+  .carousel-image.active {
+    opacity: 1;
+  }
+	
+	
+	
+	
+	
+	
+	.oval-video {
+    width: 640px;
+    height: 360px;
+    border-radius: 50% / 30%;
+    overflow: hidden;
+  }
+
+  .oval-video video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	.carousel-image {
+    display: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.5s ease-in-out;
+  }
+  .carousel-image.active {
+    display: block;
+  }
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	.shape-circle {
+    clip-path: circle(50% at 50% 50%);
+  }
+
+  .shape-triangle {
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  }
+
+  
+  .shape-star {
+  clip-path: polygon(
+    50% -20%,
+    72% 30%,
+    120% 30%,
+    80% 60%,
+    95% 120%,
+    50% 85%,
+    5% 120%,
+    20% 60%,
+    -20% 30%,
+    28% 30%
+  );
+}
+
+  .shape-hexagon {
+    clip-path: polygon(
+      25% 5%, 75% 5%,
+      100% 50%, 75% 95%,
+      25% 95%, 0% 50%
+    );
+  }
+
+  .shape-diamond {
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  }
+
+  .shape-oval {
+    clip-path: ellipse(50% 35% at 50% 50%);
+  }
+
+  .shape-cylinder {
+    clip-path: ellipse(50% 30% at 50% 0%), ellipse(50% 30% at 50% 100%);
+    border-radius: 50% / 30%;
+  }
+
+  .shape-cone {
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  }
+
+  .shape-gasjar {
+    clip-path: polygon(
+      30% 0%, 70% 0%, 70% 15%, 80% 20%,
+      80% 80%, 70% 85%, 70% 100%, 30% 100%,
+      30% 85%, 20% 80%, 20% 20%, 30% 15%
+    );
+  }
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+	
+	
+	.section h2 {
+      text-align: center;
+      color: #0077cc;
+      margin-bottom: 1rem;
+    }
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+    }
+    .features li {
+      list-style: none;
+      background: #e6f2ff;
+      padding: 1rem;
+      border-left: 5px solid #0077cc;
+      border-radius: 5px;
+    }
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+  </style>
+
+
+</head>
+<body class="bg-white text-gray-800 font-sans leading-relaxed">
+
+  <!-- Header / Navbar -->
+  
+ 
+  <header class="bg-blue-800 text-white p-6 shadow-md">
+  <div class="max-w-7xl mx-auto flex justify-between items-center">
+    <!-- Logo and Company Name -->
+    <div class="flex items-center space-x-4">
+      <img src="https://static.wixstatic.com/media/9ba186_61b351de3531446995b426f1c49950ed~mv2.png" 
+           alt="Savina Logo" class="h-12 w-auto rounded shadow-md">
+      <h1 class="text-xl md:text-2xl font-bold">ELIMU CONNECT LTD</h1>
+    </div>
+
+    <!-- Desktop Navigation -->
+    <nav class="hidden md:flex space-x-6 text-sm font-medium">
+      <a href="#about" class="hover:underline">About Us</a>
+	  <a href="#services" class="hover:underline">Services</a>
+      <a href="#testimonials" class="block text-sm hover:underline">Testimonials</a>
+	 <a href="#features" class="block text-sm hover:underline">Key Features</a>
+	
+    
+	
+	 <a href="./appaccessdaily.html" target="_blank">Login</a>
+  <a href="https://play.google.com/store/apps/details?id=elimuconnect.tuitioncentre" target="_blank">Install Our App</a>
+  
+	
+	</nav>
+
+    <!-- Mobile Menu Button -->
+    <div class="md:hidden">
+      <button id="mobile-menu-button" class="text-white text-3xl focus:outline-none">
+        &#x22EE; <!-- Unicode for vertical ellipsis (⋮) -->
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu (hidden by default) -->
+  <div id="mobile-menu" class="md:hidden mt-4 px-4 space-y-2 hidden">
+    <a href="#about" class="block text-sm hover:underline">About Us</a>
+    <a href="#services" class="block text-sm hover:underline">Services</a>
+	<a href="#testimonials" class="block text-sm hover:underline">Testimonials</a>
+    <a href="./appaccessdaily.html" target="_blank">Login</a>
+  <a href="https://play.google.com/store/apps/details?id=elimuconnect.tuitioncentre" target="_blank">Install our App</a>
+  
+ 
+  
+  </div>
+</header>
+
+ 
+  
+  <!-- Hero Section with Oval Video -->
+<section class="w-full h-96 flex items-center justify-center my-6 mx-auto max-w-6xl" data-animate="zoom-in">
+  <div class="w-[640px] h-[360px] rounded-[50%/30%] overflow-hidden shadow-xl">
+    <video autoplay muted loop playsinline class="w-full h-full object-cover">
+      <source src="https://cdn.pixabay.com/video/2021/09/15/88751-606111298_large.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+</section>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section id="ict" class="px-4 py-8 max-w-7xl mx-auto text-center">
+
+  <h2 class="text-3xl font-bold mb-10">ICT INTEGRATION IN EDUCATION</h2>
+  
+  
+  
+  
+
+  
+  	
+	
+  <h3 class="text-5xl font-bold mb-4 text-purple-600">ICT INTEGRATION IN EDUCATION</h3>
+  <p class="font-montserrat text-[18px] leading-relaxed max-w-3xl mx-auto">
+    Book flights with ease through our comprehensive air ticketing and Visa services. We partner with major airlines to offer competitive rates and convenient schedules. Let us handle your travel arrangements for a seamless journey.
+  </p>
+
+  <div class="relative w-full max-w-6xl mx-auto mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+    <!-- Rectangle -->
+    <video class="shape-rectangle w-full h-64 object-cover" autoplay loop muted playsinline>
+      <source src="https://videos.pexels.com/video-files/5892366/5892366-uhd_2560_1440_30fps.mp4" type="video/mp4">
+    </video>
+
+    <!-- Circle -->
+    <video class="shape-circle w-full h-64 object-cover" autoplay loop muted playsinline>
+      <source src="https://videos.pexels.com/video-files/5939926/5939926-uhd_2560_1440_25fps.mp4" type="video/mp4">
+    </video>
+
+    <!-- Oval -->
+    <video class="shape-oval w-full h-64 object-cover" autoplay loop muted playsinline>
+      <source src="https://videos.pexels.com/video-files/6168921/6168921-uhd_2560_1440_30fps.mp4" type="video/mp4">
+    </video>
+
+    
+
+    <!-- Circle -->
+    <video class="shape-circle w-full h-64 object-cover" autoplay loop muted playsinline>
+      <source src="https://videos.pexels.com/video-files/4298113/4298113-uhd_2560_1440_25fps.mp4" type="video/mp4">
+    </video>
+
+    <!-- Oval -->
+    <video class="shape-oval w-full h-64 object-cover" autoplay loop muted playsinline>
+      <source src="https://videos.pexels.com/video-files/5183278/5183278-hd_1920_1080_30fps.mp4" type="video/mp4">
+    </video>
+
+   
+    <!-- Circle -->
+    <video class="shape-circle w-full h-64 object-cover" autoplay loop muted playsinline>
+      <source src="https://videos.pexels.com/video-files/1422633/1422633-hd_1920_810_24fps.mp4" type="video/mp4">
+    </video>
+
+  
+  </div>
+</section>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <section id="services" class="px-4 py-8 max-w-7xl mx-auto text-center">
+  
+  <section class="section">
+  <h2>Key Features</h2>
+  <ul class="features">
+    <li>Live Lessons – From just Ksh 100 / $1.3 per hour</li>
+    <li>FREE AI-Powered Live Tutor</li>
+    <li>Connect with Nearby Tutors</li>
+    <li>Evening School-Based Lessons</li>
+    <li>Homework Help on Demand</li>
+    <li>2000+ Video Lessons</li>
+    <li>1000+ Quizzes</li>
+    <li>Weekly Live Tests + Certificates</li>
+    <li>1000 Q&A Pairs</li>
+    <li>30,000 Past Papers</li>
+    <li>200 Ebooks</li>
+    <li>3 Fun Math Games</li>
+    <li>Student Forums + Peer Help</li>
+    <li>Career Guidance Hub</li>
+    <li>TSC Swaps Platform</li>
+    <li>Teachers’ Forum & File Sharing</li>
+    <li>Math Game Competitions (Tutors)</li>
+    <li>Schemes of Work & Lesson Plans</li>
+    <li>Remedial Lessons Tracker</li>
+    <li>Personal Study Timetable Maker</li>
+    <li>Math, Chemistry & Physics Formula Tools</li>
+    <li>Scientific Calculator & Graph Tools</li>
+    <li>Human, Fish, Plant Anatomy Tools</li>
+    <li>Digital Dictionary & Kamusi</li>
+    <li>Similes, Metaphors, Misemo, Nahau, Methali Tools</li>
+    <li>Digital Note Book</li>
+    <li>Digital Periodic Table</li>
+    <li>Physics Principles & Mole Concept Tools</li>
+    <li>Chemical Equations & Organic Chemistry Tools</li>
+    <li>Area, Volume, Trigonometry, Logarithm Tools</li>
+    <li>Income Tax, Interest, Variations & Binomial Tools</li>
+    <li>Latitudes & Longitudes Tool</li>
+    <li>Area Approximation & Errors Tool</li>
+    <li>Statistics & Matrices Calculators</li>
+    <li>Differentiation & Integration Tools</li>
+  </ul>
+</section>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <section id="service5" class="mb-16">
+  <h3 class="text-5xl font-bold mb-4 text-purple-600">AIR TICKETING AND VISA SERVICES</h3>
+  <p class="font-montserrat text-[18px] leading-relaxed max-w-3xl mx-auto mb-8">
+    Book flights with ease through our comprehensive air ticketing and Visa services. We partner with major airlines to offer competitive rates and convenient schedules. Let us handle your travel arrangements for a seamless journey.
+  </p>
+
+  <div class="relative w-full max-w-7xl mx-auto grid grid-cols-5 gap-4">
+    <!-- 30 images with shapes and double height -->
+    <!-- You can replace src URLs with your own -->
+    <!-- Row 1 -->
+    <img src="https://images.pexels.com/photos/3825572/pexels-photo-3825572.jpeg?auto=compress&cs=tinysrgb&w=600" class="object-cover w-full h-80 shape-circle" alt="">
+    <img src="https://images.pexels.com/photos/7723354/pexels-photo-7723354.jpeg?auto=compress&cs=tinysrgb&w=600" class="object-cover w-full h-80 shape-cone" alt="">
+    <img src="https://images.pexels.com/photos/248152/pexels-photo-248152.jpeg?auto=compress&cs=tinysrgb&w=600" class="object-cover w-full h-80 shape-star" alt="">
+    <img src="https://images.pexels.com/photos/3825379/pexels-photo-3825379.jpeg?auto=compress&cs=tinysrgb&w=600" class="object-cover w-full h-80 shape-hexagon" alt="">
+    <img src="https://images.pexels.com/photos/3825443/pexels-photo-3825443.jpeg?auto=compress&cs=tinysrgb&w=600" class="object-cover w-full h-80 shape-diamond" alt="">
+
+    <!-- Row 2 -->
+    <img src="https://images.pexels.com/photos/714699/pexels-photo-714699.jpeg?auto=compress&cs=tinysrgb&w=600" class="object-cover w-full h-80 shape-circle" alt="">
+    <img src="https://images.pexels.com/photos/3781338/pexels-photo-3781338.jpeg?auto=compress&cs=tinysrgb&w=600" class="object-cover w-full h-80 shape-triangle" alt="">
+    <img src="https://images.pexels.com/photos/5905857/pexels-photo-5905857.jpeg?auto=compress&cs=tinysrgb&w=600" class="object-cover w-full h-80 shape-cylinder" alt="">
+    <img src="https://images.pexels.com/photos/5212316/pexels-photo-5212316.jpeg?auto=compress&cs=tinysrgb&w=600" class="object-cover w-full h-80 shape-hexagon" alt="">
+    <img src="https://images.pexels.com/photos/5775/calculator-scientific.jpg?auto=compress&cs=tinysrgb&w=600" class="object-cover w-full h-80 shape-diamond" alt="">
+
+    <!-- Row 3 -->
+    <img src="https://images.pexels.com/photos/6156448/pexels-photo-6156448.jpeg?auto=compress&cs=tinysrgb&w=600" class="object-cover w-full h-80 shape-circle" alt="">
+    <img src="https://images.pexels.com/photos/2678059/pexels-photo-2678059.jpeg?auto=compress&cs=tinysrgb&w=600" class="object-cover w-full h-80 shape-triangle" alt="">
+    <img src="https://images.pexels.com/photos/674318/pexels-photo-674318.jpeg?auto=compress&cs=tinysrgb&w=600" class="object-cover w-full h-80 shape-star" alt="">
+    <img src="https://images.pexels.com/photos/950327/pexels-photo-950327.jpeg?auto=compress&cs=tinysrgb&w=600" class="object-cover w-full h-80 shape-hexagon" alt="">
+    <img src="https://cdn.pixabay.com/photo/2013/07/12/13/50/heart-147389_1280.png" class="object-cover w-full h-80 shape-diamond" alt="">
+
+    <!-- Row 4 -->
+    <img src="https://cdn.pixabay.com/photo/2021/07/20/12/10/atom-6480540_640.jpg" class="object-cover w-full h-80 shape-circle" alt="">
+    <img src="https://cdn.pixabay.com/photo/2015/12/19/23/17/albert-einstein-1100449_1280.png" class="object-cover w-full h-80 shape-triangle" alt="">
+    <img src="https://cdn.pixabay.com/photo/2018/02/26/15/10/pulley-3183263_640.png" class="object-cover w-full h-80 shape-star" alt="">
+    <img src="https://cdn.pixabay.com/photo/2016/07/18/07/39/quantum-mechanics-1525470_640.jpg" class="object-cover w-full h-80 shape-circle" alt="">
+    <img src="https://cdn.pixabay.com/photo/2021/11/09/06/38/physics-6780773_640.jpg" class="object-cover w-full h-80 shape-diamond" alt="">
+
+    <!-- Row 5 -->
+    <img src="https://images.pexels.com/photos/159581/dictionary-reference-book-learning-meaning-159581.jpeg?auto=compress&cs=tinysrgb&w=600" class="object-cover w-full h-80 shape-circle" alt="">
+    <img src="https://images.pexels.com/photos/27240871/pexels-photo-27240871/free-photo-of-a-pile-of-books-with-the-words-the-best-books-to-read-in-2020.jpeg?auto=compress&cs=tinysrgb&w=600" class="object-cover w-full h-80 shape-triangle" alt="">
+    <img src="https://images.pexels.com/photos/1205651/pexels-photo-1205651.jpeg?auto=compress&cs=tinysrgb&w=600" class="object-cover w-full h-80 shape-star" alt="">
+    <img src="https://images.pexels.com/photos/1179229/pexels-photo-1179229.jpeg?auto=compress&cs=tinysrgb&w=600" class="object-cover w-full h-80 shape-hexagon" alt="">
+    <img src="https://images.pexels.com/photos/382177/pexels-photo-382177.jpeg?auto=compress&cs=tinysrgb&w=600" class="object-cover w-full h-80 shape-diamond" alt="">
+  </div>
+</section>
+ 
+  
+  
+  
+  
+  
+  
+  
+  
+
+	
+	 
+	 
+	 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+
+  <!-- About Section -->
+  <section id="about" class="bg-gray-100 py-12">
+    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <h2 class="text-3xl font-bold mb-4">Introduction</h2>
+        <p  class="font-montserrat text-[18px] leading-relaxed max-w-3xl mx-auto">Savina Consultancy Tour & Travel Ltd is based in Nairobi, Kenya, specializing in providing personalized and reliable travel services.</p>
+
+        <h2 class="text-2xl font-bold mb-2">About Us</h2>
+        <p class="font-montserrat text-[18px] leading-relaxed max-w-3xl mx-auto">We are committed to high-quality travel experiences, backed by a strong, professional team with regional and international expertise.</p>
+        <p class="mt-2">Our multinational team brings extensive knowledge in travel, tourism, and hospitality, offering exceptional service to every client.</p>
+      </div>
+    <div>
+  <img src="https://static.wixstatic.com/media/9ba186_3abc7ccd851d4146ab2a13038b8734b5~mv2.jpg"
+       alt="About Image"
+       class="w-64 rounded-xl shadow-lg"
+       data-animate="slide-in-right">
+</div>
+    </div>
+  </section>
+
+  <!-- Commitment Section -->
+  <section id="commitment" class="bg-white py-12">
+    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-10 items-center">
+      <div class="h-96 w-full rounded-xl shadow-md bg-cover bg-center"
+           style="background-image: url('https://static.wixstatic.com/media/9ba186_63153de66fe9458ea6178a16e294a2c8~mv2.png');"
+           data-animate="fade-in">
+      </div>
+      <div>
+        <h2 class="text-3xl font-bold mb-4">Our Commitment</h2>
+        <p class="font-montserrat text-[18px] leading-relaxed max-w-3xl mx-auto">We offer first-rate flexible service in a professional and personalized manner, adding real value to every client’s experience.</p>
+
+        <h3 class="text-xl font-bold mt-6 mb-2">Our Code of Conduct</h3>
+        <p class="font-montserrat text-[18px] leading-relaxed max-w-3xl mx-auto">We are transparent and consistent in our actions, fulfilling our promises with integrity and staying true to our identity.</p>
+
+        <h3 class="text-xl font-bold mt-6 mb-2">Our Company Values</h3>
+        <p class="font-montserrat text-[18px] leading-relaxed max-w-3xl mx-auto">Care, professionalism, and dedication define our approach to every customer interaction and service we provide.</p>
+
+        <blockquote class="mt-6 italic text-blue-900 font-semibold border-l-4 border-blue-300 pl-4">
+          Our services are not only totally reliable and safe, but also personalized to suit the needs and preferences of you, the customer...
+        </blockquote>
+        <p class="font-montserrat text-[18px] leading-relaxed max-w-3xl mx-auto">~ Mr Samuel Mwangi Ngunju, Managing Director</p>
+       <div class="flex justify-center">
+  <img
+    src="https://static.wixstatic.com/media/9ba186_cacb39bf45ff4fdf9e2017dbd2c06a8c~mv2.jpg"
+    alt="Director"
+    class="w-32 h-32 mt-4 rounded-full shadow-md"
+    data-animate="fade-in"
+  />
+</div>
+    </div>
+  </section>
+
+  <!-- Why Us Section -->
+  <section class="bg-gray-100 py-12 text-center">
+    <div class="max-w-4xl mx-auto px-6">
+    <h2 class="text-3xl font-bold mb-4">Why Us</h2>
+      <p class="font-montserrat text-[18px] leading-relaxed max-w-3xl mx-auto"">Our services are dependable, reliable, and efficient—earning us global recommendations.</p>
+      <img src="https://static.wixstatic.com/media/9ba186_ad34a9b8e4b54e65856bcd92bb0ca7eb~mv2.png"
+     alt="Why Us Image"
+     class="w-[32rem] rounded-xl shadow-lg mb-6 mx-auto block"
+     data-animate="fade-in">
+      <p class="font-montserrat text-[18px] leading-relaxed max-w-3xl mx-auto">We bring vast local knowledge and experience to your safari and travel plans.</p>
+      <p>Our specialty is custom designing versatile itineraries for individual travelers and groups alike.</p>
+    </div>
+  </section>
+
+
+ 
+ <section id="testimonials" class="bg-white py-10 px-4">
+  <h2 class="text-2xl sm:text-3xl font-bold text-center mb-8">What Our Clients Say</h2>
+  <div class="relative overflow-hidden max-w-3xl mx-auto">
+    <div id="testimonialSlider" class="flex transition-transform duration-700 ease-in-out">
+      <!-- Testimonial 1 -->
+      <div class="min-w-full px-6 flex justify-center">
+        <div class="bg-blue-100 w-80 h-52 rounded-full p-6 shadow flex flex-col items-center justify-center text-center">
+          <p class="italic">"Savina made my honeymoon the best experience of my life!"</p>
+         
+          <h4 class="font-semibold text-sm">Havey Kings </h4>
+          <p class="text-xs text-gray-500">Switzerland</p>
+        </div>
+      </div>
+
+      <!-- Testimonial 2 -->
+      <div class="min-w-full px-6 flex justify-center">
+        <div class="bg-green-100 w-80 h-52 rounded-full p-6 shadow flex flex-col items-center justify-center text-center">
+          <p class="italic">"Professional, affordable, and unforgettable!"</p>
+          <img src="" alt="Client 2" class="w-12 h-12 rounded-full mt-2 mb-1">
+          <h4 class="font-semibold text-sm">D. Biero Wales</h4>
+          <p class="text-xs text-gray-500">Switzerland</p>
+        </div>
+      </div>
+
+      <!-- Testimonial 3 -->
+      <div class="min-w-full px-6 flex justify-center">
+        <div class="bg-yellow-100 w-80 h-52 rounded-full p-6 shadow flex flex-col items-center justify-center text-center">
+          <p class="italic">"I can't wait to travel with Savina again!"</p>
+          <img src="" alt="Client 3" class="w-12 h-12 rounded-full mt-2 mb-1">
+          <h4 class="font-semibold text-sm">Mary Wairimu</h4>
+          <p class="text-xs text-gray-500">Mombasa</p>
+        </div>
+      </div>
+
+      <!-- Testimonial 4 -->
+      <div class="min-w-full px-6 flex justify-center">
+        <div class="bg-red-100 w-80 h-52 rounded-full p-6 shadow flex flex-col items-center justify-center text-center">
+          <p class="italic">"My business trip was smooth and well planned."</p>
+          <img src="" alt="Client 4" class="w-12 h-12 rounded-full mt-2 mb-1">
+          <h4 class="font-semibold text-sm">Paul Okongo</h4>
+          <p class="text-xs text-gray-500">Nairobi</p>
+        </div>
+      </div>
+
+     
+
+    </div>
+  </div>
+</section>
+
+
+
+
+
+  <!-- Footer -->
+<footer class="bg-black text-gray-200 text-center py-4 text-sm">
+  &copy; <span id="year"></span> Savina Consultancy Tour & Travel Ltd. All rights reserved.<br>
+  website developed by +254769255782
+</footer>
+  
+  
+  <!-- WhatsApp Floating Button -->
+<a href="https://wa.me/254769255782" target="_blank" aria-label="Chat on WhatsApp"
+   class="fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-full shadow-lg flex items-center space-x-2 transition duration-300">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 fill-current" viewBox="0 0 24 24">
+    <path d="M20.52 3.48A11.94 11.94 0 0012 0C5.373 0 0 5.373 0 12a11.94 11.94 0 001.7 6.14L0 24l6.26-1.68A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12a11.94 11.94 0 00-3.48-8.52zM12 22a9.93 9.93 0 01-5.28-1.48l-.38-.22-3.72.99.99-3.72-.22-.38A9.93 9.93 0 012 12c0-5.52 4.48-10 10-10s10 4.48 10 10-4.48 10-10 10zm5.15-7.75c-.28-.14-1.65-.81-1.9-.9-.26-.1-.45-.14-.64.14-.18.28-.73.9-.9 1.08-.17.18-.33.2-.6.07-.28-.14-1.2-.44-2.28-1.4-.84-.74-1.4-1.65-1.56-1.92-.16-.28-.02-.43.12-.57.12-.12.28-.33.42-.5.14-.17.18-.28.28-.46.1-.18.05-.35-.02-.5-.07-.14-.64-1.54-.88-2.1-.23-.56-.47-.48-.64-.48h-.55c-.18 0-.46.07-.7.35-.23.28-.9.88-.9 2.15s.92 2.5 1.05 2.68c.14.18 1.82 2.78 4.42 3.9.62.27 1.1.44 1.47.56.62.2 1.18.17 1.62.1.5-.07 1.65-.67 1.88-1.32.23-.64.23-1.2.16-1.32-.07-.1-.26-.17-.54-.3z"/>
+  </svg>
+  <span class="font-semibold text-sm">Contact Us</span>
+</a>
+
+  
+ 
+  <script>
+  
+// Intersection Observer to animate images on scroll
+    const animateImages = document.querySelectorAll('img[data-animate], section[data-animate], div[data-animate]');
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.2 // trigger when 20% of the image is visible
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const el = entry.target;
+          const animationType = el.getAttribute('data-animate');
+          if (animationType === 'fade-in') {
+            el.classList.add('animate-fade-in');
+          } else if (animationType === 'slide-in-right') {
+            el.classList.add('animate-slide-in-right');
+          } else if (animationType === 'zoom-in') {
+            el.classList.add('animate-zoom-in');
+          }
+          observer.unobserve(el);
+        }
+      });
+    }, observerOptions);
+
+    animateImages.forEach(img => {
+      observer.observe(img);
+    });
+
+ 
+ // Animate backgrounds for each service separately
+  function animateBackgrounds(serviceId, interval = 3000) {
+    const section = document.getElementById(serviceId);
+    if (!section) return;
+    const bgDivs = section.querySelectorAll('div.absolute');
+    let current = 0;
+    setInterval(() => {
+      bgDivs.forEach((div, idx) => {
+        div.style.opacity = (idx === current) ? '1' : '0';
+      });
+      current = (current + 1) % bgDivs.length;
+    }, interval);
+  }
+
+  // Run for all 9 services with 3 seconds interval
+  for(let i=1; i<=9; i++) {
+    animateBackgrounds(`service${i}`, 3000);
+  }
+
+
+function setupCarousel(id) {
+    const container = document.getElementById(id);
+    const images = container.querySelectorAll('.carousel-image');
+    let i = 0;
+    setInterval(() => {
+      images[i].classList.remove('active');
+      images[i].style.opacity = 0;
+      i = (i + 1) % images.length;
+      images[i].classList.add('active');
+      images[i].style.opacity = 1;
+    }, 4000);
+  }
+
+  [
+    "harder-carousel",
+    "beatus-carousel",
+    "grindelwald-carousel",
+    "platte-carousel",
+    "adventure-carousel",
+    "sports-carousel"
+  ].forEach(setupCarousel)
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    const btn = document.getElementById('mobile-menu-button');
+    const menu = document.getElementById('mobile-menu');
+
+    btn.addEventListener('click', () => {
+      menu.classList.toggle('hidden');
+    });
+  });
+
+
+const slider = document.getElementById('testimonialSlider');
+  let index = 0;
+  const slideCount = 5;
+
+  function showNextTestimonial() {
+    index = (index + 1) % slideCount;
+    slider.style.transform = `translateX(-${index * 100}%)`;
+  }
+
+  setInterval(showNextTestimonial, 4000); // change every 4 seconds
+
+document.getElementById('year').textContent = new Date().getFullYear();
+
+module.exports = {
+  theme: {
+    extend: {
+      fontFamily: {
+        montserrat: ['Montserrat', 'sans-serif'],
+      },
+    },
+  },
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const images = document.querySelectorAll("#sports-carousel .carousel-image");
+    let current = 0;
+
+    function showNextImage() {
+      images[current].classList.remove("active");
+      current = (current + 1) % images.length;
+      images[current].classList.add("active");
+    }
+
+    setInterval(showNextImage, 2000); // 2 seconds
+  });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Carousel functionality for Masai Mara Safari
+  const carouselImages = document.querySelectorAll('#sports-carousel .carousel-image');
+  let currentIndex = 0;
+
+  function showNextImage() {
+    // Remove 'active' from current image
+    carouselImages[currentIndex].classList.remove('active');
+    // Move to next image
+    currentIndex = (currentIndex + 1) % carouselImages.length;
+    // Add 'active' to the new image
+    carouselImages[currentIndex].classList.add('active');
+  }
+
+  // Start the carousel loop
+  setInterval(showNextImage, 3000); // Change image every 3 seconds
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </script>
+</body>
+</html>

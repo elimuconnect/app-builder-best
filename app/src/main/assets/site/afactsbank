@@ -1,0 +1,2630 @@
+
+const KNOWLEDGE_ITEMS = [
+  {
+    text: "Riddle: I’m tall when I’m young and short when I’m old. What am I?",
+    textSW: "Kitendawili: Niko mrefu ninapokuwa mchanga na mfupi ninapokuwa mzee. Mimi ni nini?",
+    category: "Riddles", duration: 10, askComment: true
+  },
+  {
+    text: "Mind trick: 6 + 4 ÷ 2 = ? Many get this wrong!",
+    textSW: "Mbinu ya akili: 6 + 4 ÷ 2 = ? Wengi wanakosea!",
+    category: "Maths", duration: 8, askComment: true
+  },
+  {
+    text: "Fun fact: Octopuses have three hearts and blue blood!",
+    textSW: "Fakta ya kufurahisha: Pweza wana mioyo mitatu na damu ya buluu!",
+    category: "Fun Science", duration: 9, askComment: false
+  },
+  {
+    text: "Riddle: The more you take, the more you leave behind. What am I?",
+    textSW: "Kitendawili: Kadri unavyotoa, ndivyo unavyobaki. Mimi ni nini?",
+    category: "Riddles", duration: 10, askComment: true
+  },
+  {
+    text: "Trivia: Your brain uses 20% of your body's energy but weighs only 2%.",
+    textSW: "Fakta: Ubongo wako hutumia 20% ya nishati ya mwili lakini unauza 2% tu.",
+    category: "Science", duration: 8, askComment: false
+  },
+  {
+    text: "Math trick: Multiply any number by 9, then sum the digits. The result is always 9!",
+    textSW: "Mbinu ya hesabu: Zidisha namba yoyote kwa 9, kisha jumlisha tarakimu. Matokeo ni 9 kila mara!",
+    category: "Maths", duration: 9, askComment: true
+  },
+  {
+    text: "Fun fact: Venus spins backward compared to most planets.",
+    textSW: "Fakta: Venus inazunguka kinyume na sayari nyingi.",
+    category: "Astronomy", duration: 8, askComment: false
+  },
+  {
+    text: "Creative challenge: Think of an object that could float in water in a funny way.",
+    textSW: "Changamoto ya ubunifu: Fikiria kitu kinachoweza kuogelea kwenye maji kwa njia ya kuchekesha.",
+    category: "Creative", duration: 10, askComment: true
+  },
+  {
+    text: "Trivia: The number 0 was invented in India.",
+    textSW: "Fakta: Sifuri ilibuniwa India.",
+    category: "Maths", duration: 7, askComment: true
+  },
+  {
+    text: "Riddle: What comes once in a minute, twice in a moment, but never in a thousand years?",
+    textSW: "Kitendawili: Nini huja mara moja kwa dakika, mara mbili kwa wakati, lakini kamwe katika miaka elfu moja?",
+    category: "Riddles", duration: 10, askComment: true
+  },
+  {
+    text: "Fun fact: A day on Venus is longer than a year on Venus!",
+    textSW: "Fakta: Siku kwenye Venus ni ndefu kuliko mwaka kwenye Venus!",
+    category: "Astronomy", duration: 8, askComment: false
+  },
+  {
+    text: "Math trick: Divide 25 by 1/2 and add 10. What’s the answer?",
+    textSW: "Mbinu ya hesabu: Gawanya 25 kwa 1/2 kisha ongeza 10. Jibu ni nini?",
+    category: "Maths", duration: 9, askComment: true
+  },
+  {
+    text: "Fun Science: Honey never spoils. Archaeologists found edible honey in ancient tombs!",
+    textSW: "Fakta ya sayansi: Asali haiharibiki. Waakiolojia walipata asali inayokula katika makaburi ya kale!",
+    category: "Fun Science", duration: 10, askComment: false
+  },
+  {
+    text: "Riddle: I have keys but no locks. I have space but no room. You can enter but can’t go outside. What am I?",
+    textSW: "Kitendawili: Nina funguo lakini sina mnyozo. Nina nafasi lakini sina chumba. Unaweza kuingia lakini huwezi kutoka nje. Mimi ni nini?",
+    category: "Riddles", duration: 12, askComment: true
+  },
+  {
+    text: "Fun fact: Some turtles can breathe through their butts!",
+    textSW: "Fakta: Baadhi ya kobe wanaweza kupumua kupitia matako yao!",
+    category: "Fun Science", duration: 8, askComment: false
+  },
+  
+
+
+  {
+    text: "Fun fact: The Moon has moonquakes.",
+    textSW: "Fakta: Mwezi una mitetemeko kama ya ardhi!",
+    category: "Astronomy", duration: 8, askComment: false
+  },
+  {
+    text: "Fun fact: Bananas are berries, but strawberries aren't.",
+    textSW: "Fakta: Ndizi ni tunda la beri, lakini stroberi sio!",
+    category: "Fun Science", duration: 9, askComment: true
+  },
+  {
+    text: "Fun fact: Sharks existed before trees.",
+    textSW: "Fakta: Papa walikuwepo kabla miti haijaanza kukua!",
+    category: "Science", duration: 8, askComment: false
+  },
+  {
+    text: "Riddle: What has hands but can’t clap?",
+    textSW: "Kitendawili: Kina mikono lakini hakiwezi kupiga makofi?",
+    category: "Riddles", duration: 9, askComment: true
+  },
+  {
+    text: "Fun fact: Water can boil and freeze at the same time!",
+    textSW: "Fakta: Maji yanaweza kuchemka na kuganda kwa wakati mmoja!",
+    category: "Fun Science", duration: 9, askComment: false
+  },
+  {
+    text: "Laugh: Why did the math book look sad? Because it had too many problems!",
+    textSW: "Kichekesho: Kwa nini kitabu cha hesabu kilihuzunika? Kwa sababu kilikuwa na matatizo mengi!",
+    category: "Laughs", duration: 8, askComment: true
+  },
+  {
+    text: "Fun fact: Sloths can hold their breath longer than dolphins.",
+    textSW: "Fakta: Sloth anaweza kushikilia pumzi muda mrefu kuliko dolphin!",
+    category: "Animals", duration: 9, askComment: false
+  },
+  {
+    text: "Trivia: There are more stars in the universe than grains of sand on Earth.",
+    textSW: "Fakta: Kuna nyota nyingi zaidi ulimwenguni kuliko punje za mchanga duniani!",
+    category: "Astronomy", duration: 9, askComment: false
+  },
+  {
+    text: "Riddle: What gets wetter the more it dries?",
+    textSW: "Kitendawili: Nini kinapata unyevu zaidi kadri kinavyokaushwa?",
+    category: "Riddles", duration: 9, askComment: true
+  },
+  {
+    text: "Fun fact: Wombat poop is cube-shaped!",
+    textSW: "Fakta: Kinyesi cha wombat ni kama mchemraba!",
+    category: "Fun Science", duration: 8, askComment: false
+  },
+  {
+    text: "Mind trick: If 5 cats catch 5 mice in 5 minutes, how many cats to catch 100 mice in 100 minutes?",
+    textSW: "Changamoto ya akili: Kama paka 5 wanakamata panya 5 kwa dakika 5, paka wangapi kwa panya 100 kwa dakika 100?",
+    category: "Maths", duration: 12, askComment: true
+  },
+  {
+    text: "Fun fact: Butterflies taste with their feet!",
+    textSW: "Fakta: Viwavi wanonja kwa miguu yao!",
+    category: "Biology", duration: 8, askComment: false
+  },
+  {
+    text: "Riddle: What has to be broken before you can use it?",
+    textSW: "Kitendawili: Nini kinahitaji kuvunjwa kabla hakijatumika?",
+    category: "Riddles", duration: 9, askComment: true
+  },
+  {
+    text: "Fun fact: Your stomach gets a new lining every 3–4 days.",
+    textSW: "Fakta: Tumbo lako hupata ukuta mpya kila siku 3 hadi 4.",
+    category: "Biology", duration: 8, askComment: false
+  },
+  {
+    text: "Laugh: Teacher: Why are you late? Student: Because my clock didn’t have the right time!",
+    textSW: "Kichekesho: Mwalimu: Kwa nini umechelewa? Mwanafunzi: Saa yangu haikuwa na wakati sahihi!",
+    category: "Laughs", duration: 9, askComment: true
+  },
+  {
+    text: "Fun fact: Hot water freezes faster than cold water!",
+    textSW: "Fakta: Maji ya moto huganda haraka kuliko ya baridi!",
+    category: "Fun Science", duration: 8, askComment: false
+  },
+  {
+    text: "Trivia: Cats can’t taste sweetness.",
+    textSW: "Fakta: Paka hawawezi kutambua ladha tamu.",
+    category: "Animals", duration: 8, askComment: false
+  },
+  {
+    text: "Riddle: What can travel around the world while staying in a corner?",
+    textSW: "Kitendawili: Nini kinaweza kusafiri duniani kote huku kikiwa pembezoni tu?",
+    category: "Riddles", duration: 10, askComment: true
+  },
+  {
+    text: "Fun fact: Koalas have fingerprints like humans.",
+    textSW: "Fakta: Koala wana alama za vidole kama binadamu!",
+    category: "Animals", duration: 8, askComment: false
+  },
+  {
+    text: "Math trick: Think of any number, double it, add 6, halve it, subtract your original number. The answer is always 3!",
+    textSW: "Mbinu ya hesabu: Fikiria namba yoyote, zidisha mara 2, ongeza 6, gawanya kwa 2, toa namba ya kwanza — jibu daima ni 3!",
+    category: "Maths", duration: 10, askComment: true
+  },
+  {
+    text: "Fun fact: Cows have best friends and get stressed when apart.",
+    textSW: "Fakta: Ng’ombe wana marafiki wa karibu na hupata msongo wakitenganishwa.",
+    category: "Animals", duration: 8, askComment: false
+  },
+  {
+    text: "Riddle: What has an eye but cannot see?",
+    textSW: "Kitendawili: Kina jicho lakini hakiwezi kuona?",
+    category: "Riddles", duration: 8, askComment: true
+  },
+  {
+    text: "Fun fact: Sea otters hold hands while sleeping so they don’t drift apart.",
+    textSW: "Fakta: Panya-maji hushikana mikono wakilala ili wasiachane!",
+    category: "Animals", duration: 9, askComment: false
+  },
+  {
+    text: "Fun fact: Rats laugh when tickled.",
+    textSW: "Fakta: Panya hucheka wanapochekeshwa!",
+    category: "Science", duration: 8, askComment: false
+  },
+  {
+    text: "Riddle: What has one eye but cannot see anything?",
+    textSW: "Kitendawili: Kina jicho moja lakini hakiwezi kuona chochote?",
+    category: "Riddles", duration: 8, askComment: true
+  },
+  {
+    text: "Fun fact: Humans share 60% of their DNA with bananas.",
+    textSW: "Fakta: Binadamu wanashiriki 60% ya DNA yao na ndizi!",
+    category: "Biology", duration: 9, askComment: false
+  },
+  {
+    text: "Trivia: A group of flamingos is called a ‘flamboyance’.",
+    textSW: "Fakta: Kundi la flamingo huitwa ‘flamboyance’.",
+    category: "Animals", duration: 8, askComment: false
+  },
+  {
+    text: "Fun fact: The Eiffel Tower grows taller in summer due to heat expansion.",
+    textSW: "Fakta: Mnara wa Eiffel huongezeka kimo wakati wa kiangazi!",
+    category: "Science", duration: 9, askComment: false
+  },
+  {
+    text: "Riddle: The more you take, the more you leave behind. What am I?",
+    textSW: "Kitendawili: Kadri unavyotoa, ndivyo unavyobaki. Mimi ni nini?",
+    category: "Riddles", duration: 9, askComment: true
+  },
+  {
+    text: "Fun fact: Bees can recognize human faces.",
+    textSW: "Fakta: Nyuki wanaweza kutambua nyuso za binadamu!",
+    category: "Biology", duration: 9, askComment: false
+  },
+  {
+    text: "Laugh: Parallel lines have so much in common. It’s a shame they’ll never meet!",
+    textSW: "Kichekesho: Mistari sambamba ina mambo mengi sawa. Ni bahati mbaya hawatakutana kamwe!",
+    category: "Laughs", duration: 8, askComment: true
+  },
+  {
+    text: "Fun fact: A sneeze travels at about 160 km/h!",
+    textSW: "Fakta: Chafya husafiri kwa kasi ya zaidi ya kilomita 160 kwa saa!",
+    category: "Science", duration: 8, askComment: false
+  },
+  {
+    text: "Trivia: There’s enough DNA in your body to stretch to Pluto and back!",
+    textSW: "Fakta: Kuna DNA ya kutosha mwilini mwako kufika Pluto na kurudi!",
+    category: "Science", duration: 9, askComment: false
+  },
+  {
+    text: "Riddle: What begins with T, ends with T, and has T in it?",
+    textSW: "Kitendawili: Ni nini huanza na T, kuisha na T, na lina T ndani yake?",
+    category: "Riddles", duration: 9, askComment: true
+  },
+  {
+    text: "Fun fact: Some frogs can freeze solid and still survive!",
+    textSW: "Fakta: Baadhi ya vyura wanaweza kuganda kabisa na bado wakaishi!",
+    category: "Animals", duration: 9, askComment: false
+  },
+  {
+    text: "Trivia: There’s a species of jellyfish that can live forever.",
+    textSW: "Fakta: Kuna aina ya jellyfish isiyokufa kamwe!",
+    category: "Biology", duration: 9, askComment: false
+  },
+  {
+    text: "Math trick: Multiply your age by 7, then divide by 7 — your age doesn’t change!",
+    textSW: "Mbinu ya hesabu: Zidisha umri wako kwa 7, kisha gawanya kwa 7 — utabaki vilevile!",
+    category: "Maths", duration: 8, askComment: true
+  },
+  {
+    text: "Fun fact: Humans are the only animals that blush.",
+    textSW: "Fakta: Binadamu ndio viumbe pekee wanaoweza kuwa na haya (blush)!",
+    category: "Biology", duration: 9, askComment: false
+  },
+  {
+    text: "Trivia: Tomatoes have more genes than humans!",
+    textSW: "Fakta: Nyanya zina jeni nyingi zaidi kuliko binadamu!",
+    category: "Biology", duration: 9, askComment: false
+  },
+  {
+    text: "History fact: The shortest war in history lasted only 38 minutes between Britain and Zanzibar.",
+    textSW: "Historia: Vita vifupi zaidi vilidumu dakika 38 pekee kati ya Uingereza na Zanzibar.",
+    category: "History", duration: 9, askComment: false
+  },
+  {
+    text: "Fun fact: A cloud can weigh more than a million kilograms!",
+    textSW: "Fakta: Wingu linaweza kuwa na uzito wa zaidi ya kilo milioni moja!",
+    category: "Science", duration: 8, askComment: false
+  },
+  {
+    text: "Laugh: Why did the scarecrow win an award? Because he was outstanding in his field!",
+    textSW: "Kichekesho: Kwa nini mzimu wa shamba alipata tuzo? Kwa sababu alikuwa bora shambani kwake!",
+    category: "Laughs", duration: 9, askComment: true
+  },
+  {
+    text: "Trivia: The word 'school' comes from a Greek word meaning 'leisure'.",
+    textSW: "Fakta: Neno 'shule' limetoka kwa neno la Kigiriki linalomaanisha 'mapumziko'!",
+    category: "Education", duration: 8, askComment: false
+  },
+  {
+    text: "Fun fact: Lightning strikes the Earth about 8 million times a day!",
+    textSW: "Fakta: Radi hupiga Dunia takribani mara milioni 8 kwa siku!",
+    category: "Science", duration: 8, askComment: false
+  },
+  {
+    text: "Riddle: You can’t hum while holding your nose closed!",
+    textSW: "Kitendawili: Huwezi kunong’ona ukiwa umefunga pua yako!",
+    category: "Mind Trick", duration: 8, askComment: true
+  },
+  {
+    text: "Fun fact: The average cumulus cloud weighs about 500 tons!",
+    textSW: "Fakta: Wingu la kawaida lina uzito wa tani 500!",
+    category: "Science", duration: 8, askComment: false
+  },
+
+  {
+    text: "Fun fact: It rains diamonds on Saturn and Jupiter!",
+    textSW: "Fakta ya kufurahisha: Kunanyesha almasi kwenye Saturn na Jupiter!",
+    category: "Astronomy", duration: 10, askComment: true
+  },
+  {
+    text: "Riddle: What has hands but can’t clap?",
+    textSW: "Kitendawili: Kina mikono lakini hakiwezi kupiga makofi?",
+    category: "Riddles", duration: 9, askComment: true
+  },
+  {
+    text: "Fun fact: A snail can sleep for three years.",
+    textSW: "Fakta: Konokono anaweza kulala kwa miaka mitatu!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "Did you know? Giraffes have the same number of neck bones as humans!",
+    textSW: "Je, wajua? Twiga wana idadi sawa ya mifupa ya shingo kama binadamu!",
+    category: "Biology", duration: 9, askComment: true
+  },
+  {
+    text: "Science fact: Earth’s rotation is slowing down — days are getting longer!",
+    textSW: "Fakta ya sayansi: Mzunguko wa Dunia unapungua — siku zinakuwa ndefu!",
+    category: "Science", duration: 9, askComment: false
+  },
+  {
+    text: "Riddle: What belongs to you but is used more by others?",
+    textSW: "Kitendawili: Ni chako lakini wengine hutumia zaidi?",
+    category: "Riddles", duration: 10, askComment: true
+  },
+  {
+    text: "Fun fact: Avocados are fruits, not vegetables!",
+    textSW: "Fakta: Parachichi ni matunda, si mboga!",
+    category: "Food", duration: 7, askComment: true
+  },
+  {
+    text: "Cute fact: Penguins propose with pebbles 💍🐧",
+    textSW: "Fakta tamu: Penguins hupendekeza kwa kutumia mawe madogo 💍🐧",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Space fact: Space smells like burnt steak!",
+    textSW: "Fakta ya anga: Anga ina harufu kama nyama iliyochomeka!",
+    category: "Astronomy", duration: 9, askComment: false
+  },
+  {
+    text: "Riddle: What gets wetter the more it dries?",
+    textSW: "Kitendawili: Ni nini kinachokuwa na maji zaidi kadri kinavyokauka?",
+    category: "Riddles", duration: 10, askComment: true
+  },
+  {
+    text: "Fun fact: An ostrich’s eye is bigger than its brain.",
+    textSW: "Fakta: Jicho la mbuni ni kubwa kuliko ubongo wake.",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "Did you know? There are more trees on Earth than stars in the Milky Way.",
+    textSW: "Je, wajua? Kuna miti mingi zaidi duniani kuliko nyota katika Njia ya Maziwa.",
+    category: "Astronomy", duration: 9, askComment: true
+  },
+  {
+    text: "Science fact: Goldfish can see infrared and ultraviolet light.",
+    textSW: "Fakta ya sayansi: Samaki wa dhahabu wanaona mwanga wa infrared na ultraviolet.",
+    category: "Science", duration: 9, askComment: true
+  },
+  {
+    text: "Fun fact: A day on Mercury lasts 1,408 hours!",
+    textSW: "Fakta: Siku moja kwenye Mercury hudumu saa 1,408!",
+    category: "Astronomy", duration: 9, askComment: true
+  },
+  {
+    text: "Word fun: The dot over an 'i' or 'j' is called a tittle!",
+    textSW: "Furaha ya maneno: Nukta juu ya 'i' au 'j' huitwa 'tittle'!",
+    category: "Language", duration: 8, askComment: true
+  },
+  {
+    text: "Brain fact: Your brain generates about 20 watts — enough to power a light bulb!",
+    textSW: "Fakta ya ubongo: Ubongo wako huzalisha karibu watts 20 — za kutosha kuwasha balbu!",
+    category: "Science", duration: 9, askComment: true
+  },
+  {
+    text: "Fun fact: A teaspoon of honey is the life’s work of 12 bees!",
+    textSW: "Fakta: Kijiko kimoja cha asali ni kazi ya maisha ya nyuki 12!",
+    category: "Fun Science", duration: 9, askComment: false
+  },
+  {
+    text: "Riddle: What has a face and two hands but no arms or legs?",
+    textSW: "Kitendawili: Kina uso na mikono miwili lakini hakina mikono wala miguu?",
+    category: "Riddles", duration: 9, askComment: true
+  },
+  {
+    text: "Fun fact: Starfish can regrow their arms!",
+    textSW: "Fakta: Nyota wa baharini wanaweza kukuza mikono yao tena!",
+    category: "Biology", duration: 9, askComment: true
+  },
+  {
+    text: "Did you know? The human body has enough iron to make a small nail.",
+    textSW: "Je, wajua? Mwili wa binadamu una chuma cha kutosha kutengeneza msumari mdogo.",
+    category: "Human Body", duration: 9, askComment: true
+  },
+  {
+    text: "Fun fact: Koalas’ fingerprints are nearly identical to humans’!",
+    textSW: "Fakta: Alama za vidole za koala zinafanana sana na za binadamu!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "Trivia: Every minute, about 240 babies are born worldwide.",
+    textSW: "Fakta: Kila dakika, watoto 240 huzaliwa duniani kote.",
+    category: "Trivia", duration: 9, askComment: true
+  },
+  {
+    text: "Cool fact: Polar bears have black skin under their white fur!",
+    textSW: "Fakta: Dhibiti za polar zina ngozi nyeusi chini ya manyoya meupe!",
+    category: "Animals", duration: 9, askComment: false
+  },
+  {
+    text: "Myth buster: The Great Wall of China isn’t visible from the Moon.",
+    textSW: "Ukweli: Ukuta Mkubwa wa China hauonekani kutoka Mwezini.",
+    category: "History", duration: 9, askComment: true
+  },
+  {
+    text: "Animal fact: Elephants can’t jump!",
+    textSW: "Fakta ya wanyama: Tembo hawawezi kuruka!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "Fun fact: Dolphins sleep with one eye open.",
+    textSW: "Fakta: Pomboo hulala na jicho moja likiwa wazi!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Science fact: Earth is hit by lightning 100 times every second.",
+    textSW: "Fakta ya sayansi: Dunia hupigwa radi mara 100 kila sekunde.",
+    category: "Science", duration: 8, askComment: false
+  },
+  {
+    text: "Fun fact: Rainbows can appear at night — they’re called moonbows!",
+    textSW: "Fakta: Upinde wa mvua unaweza kuonekana usiku — unaitwa moonbow!",
+    category: "Astronomy", duration: 8, askComment: true
+  },
+  {
+    text: "Weird fact: The longest hiccup spree lasted 68 years!",
+    textSW: "Fakta ya ajabu: Mtu mmoja alipiga hipo kwa miaka 68 mfululizo!",
+    category: "Human Body", duration: 10, askComment: true
+  },
+  {
+    text: "Funny fact: Mosquitoes are attracted to people who just ate bananas!",
+    textSW: "Fakta ya kuchekesha: Mbu huvutiwa na watu waliokula ndizi hivi punde!",
+    category: "Fun Science", duration: 9, askComment: true
+  },
+  {
+    text: "Did you know? Your tongue print is unique like your fingerprint.",
+    textSW: "Je, wajua? Alama ya ulimi wako ni ya kipekee kama ya kidole chako.",
+    category: "Human Body", duration: 8, askComment: true
+  },
+  {
+    text: "Fun fact: There are more stars in the universe than atoms in a grain of sand.",
+    textSW: "Fakta: Kuna nyota nyingi zaidi ulimwenguni kuliko atomi kwenye punje ya mchanga.",
+    category: "Astronomy", duration: 10, askComment: false
+  },
+  {
+    text: "Food fact: Peanuts are not nuts — they’re legumes!",
+    textSW: "Fakta ya chakula: Njugu si karanga, ni mbegu za kunde!",
+    category: "Food", duration: 8, askComment: true
+  },
+  {
+    text: "Fun fact: Birds are the closest living relatives of dinosaurs.",
+    textSW: "Fakta: Ndege ni jamaa wa karibu wa wanyama wa kale (dinosaurs).",
+    category: "Science", duration: 9, askComment: true
+  },
+  {
+    text: "Science fact: Octopuses have blue blood!",
+    textSW: "Fakta ya sayansi: Pweza wana damu ya bluu!",
+    category: "Biology", duration: 8, askComment: true
+  },
+  {
+    text: "Weird fact: The smell of freshly cut grass is actually a plant distress signal.",
+    textSW: "Fakta ya ajabu: Harufu ya nyasi zilizokatwa ni ishara ya dharura ya mimea!",
+    category: "Plants", duration: 9, askComment: true
+  },
+  {
+    text: "Crazy fact: Some cats are allergic to humans!",
+    textSW: "Fakta: Baadhi ya paka wana mzio wa binadamu!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "Astronomy fact: Saturn’s rings could disappear in 100 million years.",
+    textSW: "Fakta ya anga: Pete za Saturn zinaweza kutoweka ndani ya miaka milioni 100!",
+    category: "Astronomy", duration: 9, askComment: true
+  },
+  {
+    text: "Fun fact: The inventor of the Pringles can is buried in one!",
+    textSW: "Fakta: Mvumbuzi wa kopo la Pringles alizikwa ndani yake!",
+    category: "Trivia", duration: 9, askComment: true
+  },
+  {
+    text: "Word trivia: A 'moment' technically means 90 seconds.",
+    textSW: "Trivia ya maneno: 'Moment' kihistoria inamaanisha sekunde 90!",
+    category: "Language", duration: 8, askComment: true
+  },
+  {
+    text: "Animal fact: Rabbits can see behind them without turning their heads!",
+    textSW: "Fakta ya wanyama: Sungura wanaweza kuona nyuma bila kugeuza vichwa!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Mind fact: There are more possible chess moves than atoms in the known universe!",
+    textSW: "Fakta ya akili: Kuna miondoko zaidi kwenye chess kuliko atomi katika ulimwengu unaojulikana!",
+    category: "Mind Games", duration: 10, askComment: true
+  },
+  {
+    text: "Science fact: Bees can’t see red but can see ultraviolet light.",
+    textSW: "Fakta: Nyuki hawaoni rangi nyekundu lakini wanaona mwanga wa ultraviolet.",
+    category: "Fun Science", duration: 8, askComment: true
+  },
+  {
+    text: "Weird fact: Humans shed about 600,000 particles of skin every hour!",
+    textSW: "Fakta: Binadamu hupoteza chembe 600,000 za ngozi kila saa!",
+    category: "Human Body", duration: 9, askComment: false
+  },
+  {
+    text: "Record fact: The longest time between two twins being born is 87 days!",
+    textSW: "Fakta: Tofauti ndefu zaidi kati ya mapacha kuzaliwa ni siku 87!",
+    category: "Trivia", duration: 9, askComment: true
+  },
+  {
+    text: "Science fact: Octopus ink doesn’t just hide them — it dulls predators’ sense of smell.",
+    textSW: "Fakta ya sayansi: Wino wa pweza hauwafichi tu — hupunguza harufu ya wanyama wanaowawinda!",
+    category: "Biology", duration: 10, askComment: true
+  },
+  {
+    text: "History twist: The first oranges weren’t orange — they were green!",
+    textSW: "Fakta ya kihistoria: Machungwa ya kwanza hayakuwa ya rangi ya chungwa — yalikuwa ya kijani!",
+    category: "Food", duration: 8, askComment: true
+  },
+  {
+    text: "Mind-blowing fact: Cleopatra lived closer to the iPhone than to the pyramids!",
+    textSW: "Fakta ya kushangaza: Cleopatra aliishi karibu zaidi na uvumbuzi wa iPhone kuliko ujenzi wa piramidi!",
+    category: "History", duration: 9, askComment: true
+  },
+  {
+    text: "Science fact: Some metals can remember their shape!",
+    textSW: "Fakta ya sayansi: Baadhi ya metali hukumbuka umbo lao asilia!",
+    category: "Science", duration: 9, askComment: true
+  },
+  {
+    text: "Trivia: The shortest commercial flight lasts only 57 seconds!",
+    textSW: "Fakta: Safari fupi zaidi ya ndege kibiashara hudumu sekunde 57 tu!",
+    category: "Trivia", duration: 8, askComment: true
+  },
+  {
+    text: "Fun fact: Dogs can smell time!",
+    textSW: "Fakta: Mbwa wanaweza kunusa muda!",
+    category: "Animals", duration: 9, askComment: true
+  },
+      {
+    text: "Space fact: One day on Venus is longer than one year on Venus!",
+    textSW: "Fakta ya anga: Siku moja kwenye sayari ya Venus ni ndefu kuliko mwaka mmoja huko!",
+    category: "Astronomy", duration: 9, askComment: true
+  },
+  {
+    text: "Science fact: You can’t burp in space — there’s no gravity to separate gas from liquid!",
+    textSW: "Fakta ya sayansi: Huwezi kubelchi kwenye anga — hakuna mvuto wa kutenganisha gesi na kioevu!",
+    category: "Science", duration: 10, askComment: true
+  },
+  {
+    text: "Fun fact: The heart of a blue whale is the size of a small car!",
+    textSW: "Fakta: Moyo wa nyangumi wa bluu ni mkubwa kama gari dogo!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Mind trick: Rearrange the letters of 'Listen' and you get 'Silent'!",
+    textSW: "Hila ya akili: Ukipanga upya herufi za 'Listen', unapata 'Silent'!",
+    category: "Language", duration: 9, askComment: true
+  },
+  {
+    text: "History fact: The first email was sent in 1971!",
+    textSW: "Fakta ya kihistoria: Barua pepe ya kwanza ilitumwa mwaka 1971!",
+    category: "History", duration: 8, askComment: false
+  },
+  {
+    text: "Science fact: The human nose can detect over 1 trillion different smells!",
+    textSW: "Fakta ya sayansi: Pua ya binadamu inaweza kutambua zaidi ya harufu trilioni moja!",
+    category: "Human Body", duration: 9, askComment: false
+  },
+  {
+    text: "Fun fact: Octopuses have three hearts!",
+    textSW: "Fakta: Pweza wana mioyo mitatu!",
+    category: "Biology", duration: 8, askComment: true
+  },
+  {
+    text: "Riddle: What has a neck but no head?",
+    textSW: "Kitendawili: Kina shingo lakini hakina kichwa?",
+    category: "Riddles", duration: 8, askComment: true
+  },
+  {
+    text: "Fun fact: The fingerprints of twins are never identical.",
+    textSW: "Fakta: Alama za vidole za mapacha hazifanani kamwe!",
+    category: "Human Body", duration: 8, askComment: false
+  },
+  {
+    text: "Trivia: The inventor of the microwave oven discovered it by accident with a chocolate bar!",
+    textSW: "Fakta: Mvumbuzi wa oveni ya microwave aliigundua kwa bahati baada ya chokoleti kuyeyuka mfukoni!",
+    category: "Science", duration: 10, askComment: true
+  },
+  {
+    text: "Fun fact: Camels have three eyelids to protect against sand.",
+    textSW: "Fakta: Ngamia wana kope tatu kulinda macho yao kutokana na mchanga!",
+    category: "Animals", duration: 9, askComment: false
+  },
+  {
+    text: "Mind fact: You can’t tickle yourself — your brain knows it’s coming!",
+    textSW: "Fakta ya akili: Huwezi kujichekesha kwa kujiwasha — ubongo wako unajua kinachokuja!",
+    category: "Mind Games", duration: 9, askComment: true
+  },
+  {
+    text: "Science fact: Sound travels 4 times faster in water than in air!",
+    textSW: "Fakta ya sayansi: Sauti husafiri mara 4 kwa kasi zaidi majini kuliko hewani!",
+    category: "Science", duration: 9, askComment: false
+  },
+  {
+    text: "Fun fact: Pineapples take about two years to grow.",
+    textSW: "Fakta: Mananasi huchukua takribani miaka miwili kukua!",
+    category: "Food", duration: 8, askComment: false
+  },
+  {
+    text: "History fact: The first Olympic Games were held in 776 BC in Greece.",
+    textSW: "Fakta ya kihistoria: Michezo ya kwanza ya Olimpiki ilifanyika mwaka 776 KK huko Ugiriki.",
+    category: "History", duration: 9, askComment: false
+  },
+  {
+    text: "Riddle: The more you take away, the bigger I get. What am I?",
+    textSW: "Kitendawili: Kadri unavyotoa, ndivyo ninavyokuwa mkubwa. Mimi ni nani?",
+    category: "Riddles", duration: 10, askComment: true
+  },
+  {
+    text: "Fun fact: The dot on the number 9 of most calculators is not decoration — it shows polarity!",
+    textSW: "Fakta: Nukta juu ya namba 9 kwenye kalkuleta nyingi si mapambo — inaonyesha polarity!",
+    category: "Tech", duration: 9, askComment: false
+  },
+  {
+    text: "Cool fact: There are more fake flamingos in the world than real ones!",
+    textSW: "Fakta: Kuna flamingo bandia wengi zaidi duniani kuliko halisi!",
+    category: "Fun Science", duration: 9, askComment: true
+  },
+  {
+    text: "Science fact: The smell of rain has a name — petrichor!",
+    textSW: "Fakta ya sayansi: Harufu ya mvua inaitwa 'petrichor'!",
+    category: "Science", duration: 8, askComment: true
+  },
+  {
+    text: "Laugh: Why don’t skeletons fight each other? They don’t have the guts!",
+    textSW: "Kichekesho: Kwa nini mifupa haipigani? Kwa sababu haina matumbo!",
+    category: "Laughs", duration: 8, askComment: true
+  },
+  {
+    text: "Trivia: The shortest complete sentence in English is 'I am.'",
+    textSW: "Fakta: Sentensi fupi zaidi kamili kwa Kiingereza ni 'I am.'",
+    category: "Language", duration: 8, askComment: false
+  },
+  {
+    text: "Fun fact: Honey never spoils — archaeologists found edible honey in ancient tombs!",
+    textSW: "Fakta: Asali haiozi — watafiti walipata asali inayoweza kuliwa kwenye makaburi ya kale!",
+    category: "Food", duration: 10, askComment: true
+  },
+  {
+    text: "Science fact: Jupiter’s gravity is 2.5 times stronger than Earth’s!",
+    textSW: "Fakta ya sayansi: Mvuto wa Jupiter ni mara 2.5 zaidi ya ule wa Dunia!",
+    category: "Astronomy", duration: 9, askComment: true
+  },
+  {
+    text: "Animal fact: Frogs drink water through their skin, not their mouths!",
+    textSW: "Fakta ya wanyama: Vyura hunywa maji kupitia ngozi yao, si midomo!",
+    category: "Animals", duration: 9, askComment: false
+  },
+  {
+    text: "Riddle: What has a ring but no finger?",
+    textSW: "Kitendawili: Kina pete lakini hakina kidole?",
+    category: "Riddles", duration: 8, askComment: true
+  },
+  {
+    text: "Fun fact: The world’s largest desert isn’t the Sahara — it’s Antarctica!",
+    textSW: "Fakta: Jangwa kubwa zaidi duniani si Sahara, ni Antaktika!",
+    category: "Geography", duration: 9, askComment: true
+  },
+  {
+    text: "History fact: Paper was invented in China over 2,000 years ago.",
+    textSW: "Fakta ya kihistoria: Karatasi ilivumbuliwa China zaidi ya miaka 2,000 iliyopita.",
+    category: "History", duration: 8, askComment: false
+  },
+  {
+    text: "Fun fact: Human bones are about five times stronger than steel!",
+    textSW: "Fakta: Mifupa ya binadamu ni imara mara tano kuliko chuma!",
+    category: "Human Body", duration: 9, askComment: true
+  },
+  {
+    text: "Trivia: The longest English word has 189,819 letters — it’s the chemical name for 'Titin'!",
+    textSW: "Fakta: Neno refu zaidi kwa Kiingereza lina herufi 189,819 — jina la kemikali 'Titin'!",
+    category: "Language", duration: 10, askComment: true
+  },
+  {
+    text: "Science fact: The Milky Way smells like rum and tastes like raspberries!",
+    textSW: "Fakta ya sayansi: Njia ya Maziwa inanukia kama rum na ina ladha ya raspberry!",
+    category: "Astronomy", duration: 9, askComment: true
+  },
+  {
+    text: "Mind-blowing fact: Every two minutes, humans take more photos than all of humanity did in the 1800s!",
+    textSW: "Fakta ya kushangaza: Kila dakika mbili, binadamu wanapiga picha nyingi zaidi kuliko karne ya 19 nzima!",
+    category: "Trivia", duration: 10, askComment: true
+  },
+  {
+    text: "Fun fact: A group of owls is called a 'parliament'!",
+    textSW: "Fakta: Kundi la bundi huitwa 'parliament'!",
+    category: "Animals", duration: 8, askComment: false
+  }, 
+  
+  
+  {
+  text: "Fun fact: Octopuses have three hearts and blue blood.",
+  textSW: "Fakta: Pweza ana mioyo mitatu na damu ya buluu.",
+  category: "Marine Life", duration: 9, askComment: false
+},
+{
+  text: "Riddle: What has hands but can’t clap?",
+  textSW: "Kitendawili: Nini kina mikono lakini hakiwezi kupiga makofi?",
+  category: "Riddles", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: There’s a planet made entirely of diamonds!",
+  textSW: "Fakta: Kuna sayari iliyotengenezwa kabisa kwa almasi!",
+  category: "Astronomy", duration: 10, askComment: false
+},
+{
+  text: "Laugh: Why did the student eat his homework? Because the teacher said it was a piece of cake!",
+  textSW: "Cheka: Kwa nini mwanafunzi alikula kazi yake ya nyumbani? Kwa sababu mwalimu alisema ni kipande cha keki!",
+  category: "Laughs", duration: 12, askComment: false
+},
+{
+  text: "Mind Trick: Say ‘Silk’ five times. What do cows drink? (It’s water, not milk!)",
+  textSW: "Udanganyifu wa akili: Sema 'Silk' mara tano. Ng’ombe hunywa nini? (Ni maji, sio maziwa!)",
+  category: "Mind Trick", duration: 11, askComment: true
+},
+{
+  text: "Fun fact: Horses can’t vomit — ever.",
+  textSW: "Fakta: Farasi hawawezi kutapika kamwe.",
+  category: "Animals", duration: 8, askComment: false
+},
+{
+  text: "Fun fact: Bananas glow blue under black light!",
+  textSW: "Fakta: Ndizi huangaza buluu chini ya mwanga mweusi!",
+  category: "Fun Science", duration: 9, askComment: false
+},
+{
+  text: "Riddle: What can travel around the world while staying in a corner?",
+  textSW: "Kitendawili: Nini kinaweza kusafiri ulimwenguni kote huku kikiwa pembezoni?",
+  category: "Riddles", duration: 10, askComment: true
+},
+{
+  text: "Fun fact: Cows produce more milk when they listen to music.",
+  textSW: "Fakta: Ng’ombe huzalisha maziwa zaidi wakisikiliza muziki.",
+  category: "Science", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Your small intestine is about 6 meters long.",
+  textSW: "Fakta: Utumbo wako mdogo una urefu wa mita 6 hivi.",
+  category: "Biology", duration: 8, askComment: false
+},
+{
+  text: "Fun fact: Spiders can’t stand the smell of peppermint!",
+  textSW: "Fakta: Buibui hawapendi harufu ya mnanaa!",
+  category: "Nature", duration: 8, askComment: false
+},
+{
+  text: "Laugh: Parallel lines have so much in common… it’s a shame they’ll never meet!",
+  textSW: "Cheka: Mistari sambamba ina mambo mengi sawa… ni aibu hawatakutana kamwe!",
+  category: "Math Humor", duration: 10, askComment: false
+},
+{
+  text: "Fun fact: Butterflies can’t fly if they’re too cold.",
+  textSW: "Fakta: Viwavi hawana uwezo wa kuruka wakiwa baridi sana.",
+  category: "Animals", duration: 9, askComment: false
+},
+{
+  text: "Riddle: What has a face and two hands but no arms or legs?",
+  textSW: "Kitendawili: Nini kina uso na mikono miwili lakini hakina mikono wala miguu?",
+  category: "Riddles", duration: 9, askComment: true
+},
+{
+  text: "Mind Trick: If you spot the hidden word 'YES' in this sentence, your brain loves puzzles!",
+  textSW: "Udanganyifu wa akili: Ukiweza kuona neno 'NDIYO' lililojificha hapa, ubongo wako unapenda mafumbo!",
+  category: "Mind Trick", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Venus rotates backward compared to most planets.",
+  textSW: "Fakta: Sayari ya Venus huzunguka kinyume na sayari nyingi.",
+  category: "Astronomy", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Pineapples take nearly two years to grow.",
+  textSW: "Fakta: Mananasi huchukua karibu miaka miwili kukua!",
+  category: "Plants", duration: 9, askComment: false
+},
+{
+  text: "Laugh: I told my computer I needed a break — it froze!",
+  textSW: "Cheka: Nilimwambia kompyuta yangu nataka mapumziko — ikaganda!",
+  category: "Tech Humor", duration: 8, askComment: false
+},
+{
+  text: "Fun fact: Some fish can climb trees.",
+  textSW: "Fakta: Samaki wengine wanaweza kupanda miti!",
+  category: "Nature", duration: 8, askComment: false
+},
+{
+  text: "Riddle: What comes once in a minute, twice in a moment, but never in a thousand years?",
+  textSW: "Kitendawili: Nini huja mara moja kwa dakika, mara mbili kwa muda, lakini si kwa miaka elfu?",
+  category: "Riddles", duration: 11, askComment: true
+},
+{
+  text: "Fun fact: Owls can’t move their eyes — they turn their heads instead!",
+  textSW: "Fakta: Bundi hawawezi kuzungusha macho, badala yake huzungusha vichwa vyao!",
+  category: "Animals", duration: 9, askComment: false
+},
+{
+  text: "Laugh: Why don’t scientists trust atoms? Because they make up everything!",
+  textSW: "Cheka: Kwa nini wanasayansi hawawaamini atomi? Kwa sababu hutengeneza kila kitu!",
+  category: "Science Humor", duration: 10, askComment: false
+},
+{
+  text: "Fun fact: The smell of rain has a name — petrichor.",
+  textSW: "Fakta: Harufu ya mvua inaitwa petrichor.",
+  category: "Nature", duration: 8, askComment: false
+},
+{
+  text: "Mind Trick: Read this aloud — ‘Eye Yam Stew Peed.’ What did you just say? (I am stupid!)",
+  textSW: "Udanganyifu wa akili: Sema kwa sauti — ‘Ai Yam Stupid’. Umesema nini sasa? 😅",
+  category: "Mind Trick", duration: 10, askComment: true
+},
+{
+  text: "Fun fact: Human saliva contains a painkiller stronger than morphine.",
+  textSW: "Fakta: Mate ya binadamu yana dawa ya maumivu yenye nguvu kuliko morphine.",
+  category: "Biology", duration: 10, askComment: false
+},
+{
+  text: "Fun fact: Lobsters taste with their legs.",
+  textSW: "Fakta: Kamba hula kwa kutumia miguu yao!",
+  category: "Marine Life", duration: 8, askComment: false
+},
+{
+  text: "Riddle: What has to be broken before you can use it?",
+  textSW: "Kitendawili: Nini lazima kivunjwe kabla ya kukitumia?",
+  category: "Riddles", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Sea cucumbers eat with their feet.",
+  textSW: "Fakta: Tango la baharini hula kwa kutumia miguu yake!",
+  category: "Marine Life", duration: 8, askComment: false
+},
+{
+  text: "Laugh: My math teacher called me average — how mean!",
+  textSW: "Cheka: Mwalimu wa hesabu alinita wa kawaida — hiyo ndiyo 'mean'!",
+  category: "Math Humor", duration: 10, askComment: false
+},
+{
+  text: "Fun fact: Bubble wrap was originally invented as wallpaper!",
+  textSW: "Fakta: Bubble wrap ilibuniwa awali kama karatasi ya ukutani!",
+  category: "Inventions", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Some spiders can fly using electricity in the air.",
+  textSW: "Fakta: Buibui wengine huruka kwa kutumia umeme wa anga!",
+  category: "Science", duration: 9, askComment: false
+},
+{
+  text: "Riddle: What can fill a room but takes up no space?",
+  textSW: "Kitendawili: Nini kinaweza kujaza chumba lakini hakina nafasi?",
+  category: "Riddles", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Your brain shrinks slightly when you’re dehydrated.",
+  textSW: "Fakta: Ubongo wako hupungua kidogo ukikosa maji!",
+  category: "Health", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Blue whales have hearts the size of small cars!",
+  textSW: "Fakta: Mioyo ya nyangumi wa buluu ni mikubwa kama gari ndogo!",
+  category: "Animals", duration: 9, askComment: false
+},
+{
+  text: "Laugh: I told a chemistry joke… but there was no reaction!",
+  textSW: "Cheka: Nilichekesha kwa utani wa kemia… lakini hakuna aliyeitikia!",
+  category: "Science Humor", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Apples float in water because they’re 25% air.",
+  textSW: "Fakta: Tufaha huogelea kwa sababu yana hewa kwa asilimia 25!",
+  category: "Science", duration: 9, askComment: false
+},
+{
+  text: "Riddle: What has a neck but no head?",
+  textSW: "Kitendawili: Nini kina shingo lakini hakina kichwa?",
+  category: "Riddles", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Humans are the only animals that cook food.",
+  textSW: "Fakta: Binadamu ndio wanyama pekee wanaopika chakula.",
+  category: "Anthropology", duration: 9, askComment: false
+},
+{
+  text: "Mind Trick: If you just yawned while reading this, your brain’s empathy system is active!",
+  textSW: "Udanganyifu wa akili: Kama umepiga chafya ukisoma hii, mfumo wako wa huruma unafanya kazi!",
+  category: "Mind Trick", duration: 10, askComment: true
+},
+{
+  text: "Fun fact: The inventor of the frisbee was turned into a frisbee after he died!",
+  textSW: "Fakta: Mvumbuzi wa frisbee aligeuzwa kuwa frisbee baada ya kufa!",
+  category: "Weird Facts", duration: 10, askComment: false
+},
+{
+  text: "Fun fact: Crows can recognize and remember human faces.",
+  textSW: "Fakta: Kunguru wanaweza kutambua na kukumbuka uso wa binadamu!",
+  category: "Animals", duration: 9, askComment: false
+},
+{
+  text: "Laugh: Never trust an atom — they make up everything!",
+  textSW: "Cheka: Usiamini atomi — zinatengeneza kila kitu!",
+  category: "Science Humor", duration: 9, askComment: false
+},
+{
+  text: "Riddle: What belongs to you but others use it more?",
+  textSW: "Kitendawili: Nini ni chako lakini wengine hutumia zaidi?",
+  category: "Riddles", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Carrots were originally purple, not orange!",
+  textSW: "Fakta: Karoti awali zilikuwa za zambarau, si machungwa!",
+  category: "History", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Your bones are five times stronger than steel of the same density!",
+  textSW: "Fakta: Mifupa yako ni mara tano imara kuliko chuma cha uzito sawa!",
+  category: "Biology", duration: 10, askComment: false
+},
+{
+  text: "Mind Trick: Can you spot the hidden face in this text? 👀",
+  textSW: "Udanganyifu wa akili: Unaweza kuona uso uliofichwa kwenye maandishi haya? 👀",
+  category: "Mind Trick", duration: 8, askComment: true
+},
+{
+  text: "Fun fact: Koalas sleep up to 22 hours a day!",
+  textSW: "Fakta: Koala hulala hadi saa 22 kwa siku!",
+  category: "Animals", duration: 9, askComment: false
+},
+{
+  text: "Riddle: The more of me you take, the more you leave behind. What am I?",
+  textSW: "Kitendawili: Kadri unavyonichukua zaidi, ndivyo unavyobaki nyuma zaidi. Mimi ni nani?",
+  category: "Riddles", duration: 10, askComment: true
+},
+{
+  text: "Fun fact: Your tongue is the strongest muscle relative to its size.",
+  textSW: "Fakta: Ulimi wako ndio misuli yenye nguvu zaidi kulingana na ukubwa wake.",
+  category: "Biology", duration: 9, askComment: false
+},
+{
+  text: "Laugh: Why did the scarecrow win an award? He was outstanding in his field!",
+  textSW: "Cheka: Kwa nini sanamu la shamba lilishinda tuzo? Kwa sababu lilikuwa bora shambani!",
+  category: "Laughs", duration: 10, askComment: false
+},
+{
+  text: "Fun fact: Some jellyfish can clone themselves.",
+  textSW: "Fakta: Baadhi ya samaki wa jelly wanaweza kujizalisha upya!",
+  category: "Marine Life", duration: 9, askComment: false
+},
+{
+  text: "Riddle: What gets wetter the more it dries?",
+  textSW: "Kitendawili: Nini kinakuwa chepesi zaidi kinapokauka?",
+  category: "Riddles", duration: 8, askComment: true
+},
+{
+  text: "Fun fact: Chewing gum helps you concentrate.",
+  textSW: "Fakta: Kutafuna Big G kunasaidia kuzingatia zaidi!",
+  category: "Science", duration: 9, askComment: false
+},
+{
+  text: "Laugh: Why don’t skeletons fight each other? They don’t have the guts!",
+  textSW: "Cheka: Kwa nini mifupa haipigani? Haina 'matumbo' ya kufanya hivyo!",
+  category: "Laughs", duration: 10, askComment: false
+},
+{
+  text: "Fun fact: A strand of spider silk is thinner than hair but 5× stronger than steel!",
+  textSW: "Fakta: Uzi wa buibui ni mwembamba kuliko nywele lakini mara 5 imara kuliko chuma!",
+  category: "Science", duration: 10, askComment: false
+},
+{
+  text: "Riddle: What has a head, a tail, but no body?",
+  textSW: "Kitendawili: Nini kina kichwa na mkia lakini hakina mwili?",
+  category: "Riddles", duration: 8, askComment: true
+},
+{
+  text: "Fun fact: The average person produces 25,000 quarts of saliva in a lifetime.",
+  textSW: "Fakta: Mtu wa kawaida huzalisha mate zaidi ya lita 25,000 katika maisha yake.",
+  category: "Biology", duration: 10, askComment: false
+},
+{
+  text: "Mind Trick: Try to hum while holding your nose — you can’t!",
+  textSW: "Udanganyifu wa akili: Jaribu kupiga mluzi ukiwa umefunga pua — haiwezekani!",
+  category: "Mind Trick", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Bees sometimes sting other bees.",
+  textSW: "Fakta: Nyuki wakati mwingine huwadhuru nyuki wenzao!",
+  category: "Nature", duration: 8, askComment: false
+},
+{
+  text: "Fun fact: The inventor of matchsticks was a pharmacist.",
+  textSW: "Fakta: Mvumbuzi wa viberiti alikuwa mfamasia!",
+  category: "Inventions", duration: 9, askComment: false
+},
+{
+  text: "Riddle: What can you catch but not throw?",
+  textSW: "Kitendawili: Nini unaweza kukamata lakini si kutupa?",
+  category: "Riddles", duration: 8, askComment: true
+},
+{
+  text: "Fun fact: The fingerprints of twins are different.",
+  textSW: "Fakta: Alama za vidole vya mapacha ni tofauti!",
+  category: "Human Body", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Antarctica is the largest desert on Earth!",
+  textSW: "Fakta: Antaktika ndio jangwa kubwa zaidi duniani!",
+  category: "Geography", duration: 9, askComment: false
+},
+{
+  text: "Laugh: I told my Wi-Fi a joke — it didn’t get the connection!",
+  textSW: "Cheka: Nilimchekesha Wi-Fi yangu — haikupata 'connection'!",
+  category: "Tech Humor", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Koalas have chlamydia — it’s true!",
+  textSW: "Fakta: Koala wengi wana ugonjwa wa chlamydia!",
+  category: "Animals", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Your taste buds live for only about 10 days.",
+  textSW: "Fakta: Vionjo vya ulimi wako huishi takribani siku 10 pekee.",
+  category: "Biology", duration: 9, askComment: false
+},
+{
+  text: "Riddle: What’s full of holes but still holds water?",
+  textSW: "Kitendawili: Nini kimejaa mashimo lakini bado kinabeba maji?",
+  category: "Riddles", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: A single sneeze can spread over 100,000 germs!",
+  textSW: "Fakta: Chafya moja tu inaweza kutawanya vijidudu zaidi ya 100,000!",
+  category: "Health", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Sharks can live up to 500 years!",
+  textSW: "Fakta: Papa wanaweza kuishi hadi miaka 500!",
+  category: "Marine Life", duration: 9, askComment: false
+},
+{
+  text: "Mind Trick: Read the color, not the word — GREEN, RED, BLUE — confused yet?",
+  textSW: "Udanganyifu wa akili: Soma rangi, sio neno — KIJANI, NYEKUNDU, BLUU — umechanganyikiwa?",
+  category: "Mind Trick", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Some plants can count and do math!",
+  textSW: "Fakta: Mimea mingine inaweza kuhesabu na kufanya mahesabu!",
+  category: "Botany", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: The smell of vanilla sometimes comes from beaver glands.",
+  textSW: "Fakta: Harufu ya vanilla katika baadhi ya manukato hutoka kwenye tezi za beaver!",
+  category: "Weird Facts", duration: 10, askComment: false
+},
+{
+  text: "Riddle: What word is spelled incorrectly in every dictionary?",
+  textSW: "Kitendawili: Neno gani limeandikwa vibaya kwenye kamusi zote?",
+  category: "Riddles", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: A bolt of lightning is five times hotter than the sun.",
+  textSW: "Fakta: Umeme wa radi ni mara tano zaidi ya joto la jua!",
+  category: "Science", duration: 10, askComment: false
+},
+{
+  text: "Fun fact: The average human eats 70 insects a year while sleeping!",
+  textSW: "Fakta: Mtu wa kawaida hula wadudu 70 kila mwaka akiwa amelala!",
+  category: "Weird Facts", duration: 9, askComment: false
+},
+{
+  text: "Laugh: Why did the physics teacher break up with the biology teacher? There was no chemistry!",
+  textSW: "Cheka: Kwa nini mwalimu wa fizikia aliachana na wa baiolojia? Hakukuwa na 'chemistry'!",
+  category: "Laughs", duration: 10, askComment: false
+},
+{
+  text: "Fun fact: Tigers’ skin is striped, not just their fur!",
+  textSW: "Fakta: Ngozi ya chui ina mistari, si manyoya tu!",
+  category: "Animals", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Dolphins sleep with half their brain at a time.",
+  textSW: "Fakta: Pomboo hulala nusu ya ubongo kwa wakati mmoja!",
+  category: "Marine Life", duration: 9, askComment: false
+},
+{
+  text: "Mind Trick: Try writing the word 'six' while saying 'twelve' — your brain will glitch!",
+  textSW: "Udanganyifu wa akili: Andika 'sita' huku ukisema 'kumi na mbili' — ubongo unachanganyikiwa!",
+  category: "Mind Trick", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Bees can make colored honey if they eat colored syrup.",
+  textSW: "Fakta: Nyuki wanaweza kutengeneza asali yenye rangi wakila sharubati yenye rangi!",
+  category: "Nature", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Snakes can help predict earthquakes.",
+  textSW: "Fakta: Nyoka wanaweza kutabiri matetemeko ya ardhi!",
+  category: "Nature", duration: 9, askComment: false
+},
+{
+  text: "Riddle: I’m tall when I’m young and short when I’m old. What am I?",
+  textSW: "Kitendawili: Mimi ni mrefu nikiwa mchanga, mfupi nikiwa mzee. Mimi ni nani?",
+  category: "Riddles", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Some turtles can live over a year without food.",
+  textSW: "Fakta: Kasa wengine wanaweza kuishi zaidi ya mwaka bila chakula!",
+  category: "Animals", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Humans are born with 300 bones but die with 206.",
+  textSW: "Fakta: Binadamu huzaliwa na mifupa 300 lakini hufa wakiwa na 206!",
+  category: "Biology", duration: 9, askComment: false
+},
+{
+  text: "Laugh: I used to play piano by ear, but now I use my hands!",
+  textSW: "Cheka: Nilikuwa napiga piano kwa sikio, sasa natumia mikono!",
+  category: "Laughs", duration: 8, askComment: false
+},
+{
+  text: "Fun fact: Caterpillars have 12 eyes!",
+  textSW: "Fakta: Funza wana macho 12!",
+  category: "Animals", duration: 8, askComment: false
+},
+{
+  text: "Fun fact: There’s a mushroom that can control ants’ minds.",
+  textSW: "Fakta: Kuna uyoga unaoweza kudhibiti akili za sisimizi!",
+  category: "Fungi", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Elephants use their trunks as snorkels.",
+  textSW: "Fakta: Tembo hutumia midomo yao kama bomba la kupumua majini!",
+  category: "Animals", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Bats always turn left when leaving a cave.",
+  textSW: "Fakta: Popo daima hugeuka kushoto wanapotoka pangoni!",
+  category: "Animals", duration: 9, askComment: false
+},
+{
+  text: "Mind Trick: Read this backward — you just tried, didn’t you?",
+  textSW: "Udanganyifu wa akili: Soma haya kwa nyuma — umejaribu, sivyo?",
+  category: "Mind Trick", duration: 8, askComment: true
+},
+{
+  text: "Fun fact: Pineapple works as a natural meat tenderizer.",
+  textSW: "Fakta: Tunda la nanasi hufanya nyama kuwa laini kwa asili!",
+  category: "Food Science", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Ants can lift up to 50 times their body weight.",
+  textSW: "Fakta: Mchwa anaweza kuinua uzito mara 50 wa mwili wake!",
+  category: "Insects", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Rain contains vitamin B12!",
+  textSW: "Fakta: Mvua ina vitamini B12!",
+  category: "Nature", duration: 8, askComment: false
+},
+{
+  text: "Laugh: Why did the golfer bring two pairs of pants? In case he got a hole in one!",
+  textSW: "Cheka: Kwa nini mchezaji wa gofu alileta suruali mbili? Iwapo atapata tundu moja!",
+  category: "Laughs", duration: 10, askComment: false
+},
+{
+  text: "Fun fact: You can’t breathe and swallow at the same time.",
+  textSW: "Fakta: Huwezi kupumua na kumeza kwa wakati mmoja!",
+  category: "Human Body", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Cows moo in regional accents!",
+  textSW: "Fakta: Ng’ombe hubamba kwa lafudhi tofauti kulingana na maeneo!",
+  category: "Animals", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Goldfish lose color if kept in dim light.",
+  textSW: "Fakta: Samaki wa dhahabu hupoteza rangi wakikaa gizani!",
+  category: "Animals", duration: 9, askComment: false
+},
+{
+  text: "Riddle: What word becomes shorter when you add two letters to it?",
+  textSW: "Kitendawili: Neno gani linakuwa fupi zaidi ukiongeza herufi mbili?",
+  category: "Riddles", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: There’s a phobia of long words called hippopotomonstrosesquippedaliophobia!",
+  textSW: "Fakta: Kuna hofu ya maneno marefu inayoitwa hippopotomonstrosesquippedaliophobia!",
+  category: "Weird Facts", duration: 11, askComment: false
+},
+{
+  text: "Fun fact: Humans are the only animals that cry emotional tears.",
+  textSW: "Fakta: Binadamu pekee ndio hulia kwa hisia!",
+  category: "Human Body", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: The unicorn is Scotland’s national animal.",
+  textSW: "Fakta: Mnyama wa taifa wa Scotland ni farasi wa pembe moja!",
+  category: "Culture", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Dragonflies have six legs but can’t walk!",
+  textSW: "Fakta: Panzi wa maji wana miguu sita lakini hawawezi kutembea!",
+  category: "Insects", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Some sea cucumbers fight by vomiting their organs!",
+  textSW: "Fakta: Tango la baharini hupigana kwa kutapika viungo vyao vya ndani!",
+  category: "Marine Life", duration: 10, askComment: false
+}, 
+{
+  text: "Fun fact: The average person will spend six years of their life dreaming.",
+  textSW: "Fakta: Mtu wa kawaida hutumia miaka sita ya maisha yake akihota ndoto!",
+  category: "Fun Science", duration: 10, askComment: true
+},
+{
+  text: "Fun fact: Giraffes only sleep about 30 minutes a day.",
+  textSW: "Fakta: Twiga hulala kwa dakika 30 pekee kwa siku!",
+  category: "Animals", duration: 9, askComment: true
+},
+{
+  text: "Riddle: What has hands but can’t clap?",
+  textSW: "Kitendawili: Kina mikono lakini hakiwezi kupiga makofi ni nini?",
+  category: "Riddles", duration: 10, askComment: true
+},
+{
+  text: "Fun fact: Slugs have four noses!",
+  textSW: "Fakta: Slug wana pua nne!",
+  category: "Animals", duration: 9, askComment: true
+},
+{
+  text: "Laugh: If sleep is so important, why does school start so early? 😅",
+  textSW: "Cheka kidogo: Kama usingizi ni muhimu, mbona shule inaanza mapema hivi? 😅",
+  category: "Laughs", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Male seahorses give birth to babies.",
+  textSW: "Fakta: Wanaume wa samaki farasi ndio hujifungua watoto!",
+  category: "Nature", duration: 10, askComment: true
+},
+{
+  text: "Trick: Can you name three consecutive days without using Monday, Tuesday, or Wednesday?",
+  textSW: "Kichanganyo: Taja siku tatu mfululizo bila kusema Jumatatu, Jumanne au Jumatano!",
+  category: "Tricks", duration: 11, askComment: true
+},
+{
+  text: "Fun fact: Roses can grow taller than humans in some regions.",
+  textSW: "Fakta: Waridi hukua urefu kuliko binadamu katika baadhi ya maeneo!",
+  category: "Plants", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Coconuts kill more people each year than sharks!",
+  textSW: "Fakta: Nazi huua watu wengi zaidi kila mwaka kuliko papa!",
+  category: "Weird Facts", duration: 10, askComment: true
+},
+{
+  text: "Riddle: I’m tall when I’m young and short when I’m old. What am I?",
+  textSW: "Kitendawili: Mimi ni mrefu nikiwa mchanga na mfupi nikiwa mzee. Mimi ni nani?",
+  category: "Riddles", duration: 10, askComment: true
+},
+{
+  text: "Fun fact: Some animals dream just like humans.",
+  textSW: "Fakta: Baadhi ya wanyama huota ndoto kama binadamu!",
+  category: "Animals", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Bees can fly higher than Mount Everest!",
+  textSW: "Fakta: Nyuki wanaweza kuruka juu kuliko Mlima Everest!",
+  category: "Nature", duration: 9, askComment: true
+},
+{
+  text: "Laugh: My brain has too many tabs open. 🧠💭",
+  textSW: "Cheka kidogo: Ubongo wangu umefungua tabs nyingi sana. 🧠💭",
+  category: "Laughs", duration: 8, askComment: true
+},
+{
+  text: "Fun fact: Kangaroos can’t walk backward!",
+  textSW: "Fakta: Kangaroo hawawezi kutembea kurudi nyuma!",
+  category: "Animals", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Your brain is 73% water.",
+  textSW: "Fakta: Ubongo wako una maji kwa asilimia 73!",
+  category: "Human Body", duration: 9, askComment: true
+},
+{
+  text: "Riddle: What gets wetter the more it dries?",
+  textSW: "Kitendawili: Nini kinakuwa chepesi zaidi kadri kinavyokausha?",
+  category: "Riddles", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Camels have three eyelids to protect against sand.",
+  textSW: "Fakta: Ngamia wana kope tatu kulinda macho dhidi ya mchanga!",
+  category: "Animals", duration: 10, askComment: true
+},
+{
+  text: "Trick: If you throw a red stone into the blue sea, what will it become?",
+  textSW: "Kichanganyo: Ukiitupa jiwe jekundu baharini, litakuwa nini?",
+  category: "Tricks", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Ravens can solve puzzles as well as seven-year-old children.",
+  textSW: "Fakta: Kunguru wanaweza kutatua mafumbo kama watoto wa miaka saba!",
+  category: "Animals", duration: 10, askComment: true
+},
+{
+  text: "Laugh: I told my Wi-Fi we needed space... now we’re not connecting. 😆",
+  textSW: "Cheka kidogo: Niliambia Wi-Fi tunahitaji nafasi... sasa haingi tena! 😆",
+  category: "Laughs", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Some frogs give birth through their skin.",
+  textSW: "Fakta: Vyura wengine hujifungua kupitia ngozi yao!",
+  category: "Nature", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Humans and cows share about 80% of their DNA.",
+  textSW: "Fakta: Binadamu na ng’ombe wanashiriki takribani asilimia 80 ya DNA!",
+  category: "Science", duration: 9, askComment: true
+},
+{
+  text: "Riddle: What has a neck but no head?",
+  textSW: "Kitendawili: Kina shingo lakini hakina kichwa, ni nini?",
+  category: "Riddles", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Sharks are older than dinosaurs.",
+  textSW: "Fakta: Papa waliishi kabla ya dinosaurs!",
+  category: "Science", duration: 9, askComment: true
+},
+{
+  text: "Laugh: My wallet is like an onion. Opening it makes me cry. 💸😂",
+  textSW: "Cheka kidogo: Mkoba wangu ni kama kitunguu. Kukiufungua tu, machozi yanatoka. 💸😂",
+  category: "Laughs", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Bananas share 50% of their DNA with humans.",
+  textSW: "Fakta: Ndizi zinashiriki nusu ya DNA yao na binadamu!",
+  category: "Science", duration: 9, askComment: true
+},
+{
+  text: "Riddle: What has one eye but can’t see?",
+  textSW: "Kitendawili: Kina jicho moja lakini hakiwezi kuona, ni nini?",
+  category: "Riddles", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Otters use rocks as tools to open food.",
+  textSW: "Fakta: Vifaru wa majini hutumia mawe kufungua chakula!",
+  category: "Animals", duration: 9, askComment: true
+},
+{
+  text: "Trick: Can you say 'Toy Boat' five times fast without messing up?",
+  textSW: "Kichanganyo: Unaweza kusema 'Toy Boat' mara tano haraka bila kukosea?",
+  category: "Tricks", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: You are taller in the morning than at night.",
+  textSW: "Fakta: Unakuwa mrefu zaidi asubuhi kuliko jioni!",
+  category: "Human Body", duration: 9, askComment: true
+},
+{
+  text: "Laugh: My bed and I have a love-hate relationship. I love it, it hates to let me go. 😴",
+  textSW: "Cheka kidogo: Kitanda changu na mimi tuna uhusiano wa mapenzi. Mimi nakipenda, nacho hakinitaki niondoke. 😴",
+  category: "Laughs", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Some plants can hear themselves being eaten!",
+  textSW: "Fakta: Mimea mingine inaweza kusikia ikiliwa!",
+  category: "Plants", duration: 9, askComment: true
+},
+{
+  text: "Riddle: What can travel around the world while staying in a corner?",
+  textSW: "Kitendawili: Nini kinaweza kusafiri duniani kote kikiwa pembezoni tu?",
+  category: "Riddles", duration: 10, askComment: true
+},
+{
+  text: "Fun fact: Butterflies can see ultraviolet light.",
+  textSW: "Fakta: Kipepeo wanaweza kuona mwanga wa ultraviolet!",
+  category: "Nature", duration: 9, askComment: true
+},
+{
+  text: "Trick: If an electric train is moving north at 100 km/h and the wind is blowing east, which way does the smoke go?",
+  textSW: "Kichanganyo: Treni ya umeme inasafiri kaskazini kwa 100 km/h na upepo unavuma mashariki, moshi utaenda upande gani?",
+  category: "Tricks", duration: 11, askComment: true
+},
+{
+  text: "Fun fact: The first email was sent in 1971.",
+  textSW: "Fakta: Baruapepe ya kwanza ilitumwa mwaka 1971!",
+  category: "Tech", duration: 8, askComment: true
+},
+{
+  text: "Laugh: I need a six-month vacation, twice a year. 😂",
+  textSW: "Cheka kidogo: Nahitaji likizo ya miezi sita, mara mbili kwa mwaka. 😂",
+  category: "Laughs", duration: 8, askComment: true
+},
+{
+  text: "Fun fact: Rabbits can’t vomit!",
+  textSW: "Fakta: Sungura hawawezi kutapika!",
+  category: "Animals", duration: 8, askComment: true
+},
+{
+  text: "Riddle: What has to be broken before you can use it?",
+  textSW: "Kitendawili: Nini lazima kivunjwe kabla ya kutumika?",
+  category: "Riddles", duration: 8, askComment: true
+},
+{
+  text: "Fun fact: A baby blue whale gains 90 kilograms every day.",
+  textSW: "Fakta: Mtoto wa nyangumi wa buluu huongeza kilo 90 kila siku!",
+  category: "Animals", duration: 9, askComment: true
+},
+{
+  text: "Trick: Spell 'spot' three times fast — what do you do at a green light?",
+  textSW: "Kichanganyo: Sema 'spot' mara tatu haraka — unafanya nini taa ya kijani ikiwaka?",
+  category: "Tricks", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: A starfish has no brain or blood.",
+  textSW: "Fakta: Nyota wa baharini hana ubongo wala damu!",
+  category: "Sea Life", duration: 8, askComment: true
+},
+{
+  text: "Laugh: I told my mirror I wanted to lose weight… now it avoids me. 😂",
+  textSW: "Cheka kidogo: Niliambia kioo nataka kupunguza uzito… sasa hakiniangalii tena. 😂",
+  category: "Laughs", duration: 8, askComment: true
+},
+{
+  text: "Fun fact: An octopus has nine brains and three hearts.",
+  textSW: "Fakta: Pweza ana ubongo tisa na mioyo mitatu!",
+  category: "Sea Life", duration: 9, askComment: true
+},
+{
+  text: "Riddle: What begins with T, ends with T, and has T in it?",
+  textSW: "Kitendawili: Kinaanza na T, kinaishia na T, na kina T ndani yake — ni nini?",
+  category: "Riddles", duration: 10, askComment: true
+},
+
+
+
+
+  {
+    text: "Riddle: I speak without a mouth and hear without ears. What am I?",
+    textSW: "Kitendawili: Ninasema bila kinywa na kusikia bila masikio. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Trivia: Did you know the shortest war in history lasted just 38 minutes?",
+    textSW: "Ufafanuzi: Je, unajua vita kifupi zaidi katika historia vilidumu dakika 38 tu?",
+    category: "Trivia", duration: 10, askComment: true
+  },
+  {
+    text: "Joke: Why don't scientists trust atoms? Because they make up everything!",
+    textSW: "Ucheshi: Kwa nini wanasayansi hawatoi imani kwa atomi? Kwa sababu zinaunda kila kitu!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Brain teaser: What has keys but can't open locks?",
+    textSW: "Kitendawili: Nini kina funguo lakini hakiwezi kufungua milango?",
+    category: "Riddle", duration: 9, askComment: true
+  },
+  {
+    text: "Magic trick: You can predict the number someone is thinking by adding 5, doubling, subtracting 4, halving, then subtracting the original number.",
+    textSW: "Njia ya ujanja: Unaweza kutabiri namba anayofikiria mtu kwa kuongeza 5, kuzidisha kwa 2, kutoa 4, kugawanya kwa nusu, kisha kutoa namba ya awali.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Riddle: The more you take, the more you leave behind. What am I?",
+    textSW: "Kitendawili: Unapochukua zaidi, unaacha nyuma zaidi. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Trivia: Octopuses have three hearts and blue blood.",
+    textSW: "Ufafanuzi: Pweza wana mioyo mitatu na damu ya buluu.",
+    category: "Trivia", duration: 9, askComment: true
+  },
+  {
+    text: "Joke: Why did the computer go to the doctor? It caught a virus!",
+    textSW: "Ucheshi: Kwa nini kompyuta ilienda kwa daktari? Ilipata virusi!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Brain teaser: Forward I am heavy, backward I am not. What am I?",
+    textSW: "Kitendawili: Kwanza mimi ni mzito, nyuma mimi siyo. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Magic trick: Pick a number between 1-10, multiply by 9, add digits together, it always equals 9.",
+    textSW: "Njia ya ujanja: Chagua namba kati ya 1-10, zidisha kwa 9, jumlisha tarakimu, daima inakuwa 9.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Riddle: I have branches, but no fruit, trunk or leaves. What am I?",
+    textSW: "Kitendawili: Nina matawi lakini sina matunda, shina au majani. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Trivia: Dolphins sleep with one eye open.",
+    textSW: "Ufafanuzi: Delfini hula usingizi na jicho moja lililofunguliwa.",
+    category: "Trivia", duration: 9, askComment: true
+  },
+  {
+    text: "Joke: Why can't your nose be 12 inches long? Because then it would be a foot!",
+    textSW: "Ucheshi: Kwa nini pua yako haiwezi kuwa inchi 12 ndefu? Kwa sababu basi ingekuwa mguu!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Brain teaser: What has a head, a tail, is brown, and has no legs?",
+    textSW: "Kitendawili: Nini kina kichwa, mkia, ni kahawia, na haina miguu?",
+    category: "Riddle", duration: 9, askComment: true
+  },
+  {
+    text: "Magic trick: Think of a number, double it, add 10, halve it, subtract original number, result is always 5.",
+    textSW: "Njia ya ujanja: Fikiria namba, zidisha kwa 2, ongeza 10, gawanya kwa nusu, toa namba ya awali, matokeo daima ni 5.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Trivia: The honeybee can recognize human faces.",
+    textSW: "Ufafanuzi: Ndege mdogo wa mbee anaweza kutambua nyuso za binadamu.",
+    category: "Trivia", duration: 9, askComment: true
+  },
+  {
+    text: "Riddle: What comes once in a minute, twice in a moment, but never in a thousand years?",
+    textSW: "Kitendawili: Nini huja mara moja kwa dakika, mara mbili kwa muda mfupi, lakini kamwe si kwa miaka elfu?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Joke: Why did the tomato turn red? Because it saw the salad dressing!",
+    textSW: "Ucheshi: Kwa nini nyanya ilirubuka? Kwa sababu iliona dressing ya saladi!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Magic trick: Ask someone to think of a number, multiply by 2, add 8, divide by 2, subtract the original number, result is always 4.",
+    textSW: "Njia ya ujanja: Waombe mtu afikirie namba, zidisha kwa 2, ongeza 8, gawanya kwa 2, toa namba ya awali, matokeo daima ni 4.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Trivia: Butterflies taste with their feet.",
+    textSW: "Ufafanuzi: Kipepeo huchunguza ladha kwa miguu yao.",
+    category: "Trivia", duration: 9, askComment: true
+  },
+  {
+    text: "Brain teaser: The more of me you take, the more you leave behind. What am I?",
+    textSW: "Kitendawili: Unapochukua zaidi ya mimi, unaacha nyuma zaidi. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Joke: Why don't skeletons fight each other? They don't have the guts!",
+    textSW: "Ucheshi: Kwa nini mifupa haiwapigani? Kwa sababu haina moyo!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Magic trick: Think of any number, multiply by 3, add 3, divide by 3, subtract 1, the result is always the original number.",
+    textSW: "Njia ya ujanja: Fikiria namba yoyote, zidisha kwa 3, ongeza 3, gawanya kwa 3, toa 1, matokeo ni daima namba ya awali.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Trivia: Sea otters hold hands while sleeping to keep from drifting apart.",
+    textSW: "Ufafanuzi: Chui wa baharini hushikana mikono wakati wa kulala ili wasigawanyike.",
+    category: "Trivia", duration: 9, askComment: true
+  },
+  {
+    text: "Riddle: What has a heart that doesn't beat?",
+    textSW: "Kitendawili: Nini kina moyo lakini hakipigi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Joke: Why did the math book look sad? Because it had too many problems!",
+    textSW: "Ucheshi: Kwa nini kitabu cha hisabati kilionekana huzuni? Kwa sababu kilikuwa na matatizo mengi!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Brain teaser: I have cities but no houses, forests but no trees, and rivers but no water. What am I?",
+    textSW: "Kitendawili: Nina miji lakini sina nyumba, misitu lakini sina miti, mito lakini sina maji. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Magic trick: Ask someone to pick a number 1-5, double it, add 8, divide by 2, subtract original, result is always 4.",
+    textSW: "Njia ya ujanja: Waombe mtu achague namba 1-5, zidisha kwa 2, ongeza 8, gawanya kwa 2, toa namba ya awali, matokeo daima ni 4.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Trivia: A group of flamingos is called a 'flamboyance'.",
+    textSW: "Ufafanuzi: Kikundi cha flamingo huitwa 'flamboyance'.",
+    category: "Trivia", duration: 9, askComment: true
+  },
+  
+
+  {
+    text: "Riddle: What has a bottom at the top?",
+    textSW: "Kitendawili: Nini kina chini kilicho juu?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Joke: Why did the bicycle fall over? Because it was two-tired!",
+    textSW: "Ucheshi: Kwa nini baiskeli ilidondoka? Kwa sababu ilikuwa na magugu mawili!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Trivia: A shrimp’s heart is located in its head.",
+    textSW: "Ufafanuzi: Moyo wa kamba uko kichwani mwake.",
+    category: "Trivia", duration: 9, askComment: true
+  },
+  {
+    text: "Magic trick: Choose a number, multiply by 5, add 10, divide by 5, subtract original, result is always 2.",
+    textSW: "Njia ya ujanja: Chagua namba yoyote, zidisha kwa 5, ongeza 10, gawanya kwa 5, toa namba ya awali, matokeo daima ni 2.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Brain teaser: The more you take away from me, the bigger I get. What am I?",
+    textSW: "Kitendawili: Unapondoa zaidi kutoka kwangu, ninaongezeka. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Joke: Why did the cookie go to the hospital? Because he felt crummy!",
+    textSW: "Ucheshi: Kwa nini biskuti ilienda hospitali? Kwa sababu ilihisi kuwa mbaya!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Trivia: A day on Venus is longer than a year on Venus.",
+    textSW: "Ufafanuzi: Siku kwenye Venus ni ndefu kuliko mwaka kwenye Venus.",
+    category: "Trivia", duration: 10, askComment: true
+  },
+  {
+    text: "Riddle: I’m tall when I’m young, and short when I’m old. What am I?",
+    textSW: "Kitendawili: Niko mrefu ninapokuwa mchanga, na mfupi ninapokuwa mzee. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Magic trick: Ask someone to pick any number, add 7, double it, subtract 14, halve it, subtract original number, result is always 3.",
+    textSW: "Njia ya ujanja: Waombe mtu achague namba yoyote, ongeza 7, zidisha kwa 2, toa 14, gawanya kwa 2, toa namba ya awali, matokeo daima ni 3.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Joke: What do you call a fake noodle? An Impasta!",
+    textSW: "Ucheshi: Unaita nini tambi bandia? Impasta!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Trivia: Some cats are allergic to humans.",
+    textSW: "Ufafanuzi: Baadhi ya paka wana mzio kwa binadamu.",
+    category: "Trivia", duration: 9, askComment: true
+  },
+  {
+    text: "Brain teaser: What comes down but never goes up?",
+    textSW: "Kitendawili: Nini hukushuka lakini hakipandi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Magic trick: Pick any number, multiply by 4, add 8, divide by 2, subtract original number, result is always 2.",
+    textSW: "Njia ya ujanja: Chagua namba yoyote, zidisha kwa 4, ongeza 8, gawanya kwa 2, toa namba ya awali, matokeo daima ni 2.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Joke: Why did the golfer bring two pairs of pants? In case he got a hole in one!",
+    textSW: "Ucheshi: Kwa nini mchezaji wa gofu alileta suruali mbili? Ikiwa angepata shimo kwa moja!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Trivia: Bananas are berries but strawberries are not.",
+    textSW: "Ufafanuzi: Ndizi ni matunda lakini stroberi sio.",
+    category: "Trivia", duration: 9, askComment: true
+  },
+  {
+    text: "Riddle: What can travel around the world while staying in a corner?",
+    textSW: "Kitendawili: Nini kinaweza kusafiri duniani kote huku kikiwa kona?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Magic trick: Ask someone to pick a number, triple it, add 6, divide by 3, subtract original number, result is always 2.",
+    textSW: "Njia ya ujanja: Waombe mtu achague namba, zidisha mara 3, ongeza 6, gawanya kwa 3, toa namba ya awali, matokeo daima ni 2.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Brain teaser: I can be cracked, made, told, and played. What am I?",
+    textSW: "Kitendawili: Ninaweza kuvunjwa, kutengenezwa, kusemwa, na kuchezwa. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Joke: What do you call cheese that isn't yours? Nacho cheese!",
+    textSW: "Ucheshi: Unaita nini jibini ambalo si lako? Jibini la Nacho!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Trivia: Wombats have cube-shaped poop.",
+    textSW: "Ufafanuzi: Wombat wana kinyesi cha umbo la mraba.",
+    category: "Trivia", duration: 9, askComment: true
+  },
+  {
+    text: "Riddle: The more you take, the more you leave behind. What am I?",
+    textSW: "Kitendawili: Unapochukua zaidi, unaacha nyuma zaidi. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Magic trick: Ask someone to pick a number, multiply by 2, add 12, divide by 2, subtract original, result is always 6.",
+    textSW: "Njia ya ujanja: Waombe mtu achague namba, zidisha kwa 2, ongeza 12, gawanya kwa 2, toa namba ya awali, matokeo daima ni 6.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Joke: Why did the coffee file a police report? It got mugged!",
+    textSW: "Ucheshi: Kwa nini kahawa iliripoti polisi? Iliibiwa!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Trivia: Sharks can detect one drop of blood in 25 gallons of water.",
+    textSW: "Ufafanuzi: Papa wanaweza kugundua tone moja la damu katika galoni 25 za maji.",
+    category: "Trivia", duration: 9, askComment: true
+  },
+  {
+    text: "Brain teaser: What begins with T, ends with T, and has T in it?",
+    textSW: "Kitendawili: Nini huanza na T, kumaliza na T, na kina T ndani yake?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Magic trick: Pick any number, multiply by 3, add 15, divide by 3, subtract original number, result is always 5.",
+    textSW: "Njia ya ujanja: Chagua namba yoyote, zidisha kwa 3, ongeza 15, gawanya kwa 3, toa namba ya awali, matokeo daima ni 5.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Joke: Why was the math lecture so long? The professor kept going off on tangents!",
+    textSW: "Ucheshi: Kwa nini mhadhara wa hisabati ulikuwa mrefu sana? Profesa aliendelea kutoa tangenti!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Trivia: Penguins propose to their mates with a pebble.",
+    textSW: "Ufafanuzi: Pingwini hutoa jiwe kwa wapenzi wao kama pendekezo.",
+    category: "Trivia", duration: 9, askComment: true
+  },
+  {
+    text: "Riddle: What has one eye but cannot see?",
+    textSW: "Kitendawili: Nini kina jicho moja lakini hakiwezi kuona?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Brain teaser: I’m light as a feather, yet the strongest person can’t hold me for long. What am I?",
+    textSW: "Kitendawili: Mimi ni mwepesi kama manyoya, lakini mtu mwenye nguvu hawezi kunishika kwa muda mrefu. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Magic trick: Ask someone to pick a number, add 9, multiply by 2, subtract 10, divide by 2, subtract original, result is always 4.",
+    textSW: "Njia ya ujanja: Waombe mtu achague namba, ongeza 9, zidisha kwa 2, toa 10, gawanya kwa 2, toa namba ya awali, matokeo daima ni 4.",
+    category: "Trick", duration: 12, askComment: true
+  },
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  {
+    text: "Trivia: A raindrop falls at an average speed of 14 km/h.",
+    textSW: "Ufafanuzi: Tone la mvua linaanguka kwa kasi ya wastani ya km 14/h!",
+    category: "Nature", duration: 8, askComment: true
+  },
+  {
+    text: "Trivia: Some ants farm fungi for food.",
+    textSW: "Ufafanuzi: Baadhi ya ants hufuga uyoga kama chakula!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "Trivia: A group of kangaroos is called a mob.",
+    textSW: "Ufafanuzi: Kikundi cha kangaroo huitwa 'mob'!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "Trivia: Bees communicate through a dance called the waggle dance.",
+    textSW: "Ufafanuzi: Nyuki huwasiliana kwa kucheza kilichoitwa 'waggle dance'!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Trivia: The average lifespan of a red blood cell is 120 days.",
+    textSW: "Ufafanuzi: Umri wa kawaida wa seli nyekundu za damu ni siku 120!",
+    category: "Human Body", duration: 8, askComment: true
+  },
+  {
+    text: "Trivia: There’s a metal that melts in your hand — gallium.",
+    textSW: "Ufafanuzi: Kuna chuma kinachoyeyuka mkononi mwako — gallium!",
+    category: "Science", duration: 9, askComment: true
+  },
+  {
+    text: "Trivia: Some species of worms can regrow their entire bodies from a fragment.",
+    textSW: "Ufafanuzi: Baadhi ya aina za minyoo zinaweza kukua tena mwili mzima kutoka kipande!",
+    category: "Animals", duration: 10, askComment: true
+  },
+  {
+    text: "Trivia: Cats dream when they sleep deeply, just like humans.",
+    textSW: "Ufafanuzi: Paka husingizia wanapolala kwa usingizi mzito, kama binadamu!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Trivia: The heaviest onion ever grown weighed over 8 kilograms.",
+    textSW: "Ufafanuzi: Kitunguu kikubwa zaidi kilichokuzwa kilikuwa na uzito wa kilo 8!",
+    category: "Food", duration: 8, askComment: true
+  },
+  {
+    text: "Trivia: Some fish can change their gender.",
+    textSW: "Ufafanuzi: Samaki wengine wanaweza kubadilisha jinsia yao!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "Trivia: There are volcanoes that erupt under the sea.",
+    textSW: "Ufafanuzi: Kuna volkano zinazolipuka chini ya bahari!",
+    category: "Nature", duration: 9, askComment: true
+  },
+  {
+    text: "Trivia: The first recorded use of the word 'robot' was in 1921.",
+    textSW: "Ufafanuzi: Matumizi ya kwanza ya neno 'robot' yaliorekodiwa mwaka 1921!",
+    category: "History", duration: 9, askComment: true
+  },
+  {
+    text: "Trivia: The Amazon rainforest produces 20% of the world’s oxygen.",
+    textSW: "Ufafanuzi: Msitu wa mvua wa Amazon hutoa asilimia 20 ya oksijeni duniani!",
+    category: "Nature", duration: 10, askComment: true
+  },
+  {
+    text: "Trivia: Venus is hotter than Mercury despite being farther from the Sun.",
+    textSW: "Ufafanuzi: Venus ni moto kuliko Mercury ingawa ipo mbali na Jua!",
+    category: "Space", duration: 9, askComment: true
+  },
+  {
+    text: "Trivia: A newborn kangaroo is smaller than a cherry.",
+    textSW: "Ufafanuzi: Kangaroo mchanga ni mdogo kuliko cherry!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "Trivia: It’s impossible to burp in space without vomiting.",
+    textSW: "Ufafanuzi: Haiwezekani kuruka kwa hewa kwenye nafasi bila kutapika!",
+    category: "Space", duration: 9, askComment: true
+  },
+  {
+    text: "Trivia: Polar bear fur is transparent, not white.",
+    textSW: "Ufafanuzi: Nywele za dubu wa polar ni wazi, si nyeupe!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Trivia: A day on Jupiter is only 10 hours long.",
+    textSW: "Ufafanuzi: Siku moja kwenye Jupiter ni saa 10 tu!",
+    category: "Space", duration: 8, askComment: true
+  },
+  {
+    text: "Riddle: I’m always in front of you but can’t be seen. What am I?",
+    textSW: "Kitendawili: Mimi niko mbele yako kila wakati lakini siwezi kuonekana. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Joke: Why don’t skeletons fight each other? They don’t have the guts!",
+    textSW: "Ucheshi: Kwa nini mifupa haipigani? Haina utajiri wa ndani!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Magic trick: Ask someone to pick any number, add 5, multiply by 2, subtract 4, divide by 2, subtract original number, result is always 3.",
+    textSW: "Njia ya ujanja: Waombe mtu achague namba yoyote, ongeza 5, zidisha kwa 2, toa 4, gawanya kwa 2, toa namba ya awali, matokeo daima ni 3.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Brain teaser: What has hands but cannot clap?",
+    textSW: "Kitendawili: Nini kina mikono lakini hakiwezi kupiga makofi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Trivia: Octopuses have three hearts.",
+    textSW: "Ufafanuzi: Pweza wana mioyo mitatu.",
+    category: "Animals", duration: 9, askComment: true
+  },
+
+
+
+
+  {
+    text: "Riddle: What has a head, a tail, but no body?",
+    textSW: "Kitendawili: Nini kina kichwa, mkia, lakini hakina mwili?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Joke: Why did the math book look sad? Because it had too many problems!",
+    textSW: "Ucheshi: Kwa nini kitabu cha hisabati kilikuwa na huzuni? Kwa sababu kilikuwa na matatizo mengi!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Trivia: Sea otters hold hands while sleeping to keep from drifting apart.",
+    textSW: "Ufafanuzi: Sungura wa baharini hushikana mikono wanapolala ili wasijitenganishe.",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Magic trick: Think of any number, double it, add 10, halve it, subtract original number, result is always 5.",
+    textSW: "Njia ya ujanja: Fikiria namba yoyote, zidisha kwa 2, ongeza 10, gawanya kwa nusu, toa namba ya awali, matokeo daima ni 5.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Brain teaser: I’m tall when I’m young, and short when I’m old. What am I?",
+    textSW: "Kitendawili: Mimi ni mrefu ninapokuwa mchanga, na mfupi ninapokuwa mzee. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Trivia: The tongue of a blue whale weighs as much as an elephant.",
+    textSW: "Ufafanuzi: Ulimi wa nyangumi wa buluu unazidi uzito wa tembo!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Joke: Why did the chicken join a band? Because it had the drumsticks!",
+    textSW: "Ucheshi: Kwa nini kuku alijiunga na bendi? Kwa sababu alikuwa na drumsticks!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Trivia: Pigeons can recognize themselves in a mirror.",
+    textSW: "Ufafanuzi: Njiwa wanaweza kujitambua kwenye kioo!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Riddle: I’m light as a feather, yet the strongest person can’t hold me for five minutes. What am I?",
+    textSW: "Kitendawili: Mimi ni nyepesi kama manyoya, lakini mtu mwenye nguvu hawezi kunishikilia kwa dakika tano. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Magic trick: Pick any three-digit number, reverse it, subtract smaller from larger, sum digits until one number, answer is always 9.",
+    textSW: "Njia ya ujanja: Chagua namba yoyote ya tarakimu tatu, geuza, toa ndogo kutoka kubwa, jumlisha tarakimu hadi namba moja, jibu daima ni 9.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Trivia: Cows produce more milk when they listen to music.",
+    textSW: "Ufafanuzi: Ng’ombe hutengeneza maziwa zaidi wanaposikia muziki.",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Joke: Why was the broom late? It over swept!",
+    textSW: "Ucheshi: Kwa nini mswaki ulikuwa umechelewa? Ulipita kuosha!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Brain teaser: The more you take, the more you leave behind. What am I?",
+    textSW: "Kitendawili: Unapochukua zaidi, unaacha nyuma zaidi. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Trivia: A group of flamingos is called a flamboyance.",
+    textSW: "Ufafanuzi: Kikundi cha flamingo huitwa flamboyance.",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Riddle: What comes once in a minute, twice in a moment, but never in a thousand years?",
+    textSW: "Kitendawili: Nini hujitokeza mara moja kwa dakika, mara mbili kwa wakati, lakini kamwe si katika miaka elfu?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Joke: What do you call fake spaghetti? An impasta!",
+    textSW: "Ucheshi: Unaite spaghetti bandia nini? Impasta!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Trivia: Starfish can regenerate lost arms.",
+    textSW: "Ufafanuzi: Nyota za baharini zinaweza kukua tena mikono iliyopotea.",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Magic trick: Ask someone to think of a number, multiply by 9, sum the digits, answer is always 9.",
+    textSW: "Njia ya ujanja: Waombe mtu afikirie namba yoyote, zidisha kwa 9, jumlisha tarakimu, jibu daima ni 9.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Trivia: Elephants are right or left-tusked, like humans are right or left-handed.",
+    textSW: "Ufafanuzi: Tembo wana pembe ya kulia au kushoto, kama binadamu ni wa mkono wa kulia au kushoto.",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Brain teaser: I can travel around the world while staying in a corner. What am I?",
+    textSW: "Kitendawili: Ninaweza kusafiri duniani huku nikiwa kona moja. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  
+  
+  
+  
+  
+  {
+    text: "Joke: Why don’t skeletons fight each other? They don’t have the guts!",
+    textSW: "Ucheshi: Kwa nini mifupa haiingiliani? Hawana ujasiri!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Trivia: Some sharks can live for over 500 years.",
+    textSW: "Ufafanuzi: Baadhi ya papa wanaweza kuishi zaidi ya miaka 500.",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Brain teaser: What can you catch but not throw?",
+    textSW: "Kitendawili: Nini unaweza kukamata lakini huwezi kurusha?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Magic trick: Think of a number, multiply by 2, add 8, divide by 2, subtract original number, result is always 4.",
+    textSW: "Njia ya ujanja: Fikiria namba yoyote, zidisha kwa 2, ongeza 8, gawanya kwa 2, toa namba ya awali, matokeo daima ni 4.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Trivia: Honey never spoils — edible honey has been found in ancient tombs.",
+    textSW: "Ufafanuzi: Asali haiharibiki — asali ya kula imepatikana katika makaburi ya kale.",
+    category: "Food", duration: 9, askComment: true
+  },
+  {
+    text: "Joke: Why did the tomato turn red? Because it saw the salad dressing!",
+    textSW: "Ucheshi: Kwa nini nyanya ilirubishwa? Kwa sababu iliona saladi ikijipamba!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Riddle: I have branches, but no fruit, trunk or leaves. What am I?",
+    textSW: "Kitendawili: Nina matawi, lakini sina matunda, shina au majani. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Trivia: Crows can recognize individual human faces.",
+    textSW: "Ufafanuzi: Kunguru wanaweza kutambua uso wa mtu mmoja mmoja.",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Brain teaser: The more you take, the more you leave behind. What am I?",
+    textSW: "Kitendawili: Unapochukua zaidi, unaacha zaidi. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Magic trick: Think of a number, multiply by 3, add 3, multiply by 3 again, subtract 9, divide by 9, result is original number plus 1.",
+    textSW: "Njia ya ujanja: Fikiria namba yoyote, zidisha kwa 3, ongeza 3, zidisha tena kwa 3, toa 9, gawanya kwa 9, matokeo ni namba ya awali + 1.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Trivia: Octopuses have three hearts and blue blood.",
+    textSW: "Ufafanuzi: Pweza wana mioyo mitatu na damu ya buluu.",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Joke: Why did the bicycle fall over? Because it was two-tired!",
+    textSW: "Ucheshi: Kwa nini baiskeli ilianguka? Kwa sababu ilikuwa na magurudumu mawili!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Riddle: I am always hungry and will die if not fed, but whatever I touch, I soon devour. What am I?",
+    textSW: "Kitendawili: Mimi siku zote nina njaa na nitakufa kama sitakuliwa, lakini ninachogusa, hivi karibuni hula. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Trivia: Some birds can sleep while flying.",
+    textSW: "Ufafanuzi: Baadhi ya ndege wanaweza kulala huku wakiendelea kuruka.",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Magic trick: Pick any number, add 7, double it, subtract 14, divide by 2, result is original number plus 3.",
+    textSW: "Njia ya ujanja: Chagua namba yoyote, ongeza 7, zidisha kwa 2, toa 14, gawanya kwa 2, matokeo ni namba ya awali + 3.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Brain teaser: Forward I am heavy, backward I am not. What am I?",
+    textSW: "Kitendawili: Nikiwa mbele ni nzito, nikiwa nyuma siyo. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Joke: What do you call cheese that isn’t yours? Nacho cheese!",
+    textSW: "Ucheshi: Unaiita jibini ambalo si lako nini? Nacho cheese!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Trivia: The fingerprints of chimpanzees are nearly identical to humans.",
+    textSW: "Ufafanuzi: Alama za kidole za sokwe karibu sawa kabisa na za binadamu.",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Riddle: The more you take from me, the bigger I get. What am I?",
+    textSW: "Kitendawili: Unapochukua kutoka kwangu zaidi, ninaongezeka. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Trivia: Elephants are the only mammals that can’t jump.",
+    textSW: "Ufafanuzi: Tembo ni mamalia pekee wasioweza kuruka.",
+    category: "Animals", duration: 9, askComment: true
+  },
+
+
+
+
+  {
+    text: "Riddle: I fly without wings. I cry without eyes. Wherever I go, darkness flies. What am I?",
+    textSW: "Kitendawili: Nina kuruka bila mabawa. Nalia bila macho. Popote ninapoenda, giza linaondoka. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Trivia: Some snakes can fly — they glide through the air using their ribs.",
+    textSW: "Ufafanuzi: Nyoka wengine wanaweza kuruka — wanapita hewani kwa kutumia mifupa yao!",
+    category: "Animals", duration: 10, askComment: true
+  },
+  {
+    text: "Brain teaser: Your liver can regenerate up to 75% of its tissue. How is this useful to humans?",
+    textSW: "Kitendawili: Ini lako linaweza kurekebisha hadi asilimia 75 ya tishu zake. Hii ni muhimu vipi kwa binadamu?",
+    category: "Human Body", duration: 9, askComment: true
+  },
+  {
+    text: "Magic trick: Pick a number, double it, add 10, divide by 2, subtract your original number — the answer is always 5.",
+    textSW: "Njia ya ujanja: Chagua namba yoyote, zidisha kwa 2, ongeza 10, gawanya kwa 2, toa namba ya awali — jibu daima ni 5.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Trivia: There’s a spider that can jump 50 times its body length.",
+    textSW: "Ufafanuzi: Kuna buibui anayeruka mara 50 ya urefu wake!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Joke: Why did the giraffe get bad grades? Because it had its head in the clouds!",
+    textSW: "Ucheshi: Kwa nini twiga alipata alama mbaya? Kwa sababu alikuwa na kichwa chake kwenye mawingu!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Riddle: I can be cracked, made, told, and played. What am I?",
+    textSW: "Kitendawili: Ninaweza kufunikwa, kutengenezwa, kusimuliwa, na kuchezwa. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Trivia: Every year, thousands of new species are discovered.",
+    textSW: "Ufafanuzi: Kila mwaka, aina elfu mpya za viumbe zinagundulika!",
+    category: "Nature", duration: 8, askComment: true
+  },
+  {
+    text: "Brain teaser: Rainbows can form full circles, but we usually see only half. How does this happen?",
+    textSW: "Kitendawili: Upinde wa mvua unaweza kuunda mduara kamili, lakini kawaida tunaona nusu tu. Hii inatokea vipi?",
+    category: "Nature", duration: 9, askComment: true
+  },
+  {
+    text: "Magic trick: Think of a number, triple it, add 9, divide by 3, subtract your original number — result is always 3.",
+    textSW: "Njia ya ujanja: Fikiria namba yoyote, zidisha mara 3, ongeza 9, gawanya kwa 3, toa namba ya awali — matokeo daima ni 3.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Trivia: Sharks can be born from unfertilized eggs in rare cases (parthenogenesis).",
+    textSW: "Ufafanuzi: Papa wanaweza kuzaliwa kutoka mayai yasiyo ya mbolea katika hali nadra (parthenogenesis)!",
+    category: "Animals", duration: 10, askComment: true
+  },
+  {
+    text: "Joke: Why did the sun go to school? To get a little brighter!",
+    textSW: "Ucheshi: Kwa nini jua lilienda shuleni? Ili kuwa na mwangaza kidogo zaidi!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Trivia: The Sun makes up 99.86% of the solar system’s mass.",
+    textSW: "Ufafanuzi: Jua linaunda asilimia 99.86 ya wingi wa mfumo wa jua!",
+    category: "Space", duration: 9, askComment: true
+  },
+  {
+    text: "Brain teaser: Most of the oxygen you breathe comes from ocean algae. How does this affect life on Earth?",
+    textSW: "Kitendawili: Sehemu kubwa ya oksijeni unayopumua inatoka kwa mwani wa baharini. Hii inaathiri vipi maisha duniani?",
+    category: "Nature", duration: 9, askComment: true
+  },
+  {
+    text: "Trivia: The world’s smallest mammal is the bumblebee bat.",
+    textSW: "Ufafanuzi: Mnyama mdogo zaidi duniani ni popo mdogo wa nyuki (bumblebee bat)!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "Riddle: I start with a T, end with a T, and have T in me. What am I?",
+    textSW: "Kitendawili: Ninaanza na T, ninaisha na T, na nina T ndani yangu. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Trivia: A group of hippos is called a bloat.",
+    textSW: "Ufafanuzi: Kikundi cha kiboko huitwa 'bloat'!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "Magic trick: Pick any number, add 5, double it, subtract 4, divide by 2, subtract your original number — answer is always 3.",
+    textSW: "Njia ya ujanja: Chagua namba yoyote, ongeza 5, zidisha kwa 2, toa 4, gawanya kwa 2, toa namba ya awali — jibu daima ni 3.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Trivia: A human sneeze can travel 8 meters away.",
+    textSW: "Ufafanuzi: Hicho kikocho cha binadamu kinaweza kusafiri hadi mita 8!",
+    category: "Human Body", duration: 8, askComment: true
+  },
+  {
+    text: "Trivia: Giraffes clean their ears with their 45 cm-long tongues.",
+    textSW: "Ufafanuzi: Twiga husafisha masikio yao kwa kutumia ulimi wa cm 45!",
+    category: "Animals", duration: 9, askComment: false
+  },
+
+
+
+
+  {
+    text: "😂 Meme: Some ants explode themselves to protect the colony. Talk about going out with a bang!",
+    textSW: "😂 Meme: Baadhi ya ants hujirusha ili kulinda koloni! Hii ni kuondoka kwa mlipuko!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "🧠 Brain teaser: Wolves have over 200 million scent cells in their noses. Can you guess how this helps them track prey?",
+    textSW: "🧠 Kitendawili: Mbwa mwitu wana seli za harufu zaidi ya milioni 200 kwenye pua zao. Unadhani inawasaidia vipi kuwinda?",
+    category: "Animals", duration: 9, askComment: false
+  },
+  {
+    text: "😲 Fun fact: A shark can lose and regrow over 20,000 teeth in a lifetime!",
+    textSW: "😲 Fakta: Papa wanaweza kupoteza na kukua tena meno zaidi ya 20,000!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "🧩 Riddle: I orbit a star, have no moons or rings, and shine bright in the sky. What am I?",
+    textSW: "🧩 Kitendawili: Ninazunguka nyota, sina mwezi wala pete, na ninaangaza angani. Nini mimi?",
+    category: "Space", duration: 8, askComment: true
+  },
+  {
+    text: "😂 Joke: Why did the tree start gossiping? Because it had too many roots!",
+    textSW: "😂 Ucheshi: Kwa nini mti ulianza kusambaza uvumi? Kwa sababu ulikuwa na mizizi mingi!",
+    category: "Nature", duration: 10, askComment: false
+  },
+  {
+    text: "🪄 Magic trick: Show a friend a single ant. Say it can lift 50 times its weight — then demonstrate with a crumb!",
+    textSW: "🪄 Njia ya uchawi: Mwonyeshe rafiki yako kipepeo kimoja. Sema kinaweza kubeba mara 50 uzito wake — kisha onyesha kwa kipande cha mkate!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "🤣 Fun fact + laugh: Bananas grow upside down. Nature really likes to mess with us!",
+    textSW: "🤣 Fakta + kicheko: Ndizi hukua kinyume na mwelekeo wa chini juu! Asili kweli inatupendeza!",
+    category: "Food", duration: 8, askComment: true
+  },
+  {
+    text: "😲 Did you know: The Sun makes up 99.86% of the solar system’s mass!",
+    textSW: "😲 Je, unajua: Jua linaunda asilimia 99.86 ya wingi wa mfumo wa jua!",
+    category: "Space", duration: 9, askComment: true
+  },
+  {
+    text: "🧩 Riddle: I can jump 50 times my own length, but I’m tiny. Who am I?",
+    textSW: "🧩 Kitendawili: Ninaweza kuruka mara 50 ya urefu wangu, lakini mimi ni mdogo. Nani mimi?",
+    category: "Animals", duration: 9, askComment: true
+  },
+
+
+
+
+  {
+    text: "😲 Fun fact: A hummingbird’s wings beat up to 80 times per second!",
+    textSW: "😲 Fakta: Mabawa ya nyuki wanaubwaki mara 80 kwa sekunde!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "🧠 Brain teaser: The human stomach replaces its lining every few days to avoid digesting itself. Can you guess why?",
+    textSW: "🧠 Kitendawili: Tumbo la binadamu hubadilisha safu yake kila siku chache ili kuepuka kutumika kuingiza mwili wake. Unadhani kwa nini?",
+    category: "Human Body", duration: 10, askComment: true
+  },
+  {
+    text: "😲 Fun fact: Some starfish can regenerate their entire bodies from one arm!",
+    textSW: "😲 Fakta: Baadhi ya nyota za baharini zinaweza kuunda tena miili yao yote kutoka mkono mmoja!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "😂 Joke: The deepest living fish was found over 8,000 meters below sea level. Talk about a deep dive!",
+    textSW: "😂 Ucheshi: Samaki anayeishi kwa kina kirefu zaidi alipatikana zaidi ya mita 8,000 chini ya usawa wa bahari! Hii ni 'deep dive' kweli!",
+    category: "Animals", duration: 9, askComment: false
+  },
+  {
+    text: "🪄 Magic fact: Spiders can’t chew; they liquefy their food before eating. Show a friend with some syrup!",
+    textSW: "🪄 Uchawi: Buibui hawawezi kukanyaga; wananyunyiza chakula chao kabla ya kula. Onyesha rafiki yako kwa syrup!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "😲 Did you know: There’s a lake in Tanzania that turns animals into stone!",
+    textSW: "😲 Je, unajua: Kuna ziwa Tanzania linalobadilisha wanyama kuwa mawe!",
+    category: "Nature", duration: 9, askComment: true
+  },
+  {
+    text: "😲 Fun fact: Some jellyfish can turn back into their younger form after maturity!",
+    textSW: "😲 Fakta: Baadhi ya jellyfish zinaweza kurudi kwenye umri mdogo baada ya kuwa wazima!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "🧩 Riddle: I am a galaxy moving at 2.1 million km/h through space. Who am I?",
+    textSW: "🧩 Kitendawili: Mimi ni galaxy inayosogea kwa 2.1 milioni km/h angani. Nani mimi?",
+    category: "Space", duration: 10, askComment: true
+  },
+  {
+    text: "😂 Joke: Your ears never stop growing. Better watch your headphones size!",
+    textSW: "😂 Ucheshi: Masikio yako hayaishi kukua. Angalia ukubwa wa headphones zako!",
+    category: "Human Body", duration: 8, askComment: false
+  },
+  {
+    text: "😲 Fun fact: Horseshoe crabs have blue blood due to copper.",
+    textSW: "😲 Fakta: Ngamia wa kifaransa wana damu ya buluu kutokana na shaba!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "😲 Fun fact: Cats can jump up to six times their body length!",
+    textSW: "😲 Fakta: Paka wanaweza kuruka mara sita urefu wa miili yao!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "🧠 Brain teaser: The smallest bone in the human body is in the ear. Can you name it?",
+    textSW: "🧠 Kitendawili: Mfupa mdogo zaidi katika mwili wa binadamu uko masikioni. Unaweza kulitaja?",
+    category: "Human Body", duration: 8, askComment: true
+  },
+  {
+    text: "😲 Fun fact: Each taste bud has about 50 sensory cells.",
+    textSW: "😲 Fakta: Kila chembe ya ladha ina takriban seli 50 za hisia!",
+    category: "Human Body", duration: 8, askComment: true
+  },
+  {
+    text: "😂 Joke: Dogs’ sense of smell is 40 times better than humans’. Imagine sniffing your homework!",
+    textSW: "😂 Ucheshi: Hisia za harufu za mbwa ni mara 40 bora kuliko binadamu! Fikiria wanapofukia kazi yako ya nyumbani!",
+    category: "Animals", duration: 8, askComment: false
+  },
+  {
+    text: "😲 Fun fact: The largest volcano in the solar system is Olympus Mons on Mars!",
+    textSW: "😲 Fakta: Volcano kubwa zaidi katika mfumo wa jua ni Olympus Mons kwenye Mars!",
+    category: "Space", duration: 9, askComment: true
+  },
+  {
+    text: "😲 Fun fact: Some birds can sleep while flying.",
+    textSW: "😲 Fakta: Baadhi ya ndege wanaweza kulala wakiwa wanaruka!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "🧠 Brain teaser: A full moon always rises at sunset. Can you guess why?",
+    textSW: "🧠 Kitendawili: Mwezi kamili huchomoza kila wakati jua linapozama. Unadhani kwa nini?",
+    category: "Space", duration: 8, askComment: true
+  },
+  {
+    text: "😲 Fun fact: The Great Wall of China is over 21,000 kilometers long!",
+    textSW: "😲 Fakta: Ukuta Mkubwa wa China una urefu wa zaidi ya km 21,000!",
+    category: "History", duration: 9, askComment: true
+  },
+  {
+    text: "😲 Fun fact: Tigers have striped skin as well as fur.",
+    textSW: "😲 Fakta: Tiger wana ngozi yenye mistari pamoja na manyoya!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "😲 Fun fact: There’s a frog that gives birth through its mouth!",
+    textSW: "😲 Fakta: Kuna chura linalozalia kupitia mdomo wake!",
+    category: "Animals", duration: 8, askComment: false
+  },
+  {
+    text: "😲 Fun fact: Ants never sleep but do take naps!",
+    textSW: "😲 Fakta: Kipepeo hawalala kamwe lakini hupumzika kidogo!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "😲 Fun fact: Clouds move at speeds of up to 160 km/h!",
+    textSW: "😲 Fakta: Wingu husogea kwa kasi ya hadi km 160/h!",
+    category: "Nature", duration: 8, askComment: true
+  },
+  {
+    text: "😲 Fun fact: The human heart creates enough pressure to squirt blood 9 meters!",
+    textSW: "😲 Fakta: Moyo wa binadamu unaunda shinikizo la kutosha kurushia damu hadi mita 9!",
+    category: "Human Body", duration: 9, askComment: true
+  },
+  {
+    text: "🧠 Brain teaser: It’s impossible to tickle yourself because your brain predicts the touch. Can you explain why?",
+    textSW: "🧠 Kitendawili: Haiwezekani kuchokonoa mwenyewe kwa sababu ubongo unakisia mguso. Unaweza kuelezea kwa nini?",
+    category: "Human Body", duration: 8, askComment: true
+  },
+  {
+    text: "😲 Fun fact: The oldest known animal lived for 507 years!",
+    textSW: "😲 Fakta: Mnyama mzee zaidi aliyojulikana aliishi miaka 507!",
+    category: "Animals", duration: 9, askComment: false
+  },
+  {
+    text: "😲 Fun fact: Whales sleep vertically in the water!",
+    textSW: "😲 Fakta: Nyangumi hula wakiwa wamesimama wima kwenye maji!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "😲 Fun fact: The heaviest rain ever recorded fell in 1 minute — 31 mm!",
+    textSW: "😲 Fakta: Mvua nzito zaidi iliyorekodiwa ilipungua kwa dakika 1 — mm 31!",
+    category: "Nature", duration: 8, askComment: true
+  },
+  {
+    text: "😲 Fun fact: A group of flamingos is called a flamboyance!",
+    textSW: "😲 Fakta: Kundi la flamingo linaitwa flamboyance!",
+    category: "Animals", duration: 8, askComment: true
+  },
+
+
+
+
+
+
+
+  {
+    text: "😲 Fun fact: The fingerprints of pandas are nearly indistinguishable from humans!",
+    textSW: "😲 Fakta: Vidole vya panda karibu havitofautiani na vya binadamu!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "🧩 Riddle: Birds can see Earth’s magnetic field. Can you figure out how they navigate?",
+    textSW: "🧩 Kitendawili: Ndege wanaona shamba la sumaku la Dunia. Unaweza kubaini jinsi wanavyosafiri?",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "😂 Joke: The first camera took eight hours to capture an image. Imagine waiting that long for a selfie!",
+    textSW: "😂 Ucheshi: Kamera ya kwanza ilichukua masaa 8 kupiga picha. Fikiria kusubiri selfie hiyo!",
+    category: "History", duration: 9, askComment: true
+  },
+  {
+    text: "🌈 Fun fact: Rainbows can appear at 360 degrees from an airplane!",
+    textSW: "🌈 Fakta: Upinde wa mvua unaweza kuonekana kwa digrii 360 kutoka ndege!",
+    category: "Nature", duration: 8, askComment: true
+  },
+  {
+    text: "🧠 Brain teaser: There are more bacteria in your mouth than people on Earth. How many do you think?",
+    textSW: "🧠 Kitendawili: Kuna bakteria zaidi mdomoni mwako kuliko watu wote duniani. Unadhani ni wangapi?",
+    category: "Human Body", duration: 9, askComment: true
+  },
+  {
+    text: "😲 Fun fact: Venus’s clouds rain sulfuric acid!",
+    textSW: "😲 Fakta: Mawingu ya Venus hunyesha asidi ya sulfuri!",
+    category: "Space", duration: 8, askComment: false
+  },
+  {
+    text: "🪄 Science trick: Jupiter’s moon Europa has more water than Earth. Can you imagine swimming there?",
+    textSW: "🪄 Njia ya Sayansi: Mwezi wa Jupiter Europa una maji zaidi kuliko Dunia. Unaweza kufikiria kuogelea hapo?",
+    category: "Space", duration: 9, askComment: true
+  },
+  {
+    text: "🧠 Brain teaser: An adult human has about 37 trillion cells. How many can you guess in your body?",
+    textSW: "🧠 Kitendawili: Binadamu mzima ana takriban seli trilioni 37. Unaweza kubaini ngapi mwilini mwako?",
+    category: "Human Body", duration: 9, askComment: true
+  },
+  {
+    text: "🐝 Fun fact: Honey bees flap their wings about 230 times per second!",
+    textSW: "🐝 Fakta: Nyuki wa asali hupiga mabawa yao mara 230 kwa sekunde!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "🌌 Fun fact: Earth’s atmosphere extends over 10,000 km into space!",
+    textSW: "🌌 Fakta: Anga la Dunia linaenea zaidi ya km 10,000 kwenye anga!",
+    category: "Space", duration: 9, askComment: true
+  },
+  {
+    text: "😂 Joke: Some fish can walk on land. Next time, watch out for road crossings!",
+    textSW: "😂 Ucheshi: Baadhi ya samaki wanaweza kutembea ardhini! Wakati mwingine, angalia barabara!",
+    category: "Animals", duration: 8, askComment: false
+  },
+  {
+    text: "🧩 Math trick: A 'jiffy' is 1/100 of a second. How many jiffies in an hour?",
+    textSW: "🧩 Njia ya Hisabati: 'Jiffy' ni 1/100 ya sekunde. Kuna jiffies ngapi kwa saa?",
+    category: "Science", duration: 9, askComment: true
+  },
+  {
+    text: "🌩️ Fun fact: Lightning can strike the same place twice — and often does!",
+    textSW: "🌩️ Fakta: Radi inaweza kugonga mahali pale pale mara mbili — na mara nyingi hufanya hivyo!",
+    category: "Nature", duration: 9, askComment: true
+  },
+  {
+    text: "🕷️ Fun fact: A spider’s silk is five times stronger than steel by weight!",
+    textSW: "🕷️ Fakta: Hariri ya buibui ni mara tano imara kuliko chuma kwa uzito!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "🎵 Fun fact: Rats and mice can sing ultrasonic songs. Can you hear them?",
+    textSW: "🎵 Fakta: Panya na mjerumani wanaweza kuimba nyimbo za ultrasonic! Unaweza kuzisikia?",
+    category: "Animals", duration: 9, askComment: false
+  },
+  {
+    text: "🧠 Brain teaser: Crows can use tools and understand cause and effect. Can you do the same?",
+    textSW: "🧠 Kitendawili: Kunguru wanaweza kutumia zana na kuelewa sababu na matokeo. Unaweza kufanya sawa?",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "🌌 Fun fact: A teaspoon of neutron star material weighs about a billion tons!",
+    textSW: "🌌 Fakta: Kijiko kimoja cha nyenzo ya nyota ya neutron kina uzito wa takriban bilioni moja ya tani!",
+    category: "Space", duration: 9, askComment: true
+  },
+  {
+    text: "🍄 Fun fact: The largest living organism is a fungus that covers 9 km² in Oregon!",
+    textSW: "🍄 Fakta: Kiumbe hai kikubwa zaidi ni uyoga unaofunika km² 9 Oregon!",
+    category: "Nature", duration: 9, askComment: true
+  },
+  {
+    text: "🌪️ Fun fact: There’s a planet where it rains glass sideways!",
+    textSW: "🌪️ Fakta: Kuna sayari ambapo mvua ya kioo hunyesha kwa usawa!",
+    category: "Space", duration: 9, askComment: true
+  },
+  {
+    text: "😲 Fun fact: A sneeze travels faster than a speeding car!",
+    textSW: "😲 Fakta: Chafya husafiri kwa kasi zaidi ya gari lenye mwendo!",
+    category: "Human Body", duration: 8, askComment: true
+  },
+  {
+    text: "🦈 Fun fact: Sharks can detect one drop of blood in 25 gallons of water!",
+    textSW: "🦈 Fakta: Papa wanaweza kugundua tone moja la damu ndani ya galoni 25 za maji!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "🌙 Fun fact: The Moon is moving away from Earth each year!",
+    textSW: "🌙 Fakta: Mwezi unasogea mbali na Dunia kila mwaka!",
+    category: "Space", duration: 8, askComment: false
+  },
+  {
+    text: "🐛 Fun fact: Some worms have more than 10 hearts!",
+    textSW: "🐛 Fakta: Baadhi ya minyoo ina zaidi ya mioyo 10!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "🪐 Fun fact: A day on Neptune lasts 16 hours!",
+    textSW: "🪐 Fakta: Siku kwenye Neptune hudumu masaa 16!",
+    category: "Space", duration: 8, askComment: true
+  },
+  {
+    text: "🧴 Fun fact: Human skin renews itself every 27 days!",
+    textSW: "🧴 Fakta: Ngozi ya binadamu hujibadilisha kila siku 27!",
+    category: "Human Body", duration: 9, askComment: true
+  },
+
+
+
+
+
+  {
+    text: "😂 Joke: Why don’t scientists trust atoms? Because they make up everything!",
+    textSW: "😂 Ucheshi: Kwa nini wanasayansi hawaamini atoms? Kwa sababu zinaunda kila kitu!",
+    category: "Jokes", duration: 7, askComment: true
+  },
+  {
+    text: "🧩 Riddle: I speak without a mouth and hear without ears. What am I?",
+    textSW: "🧩 Kitendawili: Ninasema bila mdomo na kusikia bila masikio. Nini mimi?",
+    category: "Riddles", duration: 7, askComment: true
+  },
+  {
+    text: "🐦 Fun fact: A hummingbird weighs less than a coin!",
+    textSW: "🐦 Fakta: Nyuki ana uzito mdogo kuliko sarafu!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "🪄 Math trick: Multiply any number by 9, sum the digits repeatedly, and the result is always 9!",
+    textSW: "🪄 Njia ya Hisabati: Zidisha namba yoyote kwa 9, jumlisha tarakimu mara kwa mara, na matokeo daima ni 9!",
+    category: "Math Tricks", duration: 7, askComment: true
+  },
+  {
+    text: "🌌 Fun fact: Space is completely silent. Imagine a galaxy party you can't hear!",
+    textSW: "🌌 Fakta: Anga ni kimya kabisa. Fikiria sherehe ya galaxy usiyoweza kusikia!",
+    category: "Space", duration: 8, askComment: true
+  },
+  {
+    text: "🥶 Fun fact: The coldest temperature ever recorded on Earth was -128°F!",
+    textSW: "🥶 Fakta: Joto la baridi zaidi lililorekodiwa duniani ni -128°F!",
+    category: "Nature", duration: 8, askComment: true
+  },
+  {
+    text: "💡 Meme fact: Your brain contains 86 billion neurons. Don’t waste them on bad memes!",
+    textSW: "💡 Fakta ya Meme: Ubongo wako una neurons bilioni 86. Usiyapoteze kwenye memes mbaya!",
+    category: "Human Body", duration: 8, askComment: true
+  },
+  {
+    text: "🐊 Fun fact: A crocodile can live for over 100 years!",
+    textSW: "🐊 Fakta: Mnyama wa mto unaweza kuishi zaidi ya miaka 100!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "🌧️ Fun fact: The fastest recorded raindrop falls at 18 mph!",
+    textSW: "🌧️ Fakta: Tone la mvua lenye mwendo mkubwa zaidi lilirekodiwa likienda 18 mph!",
+    category: "Nature", duration: 8, askComment: true
+  },
+  {
+    text: "🦈 Fun fact: Sharks can detect electrical fields produced by other animals!",
+    textSW: "🦈 Fakta: Papa wanaweza kugundua shamba la umeme linalotengenezwa na wanyama wengine!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "🪐 Fun fact: Mars has the tallest volcano in the solar system, Olympus Mons!",
+    textSW: "🪐 Fakta: Mars ina volcano refu zaidi katika mfumo wa jua, Olympus Mons!",
+    category: "Space", duration: 9, askComment: true
+  },
+  {
+    text: "🐸 Fun fact: Frogs drink water through their skin!",
+    textSW: "🐸 Fakta: Chura hula maji kupitia ngozi zao!",
+    category: "Animals", duration: 8, askComment: false
+  },
+  {
+    text: "🏴‍☠️ History meme: Julius Caesar was once kidnapped by pirates!",
+    textSW: "🏴‍☠️ Meme ya Historia: Julius Caesar aliwahi kuibiwa na maharamia!",
+    category: "History", duration: 8, askComment: true
+  },
+  {
+    text: "🧩 Riddle: What has keys but can’t open locks?",
+    textSW: "🧩 Kitendawili: Nini kina funguo lakini hakiwezi kufungua milango?",
+    category: "Riddles", duration: 7, askComment: true
+  },
+  {
+    text: "💧 Science fact: Water can exist in all three states simultaneously at the triple point!",
+    textSW: "💧 Fakta ya Sayansi: Maji yanaweza kuwepo katika hali zote tatu kwa wakati mmoja kwenye triple point!",
+    category: "Science", duration: 8, askComment: true
+  },
+  {
+    text: "😂 Joke: Why did the scarecrow win an award? Because he was outstanding in his field!",
+    textSW: "😂 Ucheshi: Kwa nini scarecrow alipata tuzo? Kwa sababu alikuwa bora shambani mwake!",
+    category: "Jokes", duration: 7, askComment: true
+  }
+];
+
+

@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Smart Tutor – Daily Live Lessons</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0; height: 100%;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(to right,#e0f7fa,#fce4ec);
+}
+#app { display: flex; flex-direction: column; height: 100vh; }
+#toolbar {
+  padding: 15px;
+  background: #1976d2;
+  color: white;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+#toolbar button {
+  background: white;
+  color: #1976d2;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+#toolbar button:hover { background: #f0f0f0; }
+#editor {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* ✅ NEW CARD STYLE */
+.card {
+  max-width: 90vw;
+  width: 100%;
+  margin: 20px auto;
+  padding: 40px;
+  background: white;
+  border-radius: 25px;
+  border: 2px solid #ccc; /* Added border for prominence */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  font-size: 1.8em;
+  line-height: 2;
+  font-weight: bold;
+  animation: fadeIn 1s ease;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  color: #1a237e;
+  box-sizing: border-box;
+  transition: all 0.3s ease-in-out; /* Smooth hover or layout changes */
+}
+
+/* Headings inside cards */
+.card h2 {
+  margin-top: 0;
+  font-size: 2em;
+  font-weight: bold;
+}
+
+/* Optional manual title colors */
+.card h2.red    { color: #d81b60; }
+.card h2.green  { color: #2e7d32; }
+.card h2.blue   { color: #1565c0; }
+.card h2.orange { color: #ef6c00; }
+.card h2.purple { color: #6a1b9a; }
+
+/* Automatic color cycling for h2s inside cards */
+.card h2:nth-child(5n+1) { color: #d81b60; }
+.card h2:nth-child(5n+2) { color: #2e7d32; }
+.card h2:nth-child(5n+3) { color: #1565c0; }
+.card h2:nth-child(5n+4) { color: #ef6c00; }
+.card h2:nth-child(5n+5) { color: #6a1b9a; }
+
+.card pre {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  font-size: 1.6em;
+  line-height: 2;
+  font-weight: bold;
+  color: #1a237e;
+}
+
+#status {
+  padding: 15px;
+  background: #388e3c;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  font-size: 16px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ✅ Mobile adjustments */
+@media (max-width: 600px) {
+  #toolbar {
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  #toolbar button {
+    width: 100%;
+    font-size: 16px;
+    padding: 10px;
+  }
+
+  .card {
+    padding: 20px;
+    font-size: 1.2em;
+  }
+
+  .card h2 {
+    font-size: 1.4em;
+  }
+
+  .card pre {
+    font-size: 1.15em;
+  }
+
+  #status {
+    font-size: 15px;
+    padding: 10px;
+  }
+}
+
+/* Extra formatting helpers for lesson text */
+.lesson-title {
+  color: #d32f2f; /* Deep red */
+  font-size: 1.2em;
+  display: block;
+  margin: 10px 0;
+}
+.subtopic {
+  color: #1976d2; /* Blue */
+  font-weight: bold;
+  display: block;
+  margin-top: 15px;
+}
+.question {
+  color: #f57c00; /* Orange */
+  font-weight: bold;
+  display: block;
+  margin-top: 15px;
+}
+.answer {
+  color: #388e3c; /* Green */
+  font-weight: bold;
+  display: block;
+  margin-top: 15px;
+}
+.bullet {
+  color: #6a1b9a; /* Purple dot */
+  margin-right: 8px;
+}
+.point {
+  color: #1a237e;
+  display: block;
+  margin-left: 20px;
+}
+
+
+.rating {
+  margin-top: 20px;
+  font-size: 2em;
+  color: #ccc;            /* Default gray */
+  display: inline-block;
+  cursor: pointer;
+  user-select: none;
+}
+.rating span {
+  transition: color 0.3s;
+}
+.rating span.hover,
+.rating span.selected {
+  color: gold;            /* Highlighted star */
+}
+
+
+  .timetable {
+  margin-top: 12px;
+  background: #f9fbff;
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.timetable h3 {
+  margin: 0 0 6px;
+  color: #1976d2;
+  font-size: 1em;
+}
+
+.timetable table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85em; /* smaller font */
+}
+
+.timetable th {
+  background: #1976d2;
+  color: white;
+  padding: 4px 6px; /* reduced padding */
+  text-align: left;
+  border: 1px solid #ccc;
+}
+
+.timetable td {
+  padding: 4px 6px; /* reduced padding */
+  border: 1px solid #ccc;
+}
+
+.timetable tr:nth-child(even) {
+  background: #f1f6fb;
+}
+
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="toolbar">
+    <button id="loginBtn">🔑 Google Login</button>
+    <button onclick="startTutor()">▶️ Start Tutor</button>
+    <button onclick="pauseTutor()">⏸️ Pause</button>
+    <button onclick="resumeTutor()">▶️ Resume</button>
+    <button onclick="prevLesson()">⬅️ Back</button>
+    <button onclick="nextLesson()">➡️ Next</button>
+    <button onclick="contactWhatsApp()">💬 Customer Care</button>
+  </div>
+
+<div id="editor">
+
+  <!-- Phone Number Form -->
+  <div id="phoneForm" style="display:none; text-align:center; padding:20px; margin-bottom:20px; 
+       border:1px solid #ccc; border-radius:10px; background:#f9f9f9;">
+    <h2>📱 Enter Your Phone Number</h2>
+    <p id="studentName"></p>
+    <input type="text" id="phoneInput" placeholder="e.g. 07xx xxx xxx" 
+           style="padding:10px; font-size:1em; width:80%; max-width:300px; border:1px solid #aaa; border-radius:6px;">
+    <br><br>
+    <button onclick="savePhoneNumber()" 
+            style="padding:10px 20px; font-size:1em; border:none; border-radius:8px; background:#1976d2; color:white; cursor:pointer;">
+      Save & Unlock Lessons
+    </button>
+  </div>
+
+  <!-- Main Tutor Card -->
+  <div class="card">
+    <!-- Rating message container -->
+    <div id="ratingMessage" style="display:none; color:#388e3c; font-weight:bold; margin-bottom:10px; 
+         opacity:0; transform:translateY(-10px); transition: all 0.5s ease;"></div>
+<h2>Welcome to Smart Tutor</h2>
+<p>Login with Google to access live CBC lessons (Mon–Sat) with voice narration.</p>
+
+<!-- Timetable -->
+<div class="timetable">
+  <h3>📅 Weekly Timetable (Kenya time)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Day</th>
+        <th>Subject</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td rowspan="3">Mon – Fri</td>
+        <td>Math</td>
+        <td>5:30 PM – 7:00 PM</td>
+      </tr>
+      <tr>
+        <td>Integrated Science</td>
+        <td>7:30 PM – 8:30 PM</td>
+      </tr>
+      <tr>
+        <td>English</td>
+        <td>9:00 PM – 10:00 PM</td>
+      </tr>
+
+      <tr>
+        <td rowspan="3">Saturday</td>
+        <td>Math</td>
+        <td>8:00 AM – 10:00 AM</td>
+      </tr>
+      <tr>
+        <td>Integrated Science</td>
+        <td>10:30 AM – 12:00 PM</td>
+      </tr>
+      <tr>
+        <td>English</td>
+        <td>2:00 PM – 3:30 PM</td>
+      </tr>
+
+      <tr>
+        <td>Sunday</td>
+        <td colspan="2">No lessons scheduled</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+
+    <div class="rating" id="ratingStars">
+      <p style="font-size:0.6em;margin:5px 0;">Rate this Tutor:</p>
+      <span data-v="1">★</span>
+      <span data-v="2">★</span>
+      <span data-v="3">★</span>
+      <span data-v="4">★</span>
+      <span data-v="5">★</span>
+    </div>
+
+    <p id="ratingValue" style="font-size:0.6em;color:#1976d2;margin-top:6px;">
+      Average Rating: <span id="avgRating">–</span> ★
+    </p>
+  </div>
+</div>
+
+<div id="lessonContainer"></div>
+<div id="status">⏳ Ready…</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-database-compat.js"></script>
+
+<script>
+/* ---------- FIREBASE CONFIG ---------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyCAiOSHmURDyAAYm5EmoomLkZ_Aud7iXIQ",
+  authDomain: "cbc-general.firebaseapp.com",
+  databaseURL: "https://cbc-general-default-rtdb.firebaseio.com",
+  projectId: "cbc-general",
+  storageBucket: "cbc-general.firebasestorage.app",
+  messagingSenderId: "764732839741",
+  appId: "1:764732839741:web:ab829af54839de91359754"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+/* -------------------------------------- */
+
+const editor = document.getElementById("editor");
+const status = document.getElementById("status");
+const loginBtn = document.getElementById("loginBtn");
+
+let user = null;
+
+loginBtn.onclick = () => {
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+    .then(res => {
+      user = res.user;
+      status.textContent = `👋 Hi ${user.displayName}`;
+
+      // After login → check if phone exists
+      db.ref("students/" + user.uid).once("value").then(snap => {
+        if (!snap.exists() || !snap.val().phone) {
+          // Show phone number form
+         document.getElementById("studentName").textContent =
+  `Welcome ${user.displayName}, please enter your phone number:`;
+document.getElementById("phoneForm").style.display = "block";
+
+// Hide tutor card instead of deleting everything
+document.querySelector(".card").style.display = "none";
+
+        }
+      });
+    })
+    .catch(e => alert(e.message));
+};
+
+auth.onAuthStateChanged(u => {
+  user = u;
+  if (u) {
+    status.textContent = `👋 Hi ${u.displayName}`;
+
+    // Also check if phone is saved on reload
+    db.ref("students/" + u.uid).once("value").then(snap => {
+      if (!snap.exists() || !snap.val().phone) {
+        document.getElementById("studentName").textContent =
+  `Welcome ${user.displayName}, please enter your phone number:`;
+document.getElementById("phoneForm").style.display = "block";
+
+// Hide tutor card instead of deleting everything
+document.querySelector(".card").style.display = "none";
+
+      }
+    });
+  }
+});
+
+/* ---------- LESSON TIMETABLE ---------- */
+const timetable = {
+  Mon: [
+    {subject: "Math", start: "17:30", end: "19:00"},
+    {subject: "Science", start: "19:30", end: "20:30"},
+    {subject: "English", start: "21:00", end: "22:00"}
+  ],
+  Tue: [
+    {subject: "Math", start: "17:30", end: "19:00"},
+    {subject: "Science", start: "19:30", end: "20:30"},
+    {subject: "English", start: "21:00", end: "22:00"}
+  ],
+  Wed: [
+    {subject: "Math", start: "17:30", end: "17:40"},
+    {subject: "Science", start: "17:50", end: "20:30"},
+    {subject: "English", start: "21:00", end: "22:00"}
+  ],
+  Thu: [
+    {subject: "Math", start: "17:30", end: "19:00"},
+    {subject: "Science", start: "19:30", end: "20:30"},
+    {subject: "English", start: "21:00", end: "22:00"}
+  ],
+  Fri: [
+    {subject: "Math", start: "17:30", end: "19:00"},
+    {subject: "Science", start: "19:30", end: "20:30"},
+    {subject: "English", start: "21:00", end: "22:00"}
+  ],
+  Sat: [
+    {subject: "Math", start: "08:00", end: "10:00"},
+    {subject: "Science", start: "10:30", end: "12:00"},
+    {subject: "English", start: "14:00", end: "15:30"}
+  ]
+};
+
+/* ---------- HELPER: Check if current time is in a slot ---------- */
+function inTimeRange(start, end, now){
+  const [sH, sM] = start.split(":").map(Number);
+  const [eH, eM] = end.split(":").map(Number);
+  const startTime = new Date(now); startTime.setHours(sH, sM, 0, 0);
+  const endTime = new Date(now); endTime.setHours(eH, eM, 0, 0);
+  return now >= startTime && now <= endTime;
+}
+
+/* ---------- LESSONS ---------- */
+let lessonsArray = {
+  Mon: { Math: ["<h2>Math Lesson 1</h2><p>Surds & Indices practice…</p>"], Science: ["<h2>Science Lesson 1</h2><p>Human Digestive System…</p>"], English: ["<h2>English Lesson 1</h2><p>Sentence Analysis…</p>"] },
+  Tue: { Math: ["<h2>Math Lesson 1</h2><p>Quadratic Equations…</p>"], Science: ["<h2>Science Lesson 1</h2><p>Photosynthesis…</p>"], English: ["<h2>English Lesson 1</h2><p>Comprehension…</p>"] },
+  Wed: { Math: [`<span style="color: purple; font-size: 1.2em;"><b>Install Elimu Connect App</b></span> from Play Store or visit 
+<a href="./elimu.html" target="_blank">https://elimuconnect.github.io/ELIMU-CONNECT-/elimu</a> 
+for CBC academic & CODING lessons<br>
+
+<span style="color:purple;"><b>Lesson 1: Introduction to Integers</b></span><br><br>
+
+<span style="color:green;"><b>Lesson Content:</b></span><br><br>
+
+<b>Integers</b> are the set of whole numbers and their negatives, including zero.<br><br>
+
+<b>Examples:</b><br>
+<ul>
+  <li>Positive integers: 1, 2, 3, …</li>
+  <li>Negative integers: -1, -2, -3, …</li>
+  <li>Zero: 0 (neutral, not positive or negative)</li>
+</ul><br>
+
+On a number line, integers extend infinitely in both directions.<br><br>
+
+<span style="color:orange;"><b>Question:</b></span><br>
+What are integers? Give three examples.<br><br>
+
+<span style="color:blue;"><b>Final Answer:</b></span><br>
+Integers are whole numbers and their negatives including zero.<br>
+Examples: -3, 0, 5.<br>
+`,
+
+`<span style="color:purple;"><b>Lesson 2: Representing Integers on a Number Line</b></span><br><br>
+
+<span style="color:green;"><b>Lesson Content:</b></span><br><br>
+
+A <b>number line</b> is used to represent integers.<br>
+- Numbers to the right of zero are positive.<br>
+- Numbers to the left of zero are negative.<br><br>
+
+<b>Example:</b>  
+… -4, -3, -2, -1, 0, 1, 2, 3, 4 …<br><br>
+
+Zero separates positive and negative integers.<br><br>
+
+<span style="color:orange;"><b>Question:</b></span><br>
+How are positive and negative integers represented on a number line?<br><br>
+
+<span style="color:blue;"><b>Final Answer:</b></span><br>
+Positive integers are placed to the right of zero, while negative integers are placed to the left of zero.<br>
+`,
+
+`<span style="color:purple;"><b>Lesson 3: Addition of Integers</b></span><br><br>
+
+<span style="color:green;"><b>Lesson Content:</b></span><br><br>
+
+Rules for addition:<br>
+<ul>
+  <li>If the signs are the same → Add the numbers and keep the sign.</li>
+  <li>If the signs are different → Subtract the smaller number from the larger and take the sign of the larger number.</li>
+</ul><br>
+
+<b>Examples:</b><br>
+- (+3) + (+4) = +7<br>
+- (-5) + (-2) = -7<br>
+- (+6) + (-4) = +2<br><br>
+
+<span style="color:orange;"><b>Question:</b></span><br>
+Find the sum: (a) -7 + (-5), (b) 9 + (-3)<br><br>
+
+<span style="color:blue;"><b>Final Answer:</b></span><br>
+(a) -12<br>
+(b) 6<br>
+`,
+
+`<span style="color:purple;"><b>Lesson 4: Subtraction of Integers</b></span><br><br>
+
+<span style="color:green;"><b>Lesson Content:</b></span><br><br>
+
+Subtraction of integers can be changed into addition:<br>
+<b>a - b = a + (-b)</b><br><br>
+
+<b>Examples:</b><br>
+- 7 - 3 = 7 + (-3) = 4<br>
+- (-5) - 4 = (-5) + (-4) = -9<br>
+- (-6) - (-2) = (-6) + 2 = -4<br><br>
+
+<span style="color:orange;"><b>Question:</b></span><br>
+Simplify: (a) -8 - 3, (b) -10 - (-6)<br><br>
+
+<span style="color:blue;"><b>Final Answer:</b></span><br>
+(a) -11<br>
+(b) -4<br>
+`,
+
+`<span style="color:purple;"><b>Lesson 5: Multiplication of Integers</b></span><br><br>
+
+<span style="color:green;"><b>Lesson Content:</b></span><br><br>
+
+Rules for multiplication:<br>
+<ul>
+  <li>Positive × Positive = Positive</li>
+  <li>Negative × Negative = Positive</li>
+  <li>Positive × Negative = Negative</li>
+</ul><br>
+
+<b>Examples:</b><br>
+- 4 × 3 = 12<br>
+- (-5) × (-2) = 10<br>
+- (-6) × 3 = -18<br><br>
+
+<span style="color:orange;"><b>Question:</b></span><br>
+Evaluate: (a) -7 × 4, (b) -8 × -5<br><br>
+
+<span style="color:blue;"><b>Final Answer:</b></span><br>
+(a) -28<br>
+(b) 40<br>
+`,
+
+`<span style="color:purple;"><b>Lesson 6: Division of Integers</b></span><br><br>
+
+<span style="color:green;"><b>Lesson Content:</b></span><br><br>
+
+Rules for division:<br>
+<ul>
+  <li>Positive ÷ Positive = Positive</li>
+  <li>Negative ÷ Negative = Positive</li>
+  <li>Positive ÷ Negative = Negative</li>
+</ul><br>
+
+<b>Examples:</b><br>
+- 12 ÷ 3 = 4<br>
+- (-20) ÷ (-5) = 4<br>
+- (-15) ÷ 3 = -5<br><br>
+
+<span style="color:orange;"><b>Question:</b></span><br>
+Simplify: (a) -24 ÷ 6, (b) -30 ÷ -5<br><br>
+
+<span style="color:blue;"><b>Final Answer:</b></span><br>
+(a) -4<br>
+(b) 6<br>
+`,
+
+`<span style="color:purple;"><b>Lesson 7: Application of Integers in Real Life</b></span><br><br>
+
+<span style="color:green;"><b>Lesson Content:</b></span><br><br>
+
+Integers are used in everyday life:<br>
+<ul>
+  <li>Temperature: -5°C means 5 degrees below zero.</li>
+  <li>Banking: Negative numbers represent debts or withdrawals.</li>
+  <li>Elevations: Negative heights represent positions below sea level.</li>
+  <li>Sports: Scores may involve positive or negative points.</li>
+</ul><br>
+
+<span style="color:orange;"><b>Question:</b></span><br>
+Give two examples of how integers are used in daily life.<br><br>
+
+<span style="color:blue;"><b>Final Answer:</b></span><br>
+Integers are used to show temperatures below zero and bank account debts.<br>
+`], Science: [`<span style="color: purple; font-size: 1.2em;"><b>Install Elimu Connect App</b></span> from Play Store 
+for CBC academic, Past papers and quizes<br>
+
+<span style="color:purple;"><b>Lesson 1: Structure of the Atom</b></span><br><br>
+
+<span style="color:green;"><b>Lesson Content:</b></span><br><br>
+
+Atoms are the basic building blocks of matter. They consist of three main particles:<br>
+<ul>
+  <li><b>Protons:</b> Positively charged particles in the nucleus.</li>
+  <li><b>Neutrons:</b> Neutral particles in the nucleus.</li>
+  <li><b>Electrons:</b> Negatively charged particles orbiting the nucleus.</li>
+</ul><br>
+
+The nucleus contains almost all the atom’s mass, while electrons occupy energy levels around it.<br><br>
+
+<span style="color:orange;"><b>Question:</b></span><br>
+Name the three main particles of an atom and their charges.<br><br>
+
+<span style="color:blue;"><b>Final Answer:</b></span><br>
+Protons (+), Neutrons (0), Electrons (-).<br>
+`,
+
+`<span style="color:purple;"><b>Lesson 2: Atomic Number and Mass Number</b></span><br><br>
+
+<span style="color:green;"><b>Lesson Content:</b></span><br><br>
+
+<b>Atomic number (Z)</b> is the number of protons in an atom.<br>
+<b>Mass number (A)</b> is the sum of protons and neutrons in the nucleus.<br><br>
+
+<b>Examples:</b><br>
+- Carbon: Z = 6, A = 12 → Neutrons = 12 - 6 = 6<br>
+- Oxygen: Z = 8, A = 16 → Neutrons = 16 - 8 = 8<br><br>
+
+<span style="color:orange;"><b>Question:</b></span><br>
+An atom has 11 protons and 12 neutrons. Find its atomic number and mass number.<br><br>
+
+<span style="color:blue;"><b>Final Answer:</b></span><br>
+Atomic number = 11, Mass number = 23.<br>
+`,
+
+`<span style="color:purple;"><b>Lesson 3: Isotopes</b></span><br><br>
+
+<span style="color:green;"><b>Lesson Content:</b></span><br><br>
+
+<b>Isotopes</b> are atoms of the same element with the same number of protons but different numbers of neutrons.<br><br>
+
+<b>Examples:</b><br>
+- Carbon-12 and Carbon-14 are isotopes of carbon.<br>
+- Hydrogen has isotopes: Protium (1H), Deuterium (2H), Tritium (3H).<br><br>
+
+<span style="color:orange;"><b>Question:</b></span><br>
+Define isotopes and give an example.<br><br>
+
+<span style="color:blue;"><b>Final Answer:</b></span><br>
+Isotopes are atoms of the same element with different numbers of neutrons. Example: Carbon-12 and Carbon-14.<br>
+`,
+
+`<span style="color:purple;"><b>Lesson 4: Introduction to the Periodic Table</b></span><br><br>
+
+<span style="color:green;"><b>Lesson Content:</b></span><br><br>
+
+The <b>Periodic Table</b> is a systematic arrangement of elements based on increasing atomic number.<br>
+- Elements in the same column (group) have similar chemical properties.<br>
+- Rows are called periods.<br><br>
+
+<span style="color:orange;"><b>Question:</b></span><br>
+What is the periodic table and what is the significance of groups?<br><br>
+
+<span style="color:blue;"><b>Final Answer:</b></span><br>
+The periodic table organizes elements by atomic number. Elements in the same group have similar properties.<br>
+`,
+
+`<span style="color:purple;"><b>Lesson 5: Groups and Periods</b></span><br><br>
+
+<span style="color:green;"><b>Lesson Content:</b></span><br><br>
+
+- <b>Groups:</b> Vertical columns, numbered 1-18. Elements share chemical properties.<br>
+- <b>Periods:</b> Horizontal rows. Elements have increasing atomic number.<br><br>
+
+<b>Example:</b> Sodium (Na) and Potassium (K) are in Group 1 and have similar properties.<br><br>
+
+<span style="color:orange;"><b>Question:</b></span><br>
+Define groups and periods in the periodic table.<br><br>
+
+<span style="color:blue;"><b>Final Answer:</b></span><br>
+Groups are vertical columns with similar properties. Periods are horizontal rows with increasing atomic number.<br>
+`,
+
+`<span style="color:purple;"><b>Lesson 6: Metals, Non-metals, and Metalloids</b></span><br><br>
+
+<span style="color:green;"><b>Lesson Content:</b></span><br><br>
+
+Elements are classified as:<br>
+<ul>
+  <li><b>Metals:</b> Good conductors, malleable, ductile, shiny.</li>
+  <li><b>Non-metals:</b> Poor conductors, brittle, dull.</li>
+  <li><b>Metalloids:</b> Have properties of both metals and non-metals.</li>
+</ul><br>
+
+<span style="color:orange;"><b>Question:</b></span><br>
+Give one property each of metals, non-metals, and metalloids.<br><br>
+
+<span style="color:blue;"><b>Final Answer:</b></span><br>
+Metals: Conduct heat/electricity. Non-metals: Poor conductors. Metalloids: Semi-conductors.<br>
+`,
+
+`<span style="color:purple;"><b>Lesson 7: Summary & Real-life Applications</b></span><br><br>
+
+<span style="color:green;"><b>Lesson Content:</b></span><br><br>
+
+Atoms and the periodic table help predict chemical reactions and properties of elements.<br>
+Applications:<br>
+<ul>
+  <li>Chemical industries: Predict reactivity.</li>
+  <li>Medicine: Use isotopes in diagnosis and treatment.</li>
+  <li>Technology: Semiconductors use metalloids.</li>
+</ul><br>
+
+<span style="color:orange;"><b>Question:</b></span><br>
+State two real-life applications of knowledge about atoms and the periodic table.<br><br>
+
+<span style="color:blue;"><b>Final Answer:</b></span><br>
+Use isotopes in medicine and predict reactivity in chemical industries.<br>
+`
+], English: ["<h2>English Lesson 1</h2><p>Grammar…</p>"] },
+  Thu: { Math: ["<h2>Math Lesson 1</h2><p>Quadratic Equations…</p>"], Science: ["<h2>Science Lesson 1</h2><p>Plant Transport…</p>"], English: ["<h2>English Lesson 1</h2><p>Writing…</p>"] },
+  Fri: { Math: ["<h2>Math Lesson 1</h2><p>Quadratics…</p>"], Science: ["<h2>Science Lesson 1</h2><p>Circulation…</p>"], English: ["<h2>English Lesson 1</h2><p>Comprehension…</p>"] },
+  Sat: { Math: ["<h2>Math Lesson 1</h2><p>Quadratics…</p>"], Science: ["<h2>Science Lesson 1</h2><p>Respiration…</p>"], English: ["<h2>English Lesson 1</h2><p>Grammar…</p>"] }
+};
+
+let currentLesson = 0;
+let todayLessons = [];
+let selectedVoice = null;
+let utter = null;
+
+/* ---------- VOICE ---------- */
+function getVoice() {
+  const voices = speechSynthesis.getVoices();
+  return voices.find(v => v.lang.startsWith("en-ke") && v.name.toLowerCase().includes("female"))
+      || voices.find(v => v.lang.startsWith("en-ke"))
+      || voices.find(v => v.lang.startsWith("en-gb"))
+      || voices[0];
+}
+
+/* ---------- SPEAK ---------- */
+function speak(html) {
+  // Convert HTML to text, remove <pre> and <code>
+  const tmp = document.createElement("div");
+  tmp.innerHTML = html;
+  tmp.querySelectorAll('pre, code').forEach(el => el.remove());
+  const text = tmp.textContent || tmp.innerText || "";
+
+  speechSynthesis.cancel();
+  utter = new SpeechSynthesisUtterance(text);
+  utter.voice = selectedVoice;
+  utter.rate = 0.8;
+  speechSynthesis.speak(utter);
+}
+
+/* ---------- START TUTOR ---------- */
+function startTutor() {
+  if (!user) { 
+    alert("⚠️ Please login first."); 
+    return; 
+  }
+
+  db.ref("students/" + user.uid).once("value").then(snap => {
+    if (!snap.exists() || !snap.val().phone) {
+      alert("⚠️ Enter your phone number first.");
+      document.getElementById("phoneForm").style.display = "block";
+      return;
+    }
+
+    const now = new Date();
+    const kenyaTime = new Date(now.getTime() + (3*60 + now.getTimezoneOffset())*60000);
+    const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    const todayName = days[kenyaTime.getDay()];
+
+    const slots = timetable[todayName] || [];
+    const currentSlot = slots.find(slot => inTimeRange(slot.start, slot.end, kenyaTime));
+
+    if (!currentSlot) {
+      editor.innerHTML = "<div class='card'><h2>⏳ No active lesson right now. Check the timetable.</h2></div>";
+      status.textContent = "No active lesson";
+      return;
+    }
+
+    todayLessons = lessonsArray[todayName][currentSlot.subject] || [
+      `<div><h2>${currentSlot.subject} Lesson</h2><p>Lesson coming soon.</p></div>`
+    ];
+
+    const waitVoices = setInterval(() => {
+      if (speechSynthesis.getVoices().length) {
+        clearInterval(waitVoices);
+        selectedVoice = getVoice();
+        currentLesson = 0;
+        showLesson();
+      }
+    }, 100);
+  });
+}
+
+/* ---------- SHOW CURRENT LESSON ---------- */
+function showLesson() {
+  if (currentLesson >= todayLessons.length) {
+    editor.innerHTML = "<div class='card'><h2>✅ All lessons for this slot are done!</h2></div>";
+    return;
+  }
+
+  const lessonHtml = todayLessons[currentLesson];
+  editor.innerHTML = `<div class='card'>${lessonHtml}</div>`;
+  speak(lessonHtml);
+  currentLesson++;
+}
+
+  
+// Realtime Database reference
+const db = firebase.database();
+
+const ratingStars = document.querySelectorAll(".rating span");
+const avgRatingEl = document.getElementById("avgRating");
+
+// Add a container for the delayed message
+let ratingTimeout;
+let ratingMessage = document.getElementById("ratingMessage");
+if (!ratingMessage) {
+  ratingMessage = document.createElement("div");
+  ratingMessage.id = "ratingMessage";
+  ratingMessage.style.cssText = `
+    display:none; 
+    color:#388e3c; 
+    font-weight:bold; 
+    margin-bottom:10px; 
+    opacity:0; 
+    transform:translateY(-10px); 
+    transition: all 0.5s ease;
+  `;
+  document.querySelector(".card").prepend(ratingMessage);
+}
+
+// Function to update stars visually
+function updateStars(val) {
+  ratingStars.forEach(s => {
+    s.classList.toggle("active", s.dataset.v <= val);
+  });
+}
+
+// Function to update average rating live
+function updateAverageRating() {
+  db.ref("ratings").on("value", snapshot => {
+    let total = 0, count = 0;
+    snapshot.forEach(child => {
+      total += child.val().rating;
+      count++;
+    });
+
+    const avg = count ? (total / count).toFixed(1) : 0;
+
+    // Update the display with average and number of ratings
+    avgRatingEl.textContent = count 
+      ? `${avg} (${count} students)` 
+      : "No ratings yet";
+
+    // Optional: update stars to reflect average visually
+    ratingStars.forEach(s => {
+      s.classList.toggle("hover", s.dataset.v <= avg);
+    });
+  });
+}
+
+// Call it once to start listening for live updates
+updateAverageRating();
+
+// Attach click events to stars
+ratingStars.forEach(star => {
+  star.addEventListener("click", async () => {
+    if (!user) return alert("⚠️ Login first to save rating.");
+    const val = parseInt(star.dataset.v);
+
+    // Save/update user's rating
+    await db.ref("ratings/" + user.uid).set({
+      name: user.displayName,
+      rating: val,
+      timestamp: Date.now()
+    });
+
+    // Update stars visually for this user
+    updateStars(val);
+
+    // Clear previous timeout if any
+    if (ratingTimeout) clearTimeout(ratingTimeout);
+
+    // Delay message 5 seconds
+    ratingTimeout = setTimeout(() => {
+      ratingMessage.textContent = `Thanks! You rated ${val}⭐`;
+      ratingMessage.style.display = "block";
+      setTimeout(() => {
+        ratingMessage.style.opacity = 1;
+        ratingMessage.style.transform = "translateY(0)";
+      }, 10);
+
+      // Fade out after 3s
+      setTimeout(() => {
+        ratingMessage.style.opacity = 0;
+        ratingMessage.style.transform = "translateY(-10px)";
+        setTimeout(() => { ratingMessage.style.display = "none"; }, 500);
+      }, 3000);
+
+      ratingTimeout = null;
+    }, 5000);
+  });
+
+  // Optional: hover effect
+  star.addEventListener("mouseover", () => updateStars(star.dataset.v));
+  star.addEventListener("mouseout", () => {
+    if (user) {
+      db.ref("ratings/" + user.uid).once("value", snap => {
+        const val = snap.exists() ? snap.val().rating : 0;
+        updateStars(val);
+      });
+    }
+  });
+});
+
+// When user logs in, show their previous rating
+auth.onAuthStateChanged(u => {
+  user = u;
+  if (user) {
+    db.ref("ratings/" + user.uid).once("value", snap => {
+      if (snap.exists()) updateStars(snap.val().rating);
+    });
+  }
+});
+
+
+
+function savePhoneNumber() {
+  const phone = document.getElementById("phoneInput").value.trim();
+  if (!phone) {
+    alert("⚠️ Please enter your phone number.");
+    return;
+  }
+
+  db.ref("students/" + user.uid).update({
+    phone: phone,
+    timestamp: Date.now()
+  }).then(() => {
+    alert("✅ Phone number saved! Lessons unlocked.");
+    document.getElementById("phoneForm").style.display = "none";
+    document.querySelector(".card").style.display = "block";
+    editor.scrollIntoView({behavior: "smooth"});
+  });
+}
+
+
+  
+function showLesson(){
+  editor.innerHTML=`<div class="card">${todayLessons[currentLesson]}</div>`;
+  speak(todayLessons[currentLesson]);
+}
+
+function prevLesson(){
+  if(todayLessons.length && currentLesson>0){
+    currentLesson--;
+    showLesson();
+  }
+}
+function nextLesson(){
+  if(todayLessons.length && currentLesson<todayLessons.length-1){
+    currentLesson++;
+    showLesson();
+  }
+}
+function pauseTutor(){speechSynthesis.pause();status.textContent="⏸️ Paused";}
+function resumeTutor(){speechSynthesis.resume();status.textContent="▶️ Resumed";}
+function contactWhatsApp(){window.open("https://wa.me/254769255782","_blank");}
+  
+</script>
+</body>
+</html>

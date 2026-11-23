@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Elimu Connect - Access</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  display:flex; justify-content:center; align-items:center; height:100vh;
+  background: linear-gradient(to right, #4CAF50, #81C784);
+  flex-direction: column;
+}
+.login-container {
+  background:white; padding:30px; border-radius:12px; text-align:center; width:300px; margin-bottom:20px;
+}
+button {
+  padding:12px 20px; margin:8px 0; font-size:16px; border:none; border-radius:8px;
+  background:#4CAF50; color:white; cursor:pointer;
+}
+button:disabled { opacity:0.5; cursor:not-allowed; }
+#accessCountdown {
+  position: fixed; top: 20px; left: 50%; transform:translateX(-50%);
+  background:#0078D7; color:white; padding:10px 20px; border-radius:8px; display:none;
+}
+#accessModal {
+  position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6);
+  display:flex; justify-content:center; align-items:center; display:none; z-index:9999;
+}
+#accessModal div {
+  background:white; padding:25px; border-radius:12px; max-width:350px; text-align:center;
+}
+#accessModal button { background:#0078D7; color:white; padding:10px 18px; border:none; border-radius:8px; cursor:pointer; }
+</style>
+</head>
+<body>
+<body>
+<!-- Start Button - Always clickable -->
+<button id="startBtn" 
+        style="position:fixed; top:15px; left:15px; padding:10px 14px; 
+               border-radius:8px; background:#333; color:white; 
+               border:none; cursor:pointer; z-index:10001;">
+    ⬅ Start
+</button>
+
+<div class="login-container">
+  <h3>🎓 Student</h3>
+  <button id="studentBtn">📚Enter (Free Trial / Pro Access)</button>
+  <p style="font-size:13px;color:#444;margin-top:10px;">
+    ⏳ Free trial works best without using the Back button.
+    If access stops responding, restart the app to continue.
+  </p>
+</div>
+
+<div class="login-container">
+  <h3>👨‍👩‍👧 Parent</h3>
+  <button onclick="window.location.href='go:parent'">Parent Dashboard (Free)</button>
+</div>
+
+<div id="accessCountdown">Loading access info...</div>
+
+<div id="accessModal">
+  <div>
+    <p id="accessMessage"></p>
+    <button id="accessBtn">OK</button>
+  </div>
+</div>
+
+<script>
+// --------------------- VARIABLES ---------------------
+const PAYMENT_LINK = "https://paystack.shop/pay/2i-azr3wzx"; 
+const FIRST_TRIAL_MIN = 1;
+const DAILY_FREE_MIN = 0;
+const PAID_DURATION = 24 * 60 * 60 * 1000; 
+const KEY = "elimu_student62_";
+
+const mainBtn = document.getElementById("studentBtn");
+const countdownEl = document.getElementById("accessCountdown");
+const modal = document.getElementById("accessModal");
+const modalMsg = document.getElementById("accessMessage");
+const modalBtn = document.getElementById("accessBtn");
+const startBtn = document.getElementById("startBtn");
+
+function getQuery(param){ return new URLSearchParams(location.search).get(param); }
+function now(){ return Date.now(); }
+
+function format(ms){
+    if(ms <= 0) return "00:00:00";
+    let s = Math.floor(ms/1000);
+    let h = Math.floor(s/3600);
+    s %= 3600;
+    let m = Math.floor(s/60);
+    s %= 60;
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function showModal(msg, btn="OK", cb=null){
+    modalMsg.innerHTML = msg;
+    modalBtn.textContent = btn;
+    modal.style.display = "flex";
+    modalBtn.onclick = ()=>{ modal.style.display="none"; if(cb) cb(); };
+}
+
+// --------------------- STORAGE ---------------------
+let paidUntil = parseInt(localStorage.getItem(KEY+"paidUntil")) || 0;
+let paidRef = localStorage.getItem(KEY+"paidReference") || "";
+let firstTrialEnd = parseInt(localStorage.getItem(KEY+"firstTrialEnd")) || 0;
+let dailyFreeEnd = parseInt(localStorage.getItem(KEY+"dailyFreeEnd")) || 0;
+
+const reference = getQuery("reference");
+if(reference && reference !== paidRef){
+    paidRef = reference;
+    paidUntil = now() + PAID_DURATION;
+    localStorage.setItem(KEY+"paidReference", paidRef);
+    localStorage.setItem(KEY+"paidUntil", paidUntil);
+    localStorage.removeItem(KEY+"firstTrialEnd");
+    firstTrialEnd = 0;
+}
+
+if(!firstTrialEnd && !paidUntil){
+    firstTrialEnd = now() + FIRST_TRIAL_MIN * 60 * 1000;
+    localStorage.setItem(KEY+"firstTrialEnd", firstTrialEnd);
+}
+
+// ---------------- ENGINE & LOCK -----------------
+function engine(){
+    countdownEl.style.display = "block";
+    setInterval(()=>{
+        const t = now();
+        const hasAccess = (t < paidUntil || t < dailyFreeEnd || t < firstTrialEnd);
+
+        if(t < paidUntil) countdownEl.textContent = "Paid access: " + format(paidUntil - t);
+        else if(t < dailyFreeEnd) countdownEl.textContent = "Daily free: " + format(dailyFreeEnd - t);
+        else if(t < firstTrialEnd) countdownEl.textContent = "Free trial: " + format(firstTrialEnd - t);
+
+        if(!hasAccess){
+            countdownEl.style.display = "none";
+            mainBtn.disabled = true;
+            showModal(
+                "🚀 Your journey to success shouldn't stop here! Unlock 24 hours of AI tutor access.",
+                "Unlock Daily Pass — KSh 20",
+                ()=> location.replace(PAYMENT_LINK)
+            );
+        } else {
+            mainBtn.disabled = false;
+        }
+    }, 500);
+}
+engine();
+
+
+// ------------------- BULLETPROOF BACK TRAP (OPTIMIZED) -----------------
+function forceBackToStart() { 
+    window.location.replace("go:start"); 
+}
+
+// Push ONE state to stay ahead of the user
+function stayAhead() {
+    window.history.pushState(null, "", window.location.href);
+}
+
+// Initial 10-page buffer (so they can't double-click back immediately on load)
+for(let i=0; i<10; i++){
+    window.history.pushState(null, "", window.location.href);
+}
+
+// Catch the back button and send to start
+window.onpopstate = forceBackToStart; 
+
+// Pulse every 100ms to keep the 'Back' button locked to this page
+setInterval(stayAhead, 100);
+
+// If they touch the screen, add 5 more layers just to be safe
+document.addEventListener('touchstart', () => {
+    for(let i=0; i<5; i++) stayAhead();
+}, {passive:true});
+
+// ------------------- NAVIGATION -----------------
+// CRITICAL: Ensure this is the ONLY startBtn logic
+startBtn.onclick = () => { 
+    window.location.replace("go:start"); 
+};
+
+
+
+mainBtn.onclick = () => {
+    const t = now();
+    if(t < paidUntil || t < dailyFreeEnd || t < firstTrialEnd){
+        window.location.replace("go:bot1");
+    } else {
+        window.location.replace("go:access");
+    }
+};
+
+// Safety check for expired access
+setInterval(() => {
+    const t = now();
+    const hasAccess = (t < paidUntil || t < dailyFreeEnd || t < firstTrialEnd);
+    if(!hasAccess) window.location.replace("go:access");
+}, 2000);
+</script>
+</body>
+
+</body>
+</html>

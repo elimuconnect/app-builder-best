@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Smart Tutor Flipbook</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Flipbook CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/page-flip/dist/page-flip.min.css" />
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #d7ccc8; /* paper-like background */
+      font-family: Georgia, serif;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #book-container {
+      width: 90vw;
+      max-width: 600px;
+      height: 75vh; /* 3/4 of screen height */
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
+      border-radius: 12px;
+      background: #fff;
+      overflow: hidden;
+      border: 3px solid #6d4c41; /* dark brown for book edges */
+    }
+
+    .my-page {
+      background: #fff8e1;
+      width: 100%;
+      height: 100%;
+      padding: 25px;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    .my-page h2 {
+      margin-top: 0;
+      color: #4e342e;
+    }
+
+    .my-page p, .my-page li {
+      font-size: 1.05em;
+      line-height: 1.5;
+      color: #333;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="book-container">
+  <div id="flipbook"></div>
+</div>
+
+<!-- Flipbook JS -->
+<script src="https://unpkg.com/page-flip"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const flipbook = document.getElementById('flipbook');
+
+    const pageFlip = new St.PageFlip(flipbook, {
+      width: document.getElementById('book-container').clientWidth,
+      height: document.getElementById('book-container').clientHeight,
+      size: 'stretch',
+      minWidth: 300,
+      maxWidth: 1000,
+      minHeight: 400,
+      maxHeight: 1536,
+      showCover: false,
+      usePortrait: true,
+      mobileScrollSupport: false,
+      swipeDistance: 20 // easier swiping
+    });
+
+    const lessons = [
+      `<div class="my-page">
+        <h2>Lesson 1: Physical Properties of Metals</h2>
+        <ul>
+          <li>Lustrous – shiny when polished</li>
+          <li>Good conductors – heat & electricity</li>
+          <li>Malleable – hammered into sheets</li>
+          <li>Ductile – drawn into wires</li>
+        </ul>
+      </div>`,
+
+      `<div class="my-page">
+        <h2>Lesson 2: Composition of Alloys</h2>
+        <ul>
+          <li>Brass = Copper + Zinc</li>
+          <li>Bronze = Copper + Tin</li>
+          <li>Steel = Iron + Carbon</li>
+        </ul>
+      </div>`,
+
+      `<div class="my-page">
+        <h2>Lesson 3: Uses of Metals</h2>
+        <ul>
+          <li>Iron – buildings, tools</li>
+          <li>Aluminum – utensils, foil</li>
+          <li>Copper – electrical wiring</li>
+        </ul>
+      </div>`,
+
+      `<div class="my-page">
+        <h2>Lesson 4: Rusting of Iron</h2>
+        <p>Rusting is the reaction of iron with water and oxygen.</p>
+        <p><strong>Prevention:</strong></p>
+        <ul>
+          <li>Painting</li>
+          <li>Oiling</li>
+          <li>Galvanizing</li>
+          <li>Electroplating</li>
+        </ul>
+      </div>`
+    ];
+
+    // Add pages
+    lessons.forEach(html => {
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = html;
+      flipbook.appendChild(wrapper);
+    });
+
+    // Load pages
+    pageFlip.loadFromHTML(document.querySelectorAll("#flipbook > div"));
+  });
+</script>
+
+</body>
+</html>
+

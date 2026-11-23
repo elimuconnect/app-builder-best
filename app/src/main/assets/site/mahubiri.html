@@ -1,0 +1,2057 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Elimu Connect • 5-Minute Compilation (Merged)</title>
+
+
+
+  <style>
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    margin: 0;
+    padding: 0;
+    background: #0b1220;
+    color: #fff;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  header {
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 22px;
+    margin: 0;
+  }
+
+  .small {
+    font-size: 12px;
+    color: #cbd5e1;
+  }
+
+  .controls {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 8px 0;
+  }
+
+  .controls label {
+    font-size: 14px;
+  }
+
+  /* ✅ Desktop: fills 3/4 of screen */
+  #stageWrap {
+    position: relative;
+    width: 75vw;       /* 3/4 of viewport width */
+    height: 75vh;      /* 3/4 of viewport height */
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+    background: #000;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  canvas {
+  width: 100%;
+  height: 100%;
+  image-rendering: auto;
+}
+
+  .status {
+    margin-top: 10px;
+    color: #fffb;
+    font-size: 13px;
+  }
+
+  .hint {
+    font-size: 12px;
+    color: #cbd5e1;
+    text-align: center;
+  }
+
+  button {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 0;
+    background: #1f2937;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  a {
+    color: #9ae6b4;
+  }
+
+  /* ✅ Mobile phones: switch to 9:16 portrait ratio */
+  @media (max-width: 768px) {
+    #stageWrap {
+      width: 90vw;
+      aspect-ratio: 9 / 16;
+      height: auto; /* maintain ratio automatically */
+    }
+  }
+</style>
+
+  
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Elimu Connect • 3-Minute Compilation</h1>
+      <div class="small">6 Clips (60s each) • Total Duration: 3 Minutes</div>
+    </header>
+
+    <div class="controls">
+<label>Language:
+  <select id="langSelect">
+    <option value="sw" selected>Kiswahili</option>
+    <option value="en">English</option>
+  </select>
+</label>
+    </div>
+    
+    <div class="controls">
+      <button id="genBtn" class="w-full sm:w-1/2">🎲 Generate Preview (Clip 1)</button>
+      <button id="recordBtn" class="w-full sm:w-1/2">🔴 Start 3-Minute Record</button>
+    </div>
+
+    <div id="stageWrap" title="This box is the recorded 9:16 area">
+      <canvas id="canvasPreview" width="720" height="1280"></canvas>
+    </div>
+
+    <div class="controls">
+      <a id="downloadLink" class="hidden"></a>
+    </div>
+
+    <div class="status" id="status">Click Generate Preview to check the first clip's visuals and audio.</div>
+    <div class="hint">The recording will automatically stop after 30 minutes (30 transitions). Audio is captured only from the background music and any embedded voice method (mic/upload).</div>
+  </div>
+
+
+
+<script>
+/* =========================
+   MERGED: A + assets from B
+   Single file output
+   ========================= */
+
+/* ---------- CONFIGURATION FOR 30 MIN VIDEO ---------- */
+const CANVAS_W = 720, CANVAS_H = 1280; // portrait 9:16
+const CLIP_DURATION_S = 25; 
+const TOTAL_CLIPS = 6;
+const TOTAL_DURATION_MS = TOTAL_CLIPS * CLIP_DURATION_S * 1000;
+
+/* ---------- Global State & Control ---------- */
+let currentClip = 0;
+let longRecordingTimeout = null;
+let clipCycleInterval = null;
+let animationFrameId = null;
+let mediaRecorder = null;
+let recordedChunks = [];
+let audioTrack = null;
+let videoTrack = null;
+let timerProgress = 1;
+let currentTopic = null;
+let assetsLoaded = false;
+let clipStartTime = 0;
+
+/* ---------- UI elements and Canvas Setup ---------- */
+const canvas = document.getElementById('canvasPreview');
+const ctx = canvas.getContext('2d', { alpha: false });
+canvas.width = CANVAS_W;
+canvas.height = CANVAS_H;
+
+const voiceMethodSel = document.getElementById('voiceMethod');
+const voiceGenderSel = document.getElementById('voiceGender');
+const voiceUploadEl = document.getElementById('voiceUpload');
+const useUploadBtn = document.getElementById('useUploadBtn');
+const genBtn = document.getElementById('genBtn');
+const recordBtn = document.getElementById('recordBtn');
+const statusEl = document.getElementById('status');
+const downloadLink = document.getElementById('downloadLink');
+
+recordBtn.disabled = false;
+
+/* =========================
+   ASSETS & DATA (from B)
+   ========================= */
+const BACKGROUNDS = [
+  // videos
+  { name: 'Sunny Schoolyard', url: 'https://cdn.pixabay.com/video/2020/11/23/57105-484330937_tiny.mp4', type: 'video' },
+  { name: 'Background 1', url: 'https://cdn.pixabay.com/video/2020/11/23/57105-484330937_tiny.mp4', type: 'video' },
+  { name: 'Background 2', url: 'https://cdn.pixabay.com/video/2021/09/21/89245-613200528_tiny.mp4', type: 'video' },
+  { name: 'Background 3', url: 'https://cdn.pixabay.com/video/2023/09/25/182283-868067131_tiny.mp4', type: 'video' },
+  { name: 'Background 4', url: 'https://cdn.pixabay.com/video/2020/11/07/55762-503981022_tiny.mp4', type: 'video' },
+  { name: 'Background 5', url: 'https://cdn.pixabay.com/video/2022/11/17/139433-772291290_tiny.mp4', type: 'video' },
+  { name: 'Background 6', url: 'https://cdn.pixabay.com/video/2017/12/09/13289-246909903_tiny.mp4', type: 'video' },
+  { name: 'Background 7', url: 'https://cdn.pixabay.com/video/2023/06/01/165379-832460315_tiny.mp4', type: 'video' },
+  { name: 'Background 8', url: 'https://cdn.pixabay.com/video/2022/06/10/119849-719283263_large.mp4', type: 'video' },
+  { name: 'Background 9', url: 'https://cdn.pixabay.com/video/2015/11/30/1462-147310229_tiny.mp4', type: 'video' },
+  { name: 'Background 10', url: 'https://cdn.pixabay.com/video/2022/02/02/106382-673007973_tiny.mp4', type: 'video' },
+  { name: 'Background 11', url: 'https://cdn.pixabay.com/video/2022/06/30/122684-726192372_tiny.mp4', type: 'video' },
+  { name: 'Background 12', url: 'https://cdn.pixabay.com/video/2021/06/05/76526-559511539_tiny.mp4', type: 'video' },
+  { name: 'Background 13', url: 'https://cdn.pixabay.com/video/2024/04/17/208306_tiny.mp4', type: 'video' },
+  { name: 'Background 14', url: 'https://cdn.pixabay.com/video/2023/12/04/191956-891301549_tiny.mp4', type: 'video' },
+  { name: 'Background 15', url: 'https://cdn.pixabay.com/video/2020/11/07/54846-479358521_tiny.mp4', type: 'video' },
+  { name: 'Background 16', url: 'https://cdn.pixabay.com/video/2022/06/24/121985-724732208_tiny.mp4', type: 'video' },
+  { name: 'Background 17', url: 'https://cdn.pixabay.com/video/2021/01/21/62556-504654653_large.mp4', type: 'video' },
+  { name: 'Background 18', url: 'https://cdn.pixabay.com/video/2023/12/04/191957-891301551_tiny.mp4', type: 'video' },
+  { name: 'Background 19', url: 'https://cdn.pixabay.com/video/2019/06/14/24405-342401498_tiny.mp4', type: 'video' },
+  { name: 'Background 20', url: 'https://cdn.pixabay.com/video/2022/03/02/109306-684501149_tiny.mp4', type: 'video' },
+  { name: 'Background 21', url: 'https://cdn.pixabay.com/video/2022/11/07/138088-769119564_tiny.mp4', type: 'video' },
+  { name: 'Background 22', url: 'https://cdn.pixabay.com/video/2020/11/21/56969-482090088_tiny.mp4', type: 'video' },
+  { name: 'Background 23', url: 'https://cdn.pixabay.com/video/2021/12/04/99691-656497305_tiny.mp4', type: 'video' },
+  { name: 'Background 24', url: 'https://cdn.pixabay.com/video/2022/03/09/110219-688187364_tiny.mp4', type: 'video' },
+  { name: 'Background 25', url: 'https://cdn.pixabay.com/video/2024/01/30/198620-907940175_tiny.mp4', type: 'video' },
+  { name: 'Background 26', url: 'https://cdn.pixabay.com/video/2021/06/15/77773-564423223_tiny.mp4', type: 'video' },
+  { name: 'Background 27', url: 'https://cdn.pixabay.com/video/2020/04/22/36902-412873827_large.mp4', type: 'video' },
+  { name: 'Background 28', url: 'https://cdn.pixabay.com/video/2021/08/08/84334-585553485_tiny.mp4', type: 'video' },
+  
+  { name: 'Background 29', url: 'https://cdn.pixabay.com/video/2023/01/13/146408-789177007_tiny.mp4', type: 'video' },
+  { name: 'Background 30', url: 'https://cdn.pixabay.com/video/2018/04/26/15826-266811435_tiny.mp4', type: 'video' },
+  { name: 'Background 31', url: 'https://cdn.pixabay.com/video/2020/11/07/54929-483011932_tiny.mp4', type: 'video' },
+  { name: 'Background 32', url: 'https://cdn.pixabay.com/video/2020/05/16/39234-421020414_tiny.mp4', type: 'video' },
+  { name: 'Background 33', url: 'https://cdn.pixabay.com/video/2020/05/24/39969-423362341_tiny.mp4', type: 'video' },
+  { name: 'Background 34', url: 'https://cdn.pixabay.com/video/2020/11/07/55249-499594009_tiny.mp4', type: 'video' },
+  { name: 'Background 35', url: 'https://cdn.pixabay.com/video/2022/03/10/110339-688648503_tiny.mp4', type: 'video' },
+  { name: 'Background 36', url: 'https://cdn.pixabay.com/video/2024/02/21/201334-915360170_large.mp4', type: 'video' },
+  { name: 'Background 37', url: 'https://cdn.pixabay.com/video/2016/04/20/2864-163910609_tiny.mp4', type: 'video' },
+  { name: 'Background 38', url: 'https://cdn.pixabay.com/video/2023/10/19/185630-876210582_tiny.mp4', type: 'video' },
+  { name: 'Background 39', url: 'https://cdn.pixabay.com/video/2020/04/13/35905-408654239_tiny.mp4', type: 'video' },
+  { name: 'Background 40', url: 'https://cdn.pixabay.com/video/2020/09/15/50016-459915440_large.mp4', type: 'video' },
+  { name: 'Background 41', url: 'https://cdn.pixabay.com/video/2020/04/22/36884-412873792_tiny.mp4', type: 'video' },
+  { name: 'Background 42', url: 'https://cdn.pixabay.com/video/2022/11/18/139572-773417751_tiny.mp4', type: 'video' },
+  { name: 'Background 43', url: 'https://cdn.pixabay.com/video/2022/04/01/112553-695117361_tiny.mp4', type: 'video' },
+  { name: 'Background 44', url: 'https://cdn.pixabay.com/video/2021/01/13/61904-500763043_tiny.mp4', type: 'video' },
+  { name: 'Background 45', url: 'https://cdn.pixabay.com/video/2016/09/21/5411-183788474_tiny.mp4', type: 'video' },
+  { name: 'Background 46', url: 'https://cdn.pixabay.com/video/2022/03/12/110491-689510259_tiny.mp4', type: 'video' },
+  { name: 'Background 47', url: 'https://cdn.pixabay.com/video/2022/01/14/104386-666197775_tiny.mp4', type: 'video' },
+  { name: 'Background 48', url: 'https://cdn.pixabay.com/video/2021/09/13/88420-607824363_tiny.mp4', type: 'video' },
+  { name: 'Background 49', url: 'https://cdn.pixabay.com/video/2020/07/01/43522-436237366_tiny.mp4', type: 'video' },
+  { name: 'Background 50', url: 'https://cdn.pixabay.com/video/2020/11/19/56858-481625623_tiny.mp4', type: 'video' },
+  { name: 'Background 51', url: 'https://cdn.pixabay.com/video/2023/02/06/149538-796360005_tiny.mp4', type: 'video' },
+  { name: 'Background 52', url: 'https://cdn.pixabay.com/video/2023/04/03/157231-814315545_tiny.mp4', type: 'video' },
+  { name: 'Background 53', url: 'https://cdn.pixabay.com/video/2023/11/11/188720-883612354_tiny.mp4', type: 'video' },
+  { name: 'Background 54', url: 'https://cdn.pixabay.com/video/2023/03/31/156893-813654701_tiny.mp4', type: 'video' },
+  { name: 'Background 55', url: 'https://cdn.pixabay.com/video/2022/12/07/141981-778907209_tiny.mp4', type: 'video' },
+  { name: 'Background 56', url: 'https://cdn.pixabay.com/video/2022/06/01/118905-716230915_tiny.mp4', type: 'video' },
+  { name: 'Background 57', url: 'https://cdn.pixabay.com/video/2022/06/15/120475-720880598_tiny.mp4', type: 'video' },
+  { name: 'Background 58', url: 'https://cdn.pixabay.com/video/2022/12/21/143758-784138204_tiny.mp4', type: 'video' },
+  { name: 'Background 59', url: 'https://cdn.pixabay.com/video/2024/04/30/210082_tiny.mp4', type: 'video' },
+  { name: 'Background 60', url: 'https://cdn.pixabay.com/video/2023/01/10/145976-788094597_tiny.mp4', type: 'video' },
+  { name: 'Background 61', url: 'https://cdn.pixabay.com/video/2022/04/25/115067-703067890_tiny.mp4', type: 'video' },
+  { name: 'Background 62', url: 'https://cdn.pixabay.com/video/2024/09/25/233204_tiny.mp4', type: 'video' },
+  { name: 'Background 63', url: 'https://cdn.pixabay.com/video/2023/05/30/165119-832090797_tiny.mp4', type: 'video' },
+  { name: 'Background 64', url: 'https://cdn.pixabay.com/video/2023/04/03/157232-814315549_tiny.mp4', type: 'video' },
+  { name: 'Background 65', url: 'https://cdn.pixabay.com/video/2024/09/25/233202_tiny.mp4', type: 'video' },
+  { name: 'Background 66', url: 'https://cdn.pixabay.com/video/2024/07/08/220150_tiny.mp4', type: 'video' },
+  { name: 'Background 67', url: 'https://cdn.pixabay.com/video/2023/05/09/162382-825277028_tiny.mp4', type: 'video' },
+  { name: 'Background 68', url: 'https://cdn.pixabay.com/video/2022/05/09/116448-708008210_tiny.mp4', type: 'video' },
+  { name: 'Background 69', url: 'https://cdn.pixabay.com/video/2022/12/07/141985-778907234_tiny.mp4', type: 'video' },
+  { name: 'Background 70', url: 'https://cdn.pixabay.com/video/2024/02/04/199249-909835726_tiny.mp4', type: 'video' },
+  { name: 'Background 71', url: 'https://cdn.pixabay.com/video/2023/11/24/190549-888131757_tiny.mp4', type: 'video' },
+  { name: 'Background 72', url: 'https://cdn.pixabay.com/video/2022/04/25/115059-703067865_tiny.mp4', type: 'video' },
+  { name: 'Background 73', url: 'https://cdn.pixabay.com/video/2024/06/06/215534_tiny.mp4', type: 'video' },
+
+  { name: 'Background 74', url: 'https://cdn.pixabay.com/video/2023/11/24/190550-888131763_tiny.mp4', type: 'video' },
+{ name: 'Background 75', url: 'https://cdn.pixabay.com/video/2022/10/21/135875-764362174_tiny.mp4', type: 'video' },
+{ name: 'Background 76', url: 'https://cdn.pixabay.com/video/2023/06/20/168039-838076818_tiny.mp4', type: 'video' },
+{ name: 'Background 77', url: 'https://cdn.pixabay.com/video/2023/03/06/153480-805374145_tiny.mp4', type: 'video' },
+{ name: 'Background 78', url: 'https://cdn.pixabay.com/video/2023/10/20/185765-876514019_tiny.mp4', type: 'video' },
+{ name: 'Background 79', url: 'https://cdn.pixabay.com/video/2023/06/05/165867-833532201_tiny.mp4', type: 'video' },
+{ name: 'Background 80', url: 'https://cdn.pixabay.com/video/2024/02/04/199250-909835729_tiny.mp4', type: 'video' },
+{ name: 'Background 81', url: 'https://cdn.pixabay.com/video/2021/07/25/82670-580050749_tiny.mp4', type: 'video' },
+{ name: 'Background 82', url: 'https://cdn.pixabay.com/video/2022/09/23/132294-753175506_tiny.mp4', type: 'video' },
+{ name: 'Background 83', url: 'https://cdn.pixabay.com/video/2023/07/16/171850-846103451_tiny.mp4', type: 'video' },
+{ name: 'Background 84', url: 'https://cdn.pixabay.com/video/2024/04/17/208372_tiny.mp4', type: 'video' },
+{ name: 'Background 85', url: 'https://cdn.pixabay.com/video/2020/11/29/57753-486147545_tiny.mp4', type: 'video' },
+{ name: 'Background 86', url: 'https://cdn.pixabay.com/video/2021/07/25/82667-580050745_tiny.mp4', type: 'video' },
+{ name: 'Background 87', url: 'https://cdn.pixabay.com/video/2022/09/23/132295-753175509_tiny.mp4', type: 'video' },
+{ name: 'Background 88', url: 'https://cdn.pixabay.com/video/2024/02/04/199254-909835739_tiny.mp4', type: 'video' },
+{ name: 'Background 89', url: 'https://cdn.pixabay.com/video/2023/08/01/174146-850740062_tiny.mp4', type: 'video' },
+{ name: 'Background 90', url: 'https://cdn.pixabay.com/video/2022/09/16/131506-750569073_tiny.mp4', type: 'video' },
+{ name: 'Background 91', url: 'https://cdn.pixabay.com/video/2022/11/24/140315-774824218_tiny.mp4', type: 'video' },
+{ name: 'Background 92', url: 'https://cdn.pixabay.com/video/2024/03/12/203933-922571593_tiny.mp4', type: 'video' },
+{ name: 'Background 93', url: 'https://cdn.pixabay.com/video/2023/01/23/147644-791958963_tiny.mp4', type: 'video' },
+{ name: 'Background 94', url: 'https://cdn.pixabay.com/video/2022/09/22/132200-752646688_tiny.mp4', type: 'video' },
+{ name: 'Background 95', url: 'https://cdn.pixabay.com/video/2022/04/25/115017-703067690_tiny.mp4', type: 'video' },
+{ name: 'Background 96', url: 'https://cdn.pixabay.com/video/2020/11/14/56375-479358459_tiny.mp4', type: 'video' },
+{ name: 'Background 97', url: 'https://cdn.pixabay.com/video/2023/10/20/185803-876514093_tiny.mp4', type: 'video' },
+{ name: 'Background 98', url: 'https://cdn.pixabay.com/video/2024/04/17/208375_tiny.mp4', type: 'video' },
+{ name: 'Background 99', url: 'https://cdn.pixabay.com/video/2022/07/09/123589-728487663_tiny.mp4', type: 'video' },
+{ name: 'Background 100', url: 'https://cdn.pixabay.com/video/2022/12/01/141159-777088863_tiny.mp4', type: 'video' },
+{ name: 'Background 101', url: 'https://cdn.pixabay.com/video/2024/10/09/235497_tiny.mp4', type: 'video' },
+{ name: 'Background 102', url: 'https://cdn.pixabay.com/video/2023/10/02/183252-870457501_tiny.mp4', type: 'video' },
+{ name: 'Background 103', url: 'https://cdn.pixabay.com/video/2021/01/14/61945-501260349_tiny.mp4', type: 'video' },
+{ name: 'Background 104', url: 'https://cdn.pixabay.com/video/2015/11/28/1438-147170157_tiny.mp4', type: 'video' },
+{ name: 'Background 105', url: 'https://cdn.pixabay.com/video/2024/04/17/208376_tiny.mp4', type: 'video' },
+{ name: 'Background 106', url: 'https://cdn.pixabay.com/video/2023/01/04/145298-786403405_tiny.mp4', type: 'video' },
+{ name: 'Background 107', url: 'https://cdn.pixabay.com/video/2023/09/27/182536-868916394_tiny.mp4', type: 'video' },
+{ name: 'Background 108', url: 'https://cdn.pixabay.com/video/2019/06/14/24410-342401514_tiny.mp4', type: 'video' },
+{ name: 'Background 109', url: 'https://cdn.pixabay.com/video/2024/03/12/203934-922571602_tiny.mp4', type: 'video' },
+  
+  { name: 'Background 110', url: 'https://cdn.pixabay.com/video/2023/12/04/191957-891301551_tiny.mp4', type: 'video' },
+{ name: 'Background 111', url: 'https://cdn.pixabay.com/video/2023/02/06/149538-796360005_tiny.mp4', type: 'video' },
+{ name: 'Background 112', url: 'https://cdn.pixabay.com/video/2023/04/03/157232-814315549_tiny.mp4', type: 'video' },
+{ name: 'Background 113', url: 'https://cdn.pixabay.com/video/2024/09/25/233204_tiny.mp4', type: 'video' },
+{ name: 'Background 114', url: 'https://cdn.pixabay.com/video/2024/09/25/233202_tiny.mp4', type: 'video' },
+{ name: 'Background 115', url: 'https://cdn.pixabay.com/video/2024/07/08/220150_tiny.mp4', type: 'video' },
+{ name: 'Background 116', url: 'https://cdn.pixabay.com/video/2024/02/04/199249-909835726_tiny.mp4', type: 'video' },
+{ name: 'Background 117', url: 'https://cdn.pixabay.com/video/2024/02/04/199250-909835729_tiny.mp4', type: 'video' },
+{ name: 'Background 118', url: 'https://cdn.pixabay.com/video/2024/02/04/199254-909835739_tiny.mp4', type: 'video' },
+{ name: 'Background 119', url: 'https://cdn.pixabay.com/video/2024/04/17/208372_tiny.mp4', type: 'video' },
+{ name: 'Background 120', url: 'https://cdn.pixabay.com/video/2024/04/17/208375_tiny.mp4', type: 'video' },
+{ name: 'Background 121', url: 'https://cdn.pixabay.com/video/2024/04/17/208376_tiny.mp4', type: 'video' },
+{ name: 'Background 122', url: 'https://cdn.pixabay.com/video/2024/04/30/210082_tiny.mp4', type: 'video' },
+{ name: 'Background 123', url: 'https://cdn.pixabay.com/video/2024/03/12/203933-922571593_tiny.mp4', type: 'video' },
+{ name: 'Background 124', url: 'https://cdn.pixabay.com/video/2024/03/12/203934-922571602_tiny.mp4', type: 'video' },
+{ name: 'Background 125', url: 'https://cdn.pixabay.com/video/2024/06/06/215534_tiny.mp4', type: 'video' },
+{ name: 'Background 126', url: 'https://cdn.pixabay.com/video/2024/10/09/235497_tiny.mp4', type: 'video' },
+
+{ name: 'Background 127', url: 'https://cdn.pixabay.com/video/2022/12/12/142683-780599470_tiny.mp4', type: 'video' },
+{ name: 'Background 128', url: 'https://cdn.pixabay.com/video/2022/09/23/132295-753175509_tiny.mp4', type: 'video' },
+{ name: 'Background 129', url: 'https://cdn.pixabay.com/video/2022/09/23/132294-753175506_tiny.mp4', type: 'video' },
+{ name: 'Background 130', url: 'https://cdn.pixabay.com/video/2023/01/03/145153-786384364_tiny.mp4', type: 'video' },
+{ name: 'Background 131', url: 'https://cdn.pixabay.com/video/2022/12/21/143761-784138211_tiny.mp4', type: 'video' },
+{ name: 'Background 132', url: 'https://cdn.pixabay.com/video/2022/05/02/115730-705415385_tiny.mp4', type: 'video' },
+{ name: 'Background 133', url: 'https://cdn.pixabay.com/video/2023/10/02/183254-870457513_tiny.mp4', type: 'video' },
+{ name: 'Background 134', url: 'https://cdn.pixabay.com/video/2022/10/31/137247-766338227_tiny.mp4', type: 'video' },
+{ name: 'Background 135', url: 'https://cdn.pixabay.com/video/2020/02/28/32989-394514023_tiny.mp4', type: 'video' },
+{ name: 'Background 136', url: 'https://cdn.pixabay.com/video/2022/09/13/131155-750216590_tiny.mp4', type: 'video' },
+{ name: 'Background 137', url: 'https://cdn.pixabay.com/video/2023/05/30/165120-832090799_tiny.mp4', type: 'video' },
+{ name: 'Background 138', url: 'https://cdn.pixabay.com/video/2022/05/04/115980-706323936_tiny.mp4', type: 'video' },
+{ name: 'Background 139', url: 'https://cdn.pixabay.com/video/2023/01/09/145864-787701151_tiny.mp4', type: 'video' },
+{ name: 'Background 140', url: 'https://cdn.pixabay.com/video/2022/10/01/133144-755982928_tiny.mp4', type: 'video' },
+{ name: 'Background 141', url: 'https://cdn.pixabay.com/video/2024/03/12/203934-922571602_tiny.mp4', type: 'video' },
+{ name: 'Background 142', url: 'https://cdn.pixabay.com/video/2022/10/31/137246-766338223_tiny.mp4', type: 'video' },
+{ name: 'Background 143', url: 'https://cdn.pixabay.com/video/2023/04/12/158527-816999750_tiny.mp4', type: 'video' },
+{ name: 'Background 144', url: 'https://cdn.pixabay.com/video/2021/03/05/66956-523721318_tiny.mp4', type: 'video' },
+{ name: 'Background 145', url: 'https://cdn.pixabay.com/video/2023/03/17/155016-809859637_tiny.mp4', type: 'video' },
+{ name: 'Background 146', url: 'https://cdn.pixabay.com/video/2022/09/21/132081-752283582_tiny.mp4', type: 'video' },
+{ name: 'Background 147', url: 'https://cdn.pixabay.com/video/2022/11/03/137579-766938298_tiny.mp4', type: 'video' },
+{ name: 'Background 148', url: 'https://cdn.pixabay.com/video/2022/09/16/131504-750569066_tiny.mp4', type: 'video' },
+{ name: 'Background 149', url: 'https://cdn.pixabay.com/video/2022/05/09/116451-708008221_tiny.mp4', type: 'video' },
+
+  { name: 'Background 150', url: 'https://cdn.pixabay.com/video/2020/11/13/56299-479205703_tiny.mp4', type: 'video' },
+{ name: 'Background 151', url: 'https://cdn.pixabay.com/video/2023/03/06/153479-805374143_tiny.mp4', type: 'video' },
+{ name: 'Background 152', url: 'https://cdn.pixabay.com/video/2023/10/17/185408-875362659_tiny.mp4', type: 'video' },
+{ name: 'Background 153', url: 'https://cdn.pixabay.com/video/2022/09/15/131403-750559764_tiny.mp4', type: 'video' },
+{ name: 'Background 154', url: 'https://cdn.pixabay.com/video/2023/10/06/183716-872027012_tiny.mp4', type: 'video' },
+{ name: 'Background 155', url: 'https://cdn.pixabay.com/video/2019/06/14/24406-342401501_tiny.mp4', type: 'video' },
+{ name: 'Background 156', url: 'https://cdn.pixabay.com/video/2023/11/07/188255-882242986_tiny.mp4', type: 'video' },
+{ name: 'Background 157', url: 'https://cdn.pixabay.com/video/2025/10/14/309804_tiny.mp4', type: 'video' },
+{ name: 'Background 158', url: 'https://cdn.pixabay.com/video/2023/04/11/158388-816637364_tiny.mp4', type: 'video' },
+{ name: 'Background 159', url: 'https://cdn.pixabay.com/video/2024/05/21/212961_tiny.mp4', type: 'video' },
+{ name: 'Background 160', url: 'https://cdn.pixabay.com/video/2025/10/06/308237_tiny.mp4', type: 'video' },
+{ name: 'Background 161', url: 'https://cdn.pixabay.com/video/2022/10/17/135212-761273636_tiny.mp4', type: 'video' },
+{ name: 'Background 162', url: 'https://cdn.pixabay.com/video/2022/10/17/135202-761273627_tiny.mp4', type: 'video' },
+{ name: 'Background 163', url: 'https://cdn.pixabay.com/video/2020/11/13/56311-479205713_tiny.mp4', type: 'video' },
+{ name: 'Background 164', url: 'https://cdn.pixabay.com/video/2023/06/27/169029-840229967_tiny.mp4', type: 'video' },
+{ name: 'Background 165', url: 'https://cdn.pixabay.com/video/2020/11/10/56075-478688146_tiny.mp4', type: 'video' },
+{ name: 'Background 166', url: 'https://cdn.pixabay.com/video/2020/01/31/31802-388997514_tiny.mp4', type: 'video' },
+{ name: 'Background 167', url: 'https://cdn.pixabay.com/video/2023/02/14/150644-798877201_tiny.mp4', type: 'video' },
+{ name: 'Background 168', url: 'https://cdn.pixabay.com/video/2024/03/12/203931-922571581_tiny.mp4', type: 'video' },
+{ name: 'Background 169', url: 'https://cdn.pixabay.com/video/2025/05/21/280481_tiny.mp4', type: 'video' },
+{ name: 'Background 170', url: 'https://cdn.pixabay.com/video/2023/05/05/161764-824152819_tiny.mp4', type: 'video' },
+{ name: 'Background 171', url: 'https://cdn.pixabay.com/video/2020/02/27/32950-394513969_tiny.mp4', type: 'video' },
+{ name: 'Background 172', url: 'https://cdn.pixabay.com/video/2023/01/23/147640-791958949_tiny.mp4', type: 'video' },
+{ name: 'Background 173', url: 'https://cdn.pixabay.com/video/2019/10/10/27729-365891002_tiny.mp4', type: 'video' },
+{ name: 'Background 174', url: 'https://cdn.pixabay.com/video/2023/10/20/185809-876514131_tiny.mp4', type: 'video' },
+{ name: 'Background 175', url: 'https://cdn.pixabay.com/video/2021/07/08/80697-572838398_tiny.mp4', type: 'video' },
+{ name: 'Background 176', url: 'https://cdn.pixabay.com/video/2017/05/10/9067-217261108_tiny.mp4', type: 'video' },
+{ name: 'Background 177', url: 'https://cdn.pixabay.com/video/2019/10/28/28388-369533658_tiny.mp4', type: 'video' },
+{ name: 'Background 178', url: 'https://cdn.pixabay.com/video/2025/05/26/281839_tiny.mp4', type: 'video' },
+{ name: 'Background 179', url: 'https://cdn.pixabay.com/video/2024/03/28/205930_tiny.mp4', type: 'video' },
+{ name: 'Background 180', url: 'https://cdn.pixabay.com/video/2025/04/22/273595_tiny.mp4', type: 'video' },
+{ name: 'Background 181', url: 'https://cdn.pixabay.com/video/2021/01/04/61116-497754343_tiny.mp4', type: 'video' },
+{ name: 'Background 182', url: 'https://cdn.pixabay.com/video/2022/11/09/138341-769520916_tiny.mp4', type: 'video' },
+{ name: 'Background 183', url: 'https://cdn.pixabay.com/video/2025/05/26/281840_tiny.mp4', type: 'video' },
+{ name: 'Background 184', url: 'https://cdn.pixabay.com/video/2023/10/02/183253-870457508_tiny.mp4', type: 'video' },
+{ name: 'Background 185', url: 'https://cdn.pixabay.com/video/2021/02/04/64093-509542772_tiny.mp4', type: 'video' },
+{ name: 'Background 186', url: 'https://cdn.pixabay.com/video/2020/05/13/38957-420224573_tiny.mp4', type: 'video' },
+{ name: 'Background 187', url: 'https://cdn.pixabay.com/video/2022/04/20/114540-701775812_tiny.mp4', type: 'video' },
+
+  { name: 'Background 188', url: 'https://cdn.pixabay.com/video/2022/09/08/130588-747868234_tiny.mp4', type: 'video' },
+{ name: 'Background 189', url: 'https://cdn.pixabay.com/video/2020/02/04/31921-389236388_tiny.mp4', type: 'video' },
+{ name: 'Background 190', url: 'https://cdn.pixabay.com/video/2023/10/20/185807-876514114_tiny.mp4', type: 'video' },
+{ name: 'Background 191', url: 'https://cdn.pixabay.com/video/2024/09/16/231704_tiny.mp4', type: 'video' },
+{ name: 'Background 192', url: 'https://cdn.pixabay.com/video/2024/04/17/208368_tiny.mp4', type: 'video' },
+{ name: 'Background 193', url: 'https://cdn.pixabay.com/video/2024/11/25/243214_tiny.mp4', type: 'video' },
+{ name: 'Background 194', url: 'https://cdn.pixabay.com/video/2022/12/12/142684-780599471_tiny.mp4', type: 'video' },
+{ name: 'Background 195', url: 'https://cdn.pixabay.com/video/2023/03/15/154794-808552003_tiny.mp4', type: 'video' },
+{ name: 'Background 196', url: 'https://cdn.pixabay.com/video/2020/11/19/56848-481625618_tiny.mp4', type: 'video' },
+{ name: 'Background 197', url: 'https://cdn.pixabay.com/video/2019/06/14/24413-342401518_tiny.mp4', type: 'video' },
+{ name: 'Background 198', url: 'https://cdn.pixabay.com/video/2024/09/25/233180_tiny.mp4', type: 'video' },
+{ name: 'Background 199', url: 'https://cdn.pixabay.com/video/2023/01/31/148754-794599361_tiny.mp4', type: 'video' },
+{ name: 'Background 200', url: 'https://cdn.pixabay.com/video/2019/06/14/24412-342401515_tiny.mp4', type: 'video' },
+{ name: 'Background 201', url: 'https://cdn.pixabay.com/video/2022/05/12/116737-709204411_tiny.mp4', type: 'video' },
+{ name: 'Background 202', url: 'https://cdn.pixabay.com/video/2023/01/16/146757-789873515_tiny.mp4', type: 'video' },
+{ name: 'Background 203', url: 'https://cdn.pixabay.com/video/2024/06/25/218195_tiny.mp4', type: 'video' },
+{ name: 'Background 204', url: 'https://cdn.pixabay.com/video/2023/10/20/185801-876514088_tiny.mp4', type: 'video' },
+{ name: 'Background 205', url: 'https://cdn.pixabay.com/video/2022/01/17/104758-667892001_tiny.mp4', type: 'video' },
+{ name: 'Background 206', url: 'https://cdn.pixabay.com/video/2023/02/12/150343-798230385_tiny.mp4', type: 'video' },
+{ name: 'Background 207', url: 'https://cdn.pixabay.com/video/2023/03/07/153655-805688970_tiny.mp4', type: 'video' },
+{ name: 'Background 208', url: 'https://cdn.pixabay.com/video/2025/10/14/309864_tiny.mp4', type: 'video' },
+{ name: 'Background 209', url: 'https://cdn.pixabay.com/video/2022/03/01/109213-684053597_tiny.mp4', type: 'video' },
+{ name: 'Background 210', url: 'https://cdn.pixabay.com/video/2021/03/22/68715-535892735_tiny.mp4', type: 'video' },
+{ name: 'Background 211', url: 'https://cdn.pixabay.com/video/2022/09/13/131149-750216576_tiny.mp4', type: 'video' },
+{ name: 'Background 212', url: 'https://cdn.pixabay.com/video/2020/11/07/55000-490755555_tiny.mp4', type: 'video' },
+{ name: 'Background 213', url: 'https://cdn.pixabay.com/video/2020/11/07/55003-490755576_tiny.mp4', type: 'video' },
+{ name: 'Background 214', url: 'https://cdn.pixabay.com/video/2022/04/11/113555-698386334_tiny.mp4', type: 'video' },
+{ name: 'Background 215', url: 'https://cdn.pixabay.com/video/2025/04/08/270864_tiny.mp4', type: 'video' },
+{ name: 'Background 216', url: 'https://cdn.pixabay.com/video/2020/03/07/33329-396402462_tiny.mp4', type: 'video' },
+{ name: 'Background 217', url: 'https://cdn.pixabay.com/video/2023/05/24/164237-830460848_tiny.mp4', type: 'video' },
+{ name: 'Background 218', url: 'https://cdn.pixabay.com/video/2025/04/14/272021_tiny.mp4', type: 'video' },
+{ name: 'Background 219', url: 'https://cdn.pixabay.com/video/2021/09/12/88359-608445677_tiny.mp4', type: 'video' },
+{ name: 'Background 220', url: 'https://cdn.pixabay.com/video/2022/11/19/139638-773417911_tiny.mp4', type: 'video' },
+{ name: 'Background 221', url: 'https://cdn.pixabay.com/video/2021/08/22/85985-590746516_tiny.mp4', type: 'video' },
+{ name: 'Background 222', url: 'https://cdn.pixabay.com/video/2020/03/21/34039-399415264_tiny.mp4', type: 'video' },
+{ name: 'Background 223', url: 'https://cdn.pixabay.com/video/2021/04/13/71018-537986680_tiny.mp4', type: 'video' },
+{ name: 'Background 224', url: 'https://cdn.pixabay.com/video/2023/03/21/155626-810650583_tiny.mp4', type: 'video' },
+{ name: 'Background 225', url: 'https://cdn.pixabay.com/video/2025/06/11/285224_tiny.mp4', type: 'video' },
+{ name: 'Background 226', url: 'https://cdn.pixabay.com/video/2023/10/25/186501-878145183_tiny.mp4', type: 'video' },
+{ name: 'Background 227', url: 'https://cdn.pixabay.com/video/2020/01/16/31296-385265706_tiny.mp4', type: 'video' },
+{ name: 'Background 228', url: 'https://cdn.pixabay.com/video/2022/04/02/112671-695204745_tiny.mp4', type: 'video' },
+{ name: 'Background 229', url: 'https://cdn.pixabay.com/video/2021/05/28/75617-556482746_tiny.mp4', type: 'video' },
+{ name: 'Background 230', url: 'https://cdn.pixabay.com/video/2021/06/21/78484-566253537_tiny.mp4', type: 'video' },
+{ name: 'Background 231', url: 'https://cdn.pixabay.com/video/2024/03/09/203522-921629678_tiny.mp4', type: 'video' },
+{ name: 'Background 232', url: 'https://cdn.pixabay.com/video/2020/11/11/56162-478755498_tiny.mp4', type: 'video' },
+{ name: 'Background 233', url: 'https://cdn.pixabay.com/video/2021/08/11/84685-590762068_tiny.mp4', type: 'video' },
+
+  
+  { name: 'Background 234', url: 'https://cdn.pixabay.com/video/2025/10/25/312010_tiny.mp4', type: 'video' },
+{ name: 'Background 235', url: 'https://cdn.pixabay.com/video/2025/09/21/305593_tiny.mp4', type: 'video' },
+{ name: 'Background 236', url: 'https://cdn.pixabay.com/video/2025/10/31/313052_tiny.mp4', type: 'video' },
+{ name: 'Background 237', url: 'https://cdn.pixabay.com/video/2024/09/14/231325_tiny.mp4', type: 'video' },
+{ name: 'Background 238', url: 'https://cdn.pixabay.com/video/2025/07/03/289368_tiny.mp4', type: 'video' },
+{ name: 'Background 239', url: 'https://cdn.pixabay.com/video/2022/04/11/113562-698386354_tiny.mp4', type: 'video' },
+{ name: 'Background 240', url: 'https://cdn.pixabay.com/video/2025/06/26/287862_tiny.mp4', type: 'video' },
+{ name: 'Background 241', url: 'https://cdn.pixabay.com/video/2024/11/02/239567_tiny.mp4', type: 'video' },
+{ name: 'Background 242', url: 'https://cdn.pixabay.com/video/2025/10/09/308981_tiny.mp4', type: 'video' },
+{ name: 'Background 243', url: 'https://cdn.pixabay.com/video/2025/10/09/308968_tiny.mp4', type: 'video' },
+{ name: 'Background 244', url: 'https://cdn.pixabay.com/video/2025/10/28/312430_tiny.mp4', type: 'video' },
+{ name: 'Background 245', url: 'https://cdn.pixabay.com/video/2025/03/18/265647_tiny.mp4', type: 'video' },
+{ name: 'Background 246', url: 'https://cdn.pixabay.com/video/2024/09/20/232259_tiny.mp4', type: 'video' },
+{ name: 'Background 247', url: 'https://cdn.pixabay.com/video/2025/08/26/299902_tiny.mp4', type: 'video' },
+{ name: 'Background 248', url: 'https://cdn.pixabay.com/video/2025/07/31/294490_tiny.mp4', type: 'video' },
+{ name: 'Background 249', url: 'https://cdn.pixabay.com/video/2024/08/08/225398_tiny.mp4', type: 'video' },
+{ name: 'Background 250', url: 'https://cdn.pixabay.com/video/2025/08/24/299377_tiny.mp4', type: 'video' },
+{ name: 'Background 251', url: 'https://cdn.pixabay.com/video/2025/11/04/313813_tiny.mp4', type: 'video' },
+{ name: 'Background 252', url: 'https://cdn.pixabay.com/video/2025/04/14/272008_tiny.mp4', type: 'video' },
+{ name: 'Background 253', url: 'https://cdn.pixabay.com/video/2024/12/09/245778_tiny.mp4', type: 'video' },
+{ name: 'Background 254', url: 'https://cdn.pixabay.com/video/2025/08/28/300430_tiny.mp4', type: 'video' },
+{ name: 'Background 255', url: 'https://cdn.pixabay.com/video/2025/06/14/285867_tiny.mp4', type: 'video' },
+{ name: 'Background 256', url: 'https://cdn.pixabay.com/video/2025/08/12/296911_tiny.mp4', type: 'video' },
+{ name: 'Background 257', url: 'https://cdn.pixabay.com/video/2025/06/05/283771_tiny.mp4', type: 'video' },
+{ name: 'Background 258', url: 'https://cdn.pixabay.com/video/2025/09/29/307043_tiny.mp4', type: 'video' },
+{ name: 'Background 259', url: 'https://cdn.pixabay.com/video/2025/06/11/285219_tiny.mp4', type: 'video' },
+{ name: 'Background 260', url: 'https://cdn.pixabay.com/video/2024/10/27/238550_tiny.mp4', type: 'video' },
+{ name: 'Background 261', url: 'https://cdn.pixabay.com/video/2025/10/31/313062_tiny.mp4', type: 'video' },
+{ name: 'Background 262', url: 'https://cdn.pixabay.com/video/2025/06/10/284934_tiny.mp4', type: 'video' },
+{ name: 'Background 263', url: 'https://cdn.pixabay.com/video/2025/08/20/298638_tiny.mp4', type: 'video' },
+
+  
+  { name: 'Background 264', url: 'https://cdn.pixabay.com/video/2025/05/14/278967_tiny.mp4', type: 'video' },
+{ name: 'Background 265', url: 'https://cdn.pixabay.com/video/2025/06/28/288323_tiny.mp4', type: 'video' },
+{ name: 'Background 266', url: 'https://cdn.pixabay.com/video/2025/03/23/266820_tiny.mp4', type: 'video' },
+{ name: 'Background 267', url: 'https://cdn.pixabay.com/video/2025/04/17/272591_tiny.mp4', type: 'video' },
+{ name: 'Background 268', url: 'https://cdn.pixabay.com/video/2025/06/03/283438_tiny.mp4', type: 'video' },
+{ name: 'Background 269', url: 'https://cdn.pixabay.com/video/2025/04/06/270194_tiny.mp4', type: 'video' },
+{ name: 'Background 270', url: 'https://cdn.pixabay.com/video/2025/06/22/287212_tiny.mp4', type: 'video' },
+{ name: 'Background 271', url: 'https://cdn.pixabay.com/video/2025/03/15/264934_tiny.mp4', type: 'video' },
+{ name: 'Background 272', url: 'https://cdn.pixabay.com/video/2025/02/16/258696_tiny.mp4', type: 'video' },
+{ name: 'Background 273', url: 'https://cdn.pixabay.com/video/2024/09/11/230932_tiny.mp4', type: 'video' },
+{ name: 'Background 274', url: 'https://cdn.pixabay.com/video/2024/11/02/239569_tiny.mp4', type: 'video' },
+{ name: 'Background 275', url: 'https://cdn.pixabay.com/video/2025/03/11/263862_tiny.mp4', type: 'video' },
+{ name: 'Background 276', url: 'https://cdn.pixabay.com/video/2024/07/17/221672_tiny.mp4', type: 'video' },
+{ name: 'Background 277', url: 'https://cdn.pixabay.com/video/2025/02/27/261352_tiny.mp4', type: 'video' },
+{ name: 'Background 278', url: 'https://cdn.pixabay.com/video/2025/09/03/301365_tiny.mp4', type: 'video' },
+{ name: 'Background 279', url: 'https://cdn.pixabay.com/video/2025/03/18/265554_tiny.mp4', type: 'video' },
+{ name: 'Background 280', url: 'https://cdn.pixabay.com/video/2025/02/23/260399_tiny.mp4', type: 'video' },
+{ name: 'Background 281', url: 'https://cdn.pixabay.com/video/2025/04/09/271155_tiny.mp4', type: 'video' },
+{ name: 'Background 282', url: 'https://cdn.pixabay.com/video/2025/09/15/304228_tiny.mp4', type: 'video' },
+{ name: 'Background 283', url: 'https://cdn.pixabay.com/video/2025/09/30/307230_tiny.mp4', type: 'video' },
+{ name: 'Background 284', url: 'https://cdn.pixabay.com/video/2025/01/23/254251_tiny.mp4', type: 'video' },
+{ name: 'Background 285', url: 'https://cdn.pixabay.com/video/2025/09/26/306481_tiny.mp4', type: 'video' },
+{ name: 'Background 286', url: 'https://cdn.pixabay.com/video/2025/09/25/306429_tiny.mp4', type: 'video' },
+{ name: 'Background 287', url: 'https://cdn.pixabay.com/video/2025/03/12/264248_tiny.mp4', type: 'video' },
+{ name: 'Background 288', url: 'https://cdn.pixabay.com/video/2025/03/27/268033_tiny.mp4', type: 'video' },
+{ name: 'Background 289', url: 'https://cdn.pixabay.com/video/2025/05/11/278281_tiny.mp4', type: 'video' },
+{ name: 'Background 290', url: 'https://cdn.pixabay.com/video/2025/09/29/307129_tiny.mp4', type: 'video' },
+{ name: 'Background 291', url: 'https://cdn.pixabay.com/video/2025/09/29/306998_tiny.mp4', type: 'video' },
+{ name: 'Background 292', url: 'https://cdn.pixabay.com/video/2025/08/25/299576_tiny.mp4', type: 'video' },
+{ name: 'Background 293', url: 'https://cdn.pixabay.com/video/2024/06/13/216613_tiny.mp4', type: 'video' },
+{ name: 'Background 294', url: 'https://cdn.pixabay.com/video/2025/04/24/274052_tiny.mp4', type: 'video' },
+{ name: 'Background 295', url: 'https://cdn.pixabay.com/video/2025/09/08/302713_tiny.mp4', type: 'video' },
+
+  
+  { name: 'Background 296', url: 'https://cdn.pixabay.com/video/2024/08/01/224231_tiny.mp4', type: 'video' },
+{ name: 'Background 297', url: 'https://cdn.pixabay.com/video/2024/09/24/232950_tiny.mp4', type: 'video' },
+{ name: 'Background 298', url: 'https://cdn.pixabay.com/video/2025/03/04/262469_tiny.mp4', type: 'video' },
+{ name: 'Background 299', url: 'https://cdn.pixabay.com/video/2025/04/04/269667_tiny.mp4', type: 'video' },
+{ name: 'Background 300', url: 'https://cdn.pixabay.com/video/2025/09/08/302588_tiny.mp4', type: 'video' },
+{ name: 'Background 301', url: 'https://cdn.pixabay.com/video/2025/03/15/265116_tiny.mp4', type: 'video' },
+{ name: 'Background 302', url: 'https://cdn.pixabay.com/video/2025/03/04/262344_tiny.mp4', type: 'video' },
+{ name: 'Background 303', url: 'https://cdn.pixabay.com/video/2025/03/14/264741_tiny.mp4', type: 'video' },
+{ name: 'Background 304', url: 'https://cdn.pixabay.com/video/2024/09/24/232949_tiny.mp4', type: 'video' },
+{ name: 'Background 305', url: 'https://cdn.pixabay.com/video/2025/10/09/308947_tiny.mp4', type: 'video' },
+{ name: 'Background 306', url: 'https://cdn.pixabay.com/video/2024/12/16/246887_tiny.mp4', type: 'video' },
+{ name: 'Background 307', url: 'https://cdn.pixabay.com/video/2024/12/07/245434_tiny.mp4', type: 'video' },
+{ name: 'Background 308', url: 'https://cdn.pixabay.com/video/2025/08/20/298654_tiny.mp4', type: 'video' },
+{ name: 'Background 309', url: 'https://cdn.pixabay.com/video/2025/04/04/269669_tiny.mp4', type: 'video' },
+{ name: 'Background 310', url: 'https://cdn.pixabay.com/video/2025/08/03/295245_tiny.mp4', type: 'video' },
+{ name: 'Background 311', url: 'https://cdn.pixabay.com/video/2025/08/17/297867_tiny.mp4', type: 'video' },
+{ name: 'Background 312', url: 'https://cdn.pixabay.com/video/2025/08/04/295332_tiny.mp4', type: 'video' },
+{ name: 'Background 313', url: 'https://cdn.pixabay.com/video/2025/05/11/278282_tiny.mp4', type: 'video' },
+{ name: 'Background 314', url: 'https://cdn.pixabay.com/video/2024/12/16/246885_tiny.mp4', type: 'video' },
+{ name: 'Background 315', url: 'https://cdn.pixabay.com/video/2025/04/04/269668_tiny.mp4', type: 'video' },
+{ name: 'Background 316', url: 'https://cdn.pixabay.com/video/2024/09/02/229355_tiny.mp4', type: 'video' },
+{ name: 'Background 317', url: 'https://cdn.pixabay.com/video/2025/04/05/269956_tiny.mp4', type: 'video' },
+{ name: 'Background 318', url: 'https://cdn.pixabay.com/video/2025/04/05/269953_tiny.mp4', type: 'video' },
+{ name: 'Background 319', url: 'https://cdn.pixabay.com/video/2025/03/04/262392_tiny.mp4', type: 'video' },
+{ name: 'Background 320', url: 'https://cdn.pixabay.com/video/2025/03/04/262426_tiny.mp4', type: 'video' },
+{ name: 'Background 321', url: 'https://cdn.pixabay.com/video/2025/03/15/265107_tiny.mp4', type: 'video' },
+{ name: 'Background 322', url: 'https://cdn.pixabay.com/video/2025/08/17/297879_tiny.mp4', type: 'video' },
+
+  
+  { name: 'Background 323', url: 'https://cdn.pixabay.com/video/2016/09/22/5631-183849543_tiny.mp4', type: 'video' },
+{ name: 'Background 324', url: 'https://cdn.pixabay.com/video/2023/05/25/164517-830865498_tiny.mp4', type: 'video' },
+{ name: 'Background 325', url: 'https://cdn.pixabay.com/video/2024/06/14/216696_tiny.mp4', type: 'video' },
+{ name: 'Background 326', url: 'https://cdn.pixabay.com/video/2022/03/19/111244-690770621_tiny.mp4', type: 'video' },
+{ name: 'Background 327', url: 'https://cdn.pixabay.com/video/2023/09/19/181314-866094614_tiny.mp4', type: 'video' },
+{ name: 'Background 328', url: 'https://cdn.pixabay.com/video/2021/02/17/65438-514139134_tiny.mp4', type: 'video' },
+{ name: 'Background 329', url: 'https://cdn.pixabay.com/video/2022/01/24/105542-670503037_tiny.mp4', type: 'video' },
+{ name: 'Background 330', url: 'https://cdn.pixabay.com/video/2023/01/04/145320-786403437_tiny.mp4', type: 'video' },
+{ name: 'Background 331', url: 'https://cdn.pixabay.com/video/2022/02/27/109016-683077123_tiny.mp4', type: 'video' },
+{ name: 'Background 332', url: 'https://cdn.pixabay.com/video/2015/11/08/1287-145131537_tiny.mp4', type: 'video' },
+{ name: 'Background 333', url: 'https://cdn.pixabay.com/video/2024/05/31/214669_tiny.mp4', type: 'video' },
+{ name: 'Background 334', url: 'https://cdn.pixabay.com/video/2024/07/16/221469_tiny.mp4', type: 'video' },
+{ name: 'Background 335', url: 'https://cdn.pixabay.com/video/2024/07/24/222838_tiny.mp4', type: 'video' },
+{ name: 'Background 336', url: 'https://cdn.pixabay.com/video/2025/03/28/268290_tiny.mp4', type: 'video' },
+{ name: 'Background 337', url: 'https://cdn.pixabay.com/video/2023/02/15/150874-799327601_tiny.mp4', type: 'video' },
+{ name: 'Background 338', url: 'https://cdn.pixabay.com/video/2017/07/16/10685-226624850_tiny.mp4', type: 'video' },
+{ name: 'Background 339', url: 'https://cdn.pixabay.com/video/2022/01/21/105229-669669059_tiny.mp4', type: 'video' },
+{ name: 'Background 340', url: 'https://cdn.pixabay.com/video/2025/05/07/277211_tiny.mp4', type: 'video' },
+{ name: 'Background 341', url: 'https://cdn.pixabay.com/video/2022/09/02/129991-746164381_tiny.mp4', type: 'video' },
+{ name: 'Background 342', url: 'https://cdn.pixabay.com/video/2022/04/26/115176-703930484_tiny.mp4', type: 'video' },
+{ name: 'Background 343', url: 'https://cdn.pixabay.com/video/2022/03/27/112039-695204665_tiny.mp4', type: 'video' },
+{ name: 'Background 344', url: 'https://cdn.pixabay.com/video/2022/02/24/108771-681686549_tiny.mp4', type: 'video' },
+{ name: 'Background 345', url: 'https://cdn.pixabay.com/video/2023/02/19/151273-800360253_tiny.mp4', type: 'video' },
+{ name: 'Background 346', url: 'https://cdn.pixabay.com/video/2017/05/10/9090-217582224_tiny.mp4', type: 'video' },
+{ name: 'Background 347', url: 'https://cdn.pixabay.com/video/2016/04/05/2717-161687558_tiny.mp4', type: 'video' },
+{ name: 'Background 348', url: 'https://cdn.pixabay.com/video/2024/03/01/202576-918431455_tiny.mp4', type: 'video' },
+{ name: 'Background 349', url: 'https://cdn.pixabay.com/video/2022/09/02/129989-746164374_tiny.mp4', type: 'video' },
+{ name: 'Background 350', url: 'https://cdn.pixabay.com/video/2016/02/09/2104-154778744_tiny.mp4', type: 'video' },
+{ name: 'Background 351', url: 'https://cdn.pixabay.com/video/2021/08/16/85339-590730585_tiny.mp4', type: 'video' },
+{ name: 'Background 352', url: 'https://cdn.pixabay.com/video/2022/11/01/137430-766532393_tiny.mp4', type: 'video' },
+{ name: 'Background 353', url: 'https://cdn.pixabay.com/video/2020/05/15/39157-420257087_tiny.mp4', type: 'video' },
+{ name: 'Background 354', url: 'https://cdn.pixabay.com/video/2023/02/09/149939-797471089_tiny.mp4', type: 'video' },
+{ name: 'Background 355', url: 'https://cdn.pixabay.com/video/2024/09/03/229572_tiny.mp4', type: 'video' },
+{ name: 'Background 356', url: 'https://www.pexels.com/download/video/9897710/', type: 'video' },
+{ name: 'Background 357', url: 'https://www.pexels.com/download/video/28337272/', type: 'video' },
+{ name: 'Background 358', url: 'https://www.pexels.com/download/video/8816905/', type: 'video' },
+{ name: 'Background 359', url: 'https://www.pexels.com/download/video/19646001/', type: 'video' },
+{ name: 'Background 360', url: 'https://www.pexels.com/download/video/8667993/', type: 'video' },
+{ name: 'Background 361', url: 'https://www.pexels.com/download/video/32957693/', type: 'video' },
+{ name: 'Background 362', url: 'https://www.pexels.com/download/video/8500926/', type: 'video' },
+{ name: 'Background 363', url: 'https://www.pexels.com/download/video/34525184/', type: 'video' },
+{ name: 'Background 364', url: 'https://www.pexels.com/download/video/18336411/', type: 'video' },
+{ name: 'Background 365', url: 'https://www.pexels.com/download/video/28337271/', type: 'video' },
+   
+  // images
+  
+  
+  {name:'Sunny Schoolyard', url:'https://cdn.pixabay.com/photo/2022/10/07/06/11/verbena-7504222_640.jpg', type:'image'},
+  {name:'Green Park', url:'https://cdn.pixabay.com/photo/2020/06/21/10/56/flower-5324314_640.jpg', type:'image'},
+  {name:'Sky & Clouds', url:'https://cdn.pixabay.com/photo/2015/11/10/17/00/still-life-1037378_640.jpg', type:'image'},
+  {name:'Playground', url:'https://cdn.pixabay.com/photo/2022/05/12/20/59/tulips-7192345_640.jpg', type:'image'},
+  {name:'Chalkboard Classroom', url:'https://cdn.pixabay.com/photo/2016/11/29/05/08/chalkboard-1866616_1280.jpg', type:'image'},
+  {name:'Beach', url:'https://cdn.pixabay.com/photo/2024/11/08/13/40/tulips-9183358_640.jpg', type:'image'},
+  {name:'Space (kids)', url:'https://cdn.pixabay.com/photo/2023/12/08/10/56/mandarins-8437425_640.jpg', type:'image'},
+  {name:'Forest Glade', url:'https://cdn.pixabay.com/photo/2015/06/19/21/24/avenue-815297_1280.jpg', type:'image'},
+  {name:'Rainbow Hills', url:'https://cdn.pixabay.com/photo/2016/07/16/16/21/flowers-1522260_640.jpg', type:'image'},
+  {name:'Science Lab', url:'https://cdn.pixabay.com/photo/2023/04/26/16/01/lighthouse-7952718_640.jpg', type:'image'},
+
+
+   {name:'Sunny Schoolyard', url:'https://cdn.pixabay.com/photo/2025/09/24/11/49/ai-9852653_1280.jpg', type:'image'},
+  {name:'Green Park', url:'https://cdn.pixabay.com/photo/2024/08/29/12/44/images-9006886_960_720.jpg', type:'image'},
+  {name:'Sky & Clouds', url:'https://cdn.pixabay.com/photo/2017/12/11/15/34/lion-3012515_640.jpg', type:'image'},
+  {name:'Playground', url:'https://cdn.pixabay.com/photo/2024/08/29/12/36/images-9006863_1280.jpg', type:'image'},
+  {name:'Chalkboard Classroom', url:'https://cdn.pixabay.com/photo/2016/02/20/20/17/animals-1212716_960_720.png', type:'image'},
+  {name:'Beach', url:'https://cdn.pixabay.com/photo/2024/08/22/11/59/images-8989212_640.jpg', type:'image'},
+  {name:'Space (kids)', url:'https://cdn.pixabay.com/photo/2023/08/18/18/19/car-8199052_640.jpg', type:'image'},
+  {name:'Forest Glade', url:'https://cdn.pixabay.com/photo/2024/08/22/11/58/images-8989205_640.jpg', type:'image'},
+  {name:'Rainbow Hills', url:'https://cdn.pixabay.com/photo/2024/08/20/13/51/images-8983354_640.jpg', type:'image'},
+  {name:'Science Lab', url:'https://cdn.pixabay.com/photo/2024/08/20/13/51/images-8983354_640.jpg', type:'image'},
+
+  {name:'Sunset', url:'https://cdn.pixabay.com/photo/2022/04/15/07/58/sunset-7133867_640.jpg', type:'image'},
+  {name:'Landscape', url:'https://cdn.pixabay.com/photo/2022/08/08/19/36/landscape-7373484_1280.jpg', type:'image'},
+  {name:'Forest Avenue', url:'https://cdn.pixabay.com/photo/2015/06/19/21/24/avenue-815297_640.jpg', type:'image'},
+  {name:'Glacier', url:'https://cdn.pixabay.com/photo/2022/05/10/14/37/glacier-7187291_640.jpg', type:'image'},
+  {name:'Lonely Tree', url:'https://cdn.pixabay.com/photo/2022/11/27/13/22/tree-7619791_640.jpg', type:'image'},
+  {name:'Field', url:'https://cdn.pixabay.com/photo/2024/12/28/03/39/field-9295186_640.jpg', type:'image'},
+  {name:'Styggkarret Lake', url:'https://cdn.pixabay.com/photo/2014/09/02/15/28/styggkarret-433688_640.jpg', type:'image'},
+  {name:'Bachalpsee Lake', url:'https://cdn.pixabay.com/photo/2022/11/05/19/56/bachalpsee-7572681_640.jpg', type:'image'},
+  {name:'Windsurfing', url:'https://cdn.pixabay.com/photo/2022/06/04/01/35/windsurfing-7241074_640.jpg', type:'image'},
+  {name:'Snow Mountain', url:'https://cdn.pixabay.com/photo/2025/05/21/15/34/snow-mountain-9614087_640.jpg', type:'image'},
+  {name:'Sailboat', url:'https://cdn.pixabay.com/photo/2025/05/13/12/40/sailboat-9597523_640.jpg', type:'image'},
+  {name:'Chilli Plant', url:'https://cdn.pixabay.com/photo/2024/11/17/04/52/chilli-9202873_640.jpg', type:'image'},
+  {name:'Dolomites', url:'https://cdn.pixabay.com/photo/2020/04/22/08/06/dolomites-5076487_640.jpg', type:'image'},
+  {name:'Desert', url:'https://cdn.pixabay.com/photo/2017/08/16/01/23/desert-2646209_640.jpg', type:'image'},
+  {name:'Cape', url:'https://cdn.pixabay.com/photo/2022/08/23/01/10/cape-7404790_640.jpg', type:'image'},
+  {name:'Forest', url:'https://cdn.pixabay.com/photo/2018/11/23/14/19/forest-3833973_640.jpg', type:'image'},
+  {name:'Owl', url:'https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg', type:'image'},
+  {name:'Water', url:'https://cdn.pixabay.com/photo/2021/08/27/18/50/water-6579313_640.jpg', type:'image'},
+  {name:'Lynx', url:'https://cdn.pixabay.com/photo/2023/12/11/12/51/lynx-8443540_640.jpg', type:'image'},
+  {name:'River', url:'https://cdn.pixabay.com/photo/2022/08/25/20/34/river-7411236_640.jpg', type:'image'},
+  {name:'Bird', url:'https://cdn.pixabay.com/photo/2023/05/03/11/20/bird-7967356_640.jpg', type:'image'},
+  {name:'Strawberries', url:'https://cdn.pixabay.com/photo/2022/04/14/20/59/strawberries-7133242_640.jpg', type:'image'},
+  {name:'Dog', url:'https://cdn.pixabay.com/photo/2013/10/02/23/03/dog-190056_640.jpg', type:'image'},
+  {name:'Bird Flying', url:'https://cdn.pixabay.com/photo/2023/04/05/21/09/bird-7902319_640.jpg', type:'image'},
+  {name:'Landscape Sunset', url:'https://cdn.pixabay.com/photo/2025/04/08/10/42/landscape-9521261_640.jpg', type:'image'},
+  {name:'Lighthouse', url:'https://cdn.pixabay.com/photo/2022/07/07/09/08/lighthouse-7306839_640.jpg', type:'image'},
+  
+  { name: 'Pine Cones', url: 'https://cdn.pixabay.com/photo/2025/09/25/17/56/pine-cones-9855502_640.jpg', type:'image' },
+  { name: 'Fisherman', url: 'https://cdn.pixabay.com/photo/2017/09/11/14/11/fisherman-2739115_640.jpg', type:'image' },
+  { name: 'Squirrel', url: 'https://cdn.pixabay.com/photo/2025/08/02/03/27/squirrel-9749860_640.jpg', type:'image' },
+  { name: 'Fly', url: 'https://cdn.pixabay.com/photo/2015/02/16/06/11/fly-637949_640.jpg', type:'image' },
+  { name: 'Rain', url: 'https://cdn.pixabay.com/photo/2017/08/02/21/15/rain-2573488_640.jpg', type:'image' },
+  { name: 'Sleeve', url: 'https://cdn.pixabay.com/photo/2024/01/18/13/05/sleeve-8516924_640.jpg', type:'image' },
+  { name: 'Spoonbill', url: 'https://cdn.pixabay.com/photo/2024/11/07/18/01/spoonbill-9181508_640.jpg', type:'image' },
+  { name: 'Hill', url: 'https://cdn.pixabay.com/photo/2020/06/21/09/48/hill-5324149_640.jpg', type:'image' },
+  { name: 'Waterfall', url: 'https://cdn.pixabay.com/photo/2020/05/28/04/42/waterfall-5229807_640.jpg', type:'image' },
+  { name: 'Sunset 2', url: 'https://cdn.pixabay.com/photo/2024/01/18/10/07/sunset-8516639_640.jpg', type:'image' },
+  { name: 'Flower', url: 'https://cdn.pixabay.com/photo/2022/10/24/09/31/flower-7543035_640.jpg', type:'image' },
+  { name: 'Flycatcher', url: 'https://cdn.pixabay.com/photo/2024/07/01/10/50/flycatcher-8864922_640.jpg', type:'image' },
+  { name: 'Pamir', url: 'https://cdn.pixabay.com/photo/2025/10/09/15/17/pamir-9883842_640.jpg', type:'image' },
+  { name: 'Tram', url: 'https://cdn.pixabay.com/photo/2024/12/28/13/28/tram-9296118_640.jpg', type:'image' },
+  { name: 'Animals', url: 'https://cdn.pixabay.com/photo/2025/04/14/16/31/animals-9533774_640.jpg', type:'image' },
+  { name: 'Leaves', url: 'https://cdn.pixabay.com/photo/2024/12/04/15/37/leaves-9244714_640.jpg', type:'image' },
+  { name: 'Blossoms', url: 'https://cdn.pixabay.com/photo/2022/02/03/18/49/blossoms-6991112_640.jpg', type:'image' },
+  { name: 'Leaves 2', url: 'https://cdn.pixabay.com/photo/2023/07/08/19/28/leaves-8115077_640.jpg', type:'image' },
+  { name: 'Sunset 3', url: 'https://cdn.pixabay.com/photo/2023/10/21/11/46/sunset-8331285_640.jpg', type:'image' },
+  { name: 'Altai Mountains', url: 'https://cdn.pixabay.com/photo/2022/01/17/06/38/altai-6943982_640.jpg', type:'image' },
+  { name: 'Spider', url: 'https://cdn.pixabay.com/photo/2018/07/12/11/46/spider-3533177_640.jpg', type:'image' },
+  { name: 'City Sunset', url: 'https://cdn.pixabay.com/photo/2024/11/02/17/29/city-9169729_640.jpg', type:'image' },
+  { name: 'Giraffe', url: 'https://cdn.pixabay.com/photo/2020/05/04/09/09/giraffe-5128394_640.jpg', type:'image' },
+  { name: 'Mountains', url: 'https://cdn.pixabay.com/photo/2016/05/24/16/48/mountains-1412683_640.png', type:'image' },
+  { name: 'Leaf', url: 'https://cdn.pixabay.com/photo/2021/04/22/18/35/leaf-6199807_640.jpg', type:'image' },
+  { name: 'Dorset', url: 'https://cdn.pixabay.com/photo/2024/10/23/09/00/dorset-9141987_640.jpg', type:'image' },
+  { name: 'Bridge', url: 'https://cdn.pixabay.com/photo/2025/05/14/10/09/bridge-9599215_640.jpg', type:'image' },
+  { name: 'Elephant', url: 'https://cdn.pixabay.com/photo/2024/08/24/14/42/elephant-8994442_640.jpg', type:'image' },
+  { name: 'Plant', url: 'https://cdn.pixabay.com/photo/2020/03/10/05/40/plant-4917877_640.jpg', type:'image' },
+  { name: 'Fly Agaric', url: 'https://cdn.pixabay.com/photo/2014/11/27/10/04/fly-agaric-547324_640.jpg', type:'image' },
+  { name: 'Forest 2', url: 'https://cdn.pixabay.com/photo/2018/05/11/23/33/forest-3392077_640.jpg', type:'image' },
+  { name: 'Insect', url: 'https://cdn.pixabay.com/photo/2023/08/10/14/17/insect-8181775_640.jpg', type:'image' },
+  { name: 'Branch', url: 'https://cdn.pixabay.com/photo/2022/12/12/03/13/branch-7650059_640.jpg', type:'image' },
+  { name: 'Animal', url: 'https://cdn.pixabay.com/photo/2020/02/17/06/06/animal-4855514_640.jpg', type:'image' },
+  { name: 'Elephants', url: 'https://cdn.pixabay.com/photo/2022/12/12/17/05/elephants-7651446_640.jpg', type:'image' },
+  { name: 'Peacock', url: 'https://cdn.pixabay.com/photo/2018/08/19/19/56/peacock-3617474_640.jpg', type:'image' },
+  { name: 'Wood', url: 'https://cdn.pixabay.com/photo/2022/12/03/22/15/wood-7633457_640.jpg', type:'image' },
+  { name: 'Mountain', url: 'https://cdn.pixabay.com/photo/2024/11/03/17/49/mountain-9172053_640.jpg', type:'image' },
+  { name: 'Mushroom', url: 'https://cdn.pixabay.com/photo/2023/11/16/18/46/mushroom-8392883_640.jpg', type:'image' },
+  { name: 'Plant 2', url: 'https://cdn.pixabay.com/photo/2022/10/17/18/19/plant-7528416_640.jpg', type:'image' },
+  { name: 'Bavarian Forest', url: 'https://cdn.pixabay.com/photo/2018/05/09/19/31/bavarian-forest-3385966_640.jpg', type:'image' },
+  { name: 'Cat', url: 'https://cdn.pixabay.com/photo/2021/09/28/13/14/cat-6664412_640.jpg', type:'image' },
+  { name: 'Drops', url: 'https://cdn.pixabay.com/photo/2023/03/27/06/06/drops-7879899_640.jpg', type:'image' },
+  { name: 'Path', url: 'https://cdn.pixabay.com/photo/2021/08/01/17/31/path-6514885_640.jpg', type:'image' },
+  
+  
+  { name: 'Landscape 2', url: 'https://cdn.pixabay.com/photo/2019/10/29/14/46/landscape-4587079_640.jpg', type: 'image' },
+  { name: 'Dog 2', url: 'https://cdn.pixabay.com/photo/2020/03/31/19/20/dog-4988985_640.jpg', type: 'image' },
+  { name: 'Animal 2', url: 'https://cdn.pixabay.com/photo/2020/02/17/06/06/animal-4855514_640.jpg', type: 'image' },
+  { name: 'Costa Rica', url: 'https://cdn.pixabay.com/photo/2024/12/31/01/02/costa-rica-9301364_640.jpg', type: 'image' },
+  { name: 'Fish', url: 'https://cdn.pixabay.com/photo/2018/04/15/17/45/fish-3322230_640.jpg', type: 'image' },
+  { name: 'Dog 2', url: 'https://cdn.pixabay.com/photo/2020/03/31/19/20/dog-4988985_640.jpg', type: 'image' },
+  { name: 'Meerkat', url: 'https://cdn.pixabay.com/photo/2018/07/09/11/53/meerkat-3525978_640.jpg', type: 'image' },
+  { name: 'Tree', url: 'https://cdn.pixabay.com/photo/2018/03/15/21/10/tree-3229512_640.jpg', type: 'image' },
+  { name: 'Fox', url: 'https://cdn.pixabay.com/photo/2015/04/10/01/41/fox-715588_640.jpg', type: 'image' },
+  { name: 'Caterpillar', url: 'https://cdn.pixabay.com/photo/2023/08/07/14/08/caterpillar-8175147_640.jpg', type: 'image' },
+  { name: 'Foliage', url: 'https://cdn.pixabay.com/photo/2023/11/28/16/10/foliage-8417776_640.jpg', type: 'image' },
+  { name: 'Animal 3', url: 'https://cdn.pixabay.com/photo/2021/10/31/08/34/animal-6756619_640.jpg', type: 'image' },
+  { name: 'Cascade', url: 'https://cdn.pixabay.com/photo/2022/04/23/17/16/cascade-7152189_640.jpg', type: 'image' },
+  { name: 'Puddle', url: 'https://cdn.pixabay.com/photo/2017/08/05/15/19/puddle-2584378_640.jpg', type: 'image' },
+  { name: 'Herons', url: 'https://cdn.pixabay.com/photo/2023/03/27/19/18/herons-7881512_640.png', type: 'image' },
+  { name: 'Nature', url: 'https://cdn.pixabay.com/photo/2023/04/16/10/55/nature-7929920_640.jpg', type: 'image' },
+  { name: 'Water Bird', url: 'https://cdn.pixabay.com/photo/2023/11/11/16/07/water-bird-8381451_640.jpg', type: 'image' },
+  { name: 'Squirrel 2', url: 'https://cdn.pixabay.com/photo/2015/02/01/18/05/squirrel-619968_640.jpg', type: 'image' },
+  { name: 'Rain 2', url: 'https://cdn.pixabay.com/photo/2022/04/25/05/48/rain-7155121_640.jpg', type: 'image' },
+  { name: 'Palm Trees', url: 'https://cdn.pixabay.com/photo/2018/08/20/15/31/palm-trees-3619180_640.jpg', type: 'image' },
+  { name: 'Hut', url: 'https://cdn.pixabay.com/photo/2025/05/06/12/19/hut-9582608_640.jpg', type: 'image' },
+  { name: 'Crocus', url: 'https://cdn.pixabay.com/photo/2025/04/02/11/45/crocus-9508835_640.jpg', type: 'image' },
+  { name: 'Bridge 2', url: 'https://cdn.pixabay.com/photo/2024/08/28/09/34/bridge-9003553_640.jpg', type: 'image' },
+  { name: 'Fall Leaves', url: 'https://cdn.pixabay.com/photo/2023/08/15/17/25/fall-8192375_640.png', type: 'image' },
+  { name: 'Plant', url: 'https://cdn.pixabay.com/photo/2023/03/14/00/30/plant-7851213_640.jpg', type: 'image' },
+  { name: 'Landscape 3', url: 'https://cdn.pixabay.com/photo/2020/03/13/15/38/landscape-4928266_640.jpg', type: 'image' },
+  { name: 'Grapes', url: 'https://cdn.pixabay.com/photo/2021/10/01/18/27/grapes-6673291_640.jpg', type: 'image' },
+  { name: 'Mountains 2', url: 'https://cdn.pixabay.com/photo/2023/08/07/21/37/mountains-8175997_640.png', type: 'image' },
+  { name: 'Deer', url: 'https://cdn.pixabay.com/photo/2018/12/25/11/10/deer-3894103_640.png', type: 'image' },
+  { name: 'Sea Bird', url: 'https://cdn.pixabay.com/photo/2020/03/12/19/55/sea-bird-4926108_640.jpg', type: 'image' },
+  { name: 'Cat 2', url: 'https://cdn.pixabay.com/photo/2022/06/06/10/55/cat-7245850_640.jpg', type: 'image' },
+  { name: 'Grasshopper', url: 'https://cdn.pixabay.com/photo/2023/09/03/12/52/grasshopper-8230682_640.jpg', type: 'image' },
+  { name: 'Animal 4', url: 'https://cdn.pixabay.com/photo/2021/10/31/09/25/animal-6756751_640.jpg', type: 'image' },
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  { name: 'Bridge 2', url: 'https://cdn.pixabay.com/photo/2024/08/28/09/34/bridge-9003553_640.jpg', type: 'image' },
+  { name: 'Forest Glade', url: 'https://elimuconnect.github.io/ELIMU-CONNECT-/image1..png', type: 'image' },
+
+  { name: 'Fall Leaves', url: 'https://cdn.pixabay.com/photo/2023/08/15/17/25/fall-8192375_640.png', type: 'image' },
+  { name: 'Forest Glade', url: 'https://elimuconnect.github.io/ELIMU-CONNECT-/image2..png', type: 'image' },
+
+  { name: 'Plant', url: 'https://cdn.pixabay.com/photo/2023/03/14/00/30/plant-7851213_640.jpg', type: 'image' },
+  { name: 'Forest Glade', url: 'https://elimuconnect.github.io/ELIMU-CONNECT-/image3..png', type: 'image' },
+
+  { name: 'Landscape 3', url: 'https://cdn.pixabay.com/photo/2020/03/13/15/38/landscape-4928266_640.jpg', type: 'image' },
+  { name: 'Forest Glade', url: 'https://elimuconnect.github.io/ELIMU-CONNECT-/image4..png', type: 'image' },
+
+  { name: 'Grapes', url: 'https://cdn.pixabay.com/photo/2021/10/01/18/27/grapes-6673291_640.jpg', type: 'image' },
+  { name: 'Forest Glade', url: 'https://elimuconnect.github.io/ELIMU-CONNECT-/image5..png', type: 'image' },
+
+  { name: 'Mountains 2', url: 'https://cdn.pixabay.com/photo/2023/08/07/21/37/mountains-8175997_640.png', type: 'image' },
+  { name: 'Forest Glade', url: 'https://elimuconnect.github.io/ELIMU-CONNECT-/image6..png', type: 'image' },
+
+  { name: 'Deer', url: 'https://cdn.pixabay.com/photo/2018/12/25/11/10/deer-3894103_640.png', type: 'image' },
+  { name: 'Forest Glade', url: 'https://elimuconnect.github.io/ELIMU-CONNECT-/image7..png', type: 'image' },
+
+  { name: 'Sea Bird', url: 'https://cdn.pixabay.com/photo/2020/03/12/19/55/sea-bird-4926108_640.jpg', type: 'image' },
+  { name: 'Forest Glade', url: 'https://elimuconnect.github.io/ELIMU-CONNECT-/image8..png', type: 'image' },
+
+  { name: 'Cat 2', url: 'https://cdn.pixabay.com/photo/2022/06/06/10/55/cat-7245850_640.jpg', type: 'image' },
+  { name: 'Forest Glade', url: 'https://elimuconnect.github.io/ELIMU-CONNECT-/image9..png', type: 'image' },
+
+  { name: 'Grasshopper', url: 'https://cdn.pixabay.com/photo/2023/09/03/12/52/grasshopper-8230682_640.jpg', type: 'image' },
+  { name: 'Forest Glade', url: 'https://elimuconnect.github.io/ELIMU-CONNECT-/image10..png', type: 'image' },
+
+  { name: 'Animal 4', url: 'https://cdn.pixabay.com/photo/2021/10/31/09/25/animal-6756751_640.jpg', type: 'image' },
+  { name: 'Forest Glade', url: 'https://elimuconnect.github.io/ELIMU-CONNECT-/image11..png', type: 'image' }
+
+
+
+  
+];
+
+
+
+const KNOWLEDGE_ITEMS = [
+
+{
+title: "Introduction: Purpose",
+en: `Welcome.`,
+sw: `Karibu.`,
+verse_en: "Word of God",
+verse_sw: " Neno La Mungu"
+},
+
+{
+en: `This channel seeks truth about Jesus Christ and Isa Al-Masih, inviting all to examine Scripture deeply. support verse: And you will know the truth, and the truth will set you free.`,
+sw: `Channel hii inatafuta ukweli kuhusu Yesu Kristo na Isa Masihi, ikialika wote kuchunguza Maandiko kwa kina. msaada wa andiko:Nanyi mtaijua kweli, nayo hiyo kweli itawaweka huru.`,
+verse_en: "John 8:32",
+verse_sw: "Yohana 8:32"
+},
+{
+en: `This channel speaks to Christians, Muslims, and all people—to understand truth about Jesus. Verse: The Messiah, Jesus son of Mary, was a messenger of Allah and His word given to Mary and a spirit from Him.`,
+sw: `Channel hii inazungumza na Wakristo, Waislamu na wote—kuelewa ukweli kuhusu Yesu. Andiko:Masihi Isa mwana wa Maryam ni Mtume wa Allah na Neno Lake na Roho kutoka kwake.`,
+verse_en: "Quran 4:171",
+verse_sw: "Qurani 4:171"
+},
+{
+en: `Truth is not inherited—it is discovered. This channel calls each person to seek who Jesus truly is. support verse: All Scripture is God-breathed and useful for teaching, rebuking, correcting and training in righteousness.`,
+sw: `Ukweli haurithiwi—hutafutwa. Channel hii inamwita kila mtu ajue Yesu ni nani kweli. msaada wa andiko: Kila Maandiko yamepuliziwa na Mungu na yanafaa kufundisha, kukemea, kurekebisha na kuadibisha katika haki.`,
+verse_en: "2 Timothy 3:16",
+verse_sw: "2 Timotheo 3:16"
+},
+
+{
+en: `Who is Jesus? God, Son, or man? This channel explores this question with truth, not assumption. support verse:  But who do you say that I am?`,
+sw: `Yesu ni nani? Mungu, Mwana, au mwanadamu? Channel hii inachunguza kwa ukweli, si dhana. msaada wa andiko: Lakini ninyi mwasema mimi ni nani?`,
+verse_en: "Matthew 16:15",
+verse_sw: "Mathayo 16:15"
+},
+
+{
+en: `Is God one or three? This channel examines this teaching through Scripture, not tradition. support verse: Hear, O Israel: The Lord our God, the Lord is one.`,
+sw: `Mungu ni mmoja au watatu? Channel hii inachunguza kwa Maandiko, si desturi. msaada wa andiko: Sikia, Israeli: Bwana Mungu wetu ni Bwana mmoja.`,
+verse_en: "Deuteronomy 6:4",
+verse_sw: "Kumbukumbu 6:4"
+},
+
+{
+en: `Are Jesus of the Bible and Isa of the Quran the same? This channel examines truth without fear. support verse: We sent Jesus son of Mary confirming the Torah.`,
+sw: `Je, Yesu wa Biblia na Isa wa Qurani ni mmoja? Channel hii inachunguza bila hofu. msaada wa andiko: Tuliwapelekea Isa mwana wa Maryam kuthibitisha Taurati.`,
+verse_en: "Quran 5:46",
+verse_sw: "Qurani 5:46"
+},
+
+{
+en: `Among many churches today, which follows Christ truly? This channel searches for truth, not numbers. support verse: Matthew 7:21 Not everyone who says Lord Lord will enter the kingdom of heaven.`,
+sw: `Kati ya makanisa mengi, lipi linafuata Kristo kweli? Channel hii hutafuta ukweli, si wingi. msaada wa andiko: Si kila aniambiaye Bwana Bwana ataingia ufalme wa mbinguni.`,
+verse_en: "Matthew 7:21",
+verse_sw: "Mathayo 7:21"
+},
+
+{
+en: `Which is the true day of worship? This channel examines what God established, not human systems. support verse: The Sabbath was made for man, not man for the Sabbath.`,
+sw: `Ni ipi siku sahihi ya ibada? Channel hii huchunguza Mungu aliweka nini, si wanadamu. msaada wa andiko: Sabato ilifanywa kwa ajili ya mwanadamu, si mwanadamu kwa ajili ya Sabato.`,
+verse_en: "Mark 2:27",
+verse_sw: "Marko 2:27"
+},
+
+{
+en: `The Quran confirms earlier Scripture existed. This channel returns to the original foundation of truth. support verse: If you are in doubt ask those who read the Scripture before you.`,
+sw: `Qurani inathibitisha Maandiko ya awali. Channel hii inarudi kwenye msingi wa ukweli. msaada wa andiko: Kama una shaka waulize wanaosoma Maandiko kabla yako.`,
+verse_en: "Quran 10:94",
+verse_sw: "Qurani 10:94"
+},
+
+{
+en: `The Quran says the Gospel was given to Isa with light and guidance. This channel examines it clearly. support verse: We gave him the Gospel in which is guidance and light.`,
+sw: `Qurani yasema Injili ilipewa Isa ikiwa na nuru na mwongozo. Channel hii inachunguza wazi. msaada wa andiko: Tuliwapa Injili yenye mwongozo na nuru.`,
+verse_en: "Quran 5:46",
+verse_sw: "Qurani 5:46"
+},
+
+{
+en: `This channel does not create a new religion, but reveals the original truth without human distortion. support verse: Even if we or an angel preach another gospel, let them be accursed.`,
+sw: `Channel hii haileti dini mpya, bali inaonyesha ukweli wa mwanzo bila kupotoshwa. msaada wa andiko:  Hata kama sisi au malaika atahubiri injili nyingine, na alaaniwe.`,
+verse_en: "Galatians 1:8",
+verse_sw: "Wagalatia 1:8"
+},
+
+{
+en: `Pray for understanding. This channel invites you to seek truth with humility and an open heart. support verse: Study to show yourself approved unto God.`,
+sw: `Omba uelewa. Channel hii inakualika utafute ukweli kwa unyenyekevu na moyo wazi. msaada wa andiko: Jitahidi kujionyesha kuwa umekubaliwa mbele za Mungu.`,
+verse_en: "2 Timothy 2:15",
+verse_sw: "2 Timotheo 2:15"
+}
+
+];
+
+
+
+// animals + birds + butterflies
+const ANIMALS = {
+  dogs: [
+    'https://cdn.pixabay.com/photo/2025/06/20/10/47/dog-9670619_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2018/03/18/18/06/australian-shepherd-3237735_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/09/25/13/12/dog-2785074_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+ 'https://cdn.pixabay.com/photo/2018/04/30/19/16/animal-3363688_640.jpg',
+    'https://cdn.pixabay.com/photo/2014/11/21/15/25/chameleon-540655_1280.jpg',
+    'https://cdn.pixabay.com/photo/2017/05/31/18/38/sea-2361247_640.jpg',
+     'https://cdn.pixabay.com/photo/2019/12/26/02/45/fish-with-lotus-4719551_640.png',
+    'https://cdn.pixabay.com/photo/2013/07/12/18/20/santa-claus-153309_640.png',
+    'https://cdn.pixabay.com/photo/2024/01/24/22/22/knight-8530654_640.jpg',
+   
+    'https://cdn.pixabay.com/photo/2016/05/02/12/58/tiger-1367197_640.jpg',
+    'https://cdn.pixabay.com/photo/2022/03/16/01/52/animal-7071426_640.jpg',
+    'https://cdn.pixabay.com/photo/2021/06/20/15/40/buffalo-6351352_640.jpg',
+    
+  ],
+  cats: [
+    'https://cdn.pixabay.com/photo/2022/03/27/11/23/cat-7094808_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/11/09/21/41/cat-2934720_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2015/11/15/20/21/cat-1044750_640.jpg',
+   'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2023/10/23/08/17/asian-giant-hornet-8335577_640.jpg',
+    'https://cdn.pixabay.com/photo/2020/04/10/07/42/wasp-5024465_640.jpg',
+    'https://cdn.pixabay.com/photo/2013/07/12/16/29/hornet-151003_640.png',
+      'https://cdn.pixabay.com/photo/2022/09/28/17/36/puffer-fish-7485602_640.jpg',
+    'https://cdn.pixabay.com/photo/2015/04/07/21/12/lionfish-711799_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/05/31/00/24/aquarium-2358739_640.jpg',
+     'https://cdn.pixabay.com/photo/2023/06/29/16/10/zebra-8096659_640.png',
+    'https://cdn.pixabay.com/photo/2020/05/04/09/09/giraffe-5128394_1280.jpg',
+    'https://cdn.pixabay.com/photo/2016/04/22/21/07/monkey-1346590_640.jpg'
+  ],
+  birds: [
+    'https://cdn.pixabay.com/photo/2023/07/24/22/07/european-herring-gull-8147941_640.jpg',
+    'https://cdn.pixabay.com/photo/2018/06/22/18/30/seagull-3491309_640.jpg',
+    'https://cdn.pixabay.com/photo/2024/11/22/18/18/mute-swan-9217198_640.jpg',
+    'https://cdn.pixabay.com/photo/2022/08/25/20/44/bird-7411270_640.jpg',
+    'https://cdn.pixabay.com/photo/2016/10/19/13/42/eagle-1753002_640.jpg'
+  ],
+  butterflies: [
+    'https://cdn.pixabay.com/photo/2023/05/30/15/12/blue-butterfuly-8028888_640.jpg',
+    'https://cdn.pixabay.com/photo/2018/06/24/18/46/butterfly-3495224_640.jpg',
+    'https://cdn.pixabay.com/photo/2014/08/28/22/41/speckled-wood-430203_640.jpg',
+    'https://cdn.pixabay.com/photo/2024/12/27/10/28/butterfly-clipart-9293644_640.png',
+    'https://cdn.pixabay.com/photo/2023/01/17/18/26/moth-7725205_640.jpg'
+  ],
+
+exotic: [
+    'https://cdn.pixabay.com/photo/2022/08/25/20/44/bird-7411270_640.jpg',
+  ],
+  fish: [
+    'https://cdn.pixabay.com/photo/2016/11/18/17/47/fish-1834823_640.jpg',
+    
+  ],
+  cartoons: [
+    'https://cdn.pixabay.com/photo/2020/06/23/18/10/cartoon-5331106_640.png',
+    
+  ],
+  insects: [
+    'https://cdn.pixabay.com/photo/2017/03/27/13/16/bee-2178341_640.jpg',
+   
+  ],
+  reptiles: [
+    'https://cdn.pixabay.com/photo/2016/11/23/14/45/lizard-1850046_640.jpg',
+
+  ],
+   
+};
+
+
+const EMOJIS = ['📚','🧮','🎨','✏️','💡','🔢','🧑‍🏫','🌈','🐶','🐱','🐭','🌟','✨','🎵','🎶','📝','📖','🌍','🌏','☀️','🌙','⚡','🔥','💧','🌊','🌳','🎯','🏆','🏅','🎁','🎉','🎈','🚀','🚲','🛶'];
+
+
+  
+/* ---------- Utility: Shuffler (persistent) ---------- */
+function createShuffler(key, items) {
+  const storageKey = 'shuffler_' + key;
+  function loadState() { try { const raw = localStorage.getItem(storageKey); return raw ? JSON.parse(raw) : null; } catch (e) { return null; } }
+  function saveState(state) { try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch (e) {} }
+  function makeOrder(n) {
+    const arr = Array.from({length:n}, (_,i)=>i);
+    for (let i = arr.length -1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [arr[i], arr[j]] = [arr[j], arr[i]]; }
+    return arr;
+  }
+  let state = loadState();
+  if (!state || !Array.isArray(state.order) || state.sourceLength !== items.length) {
+    state = { order: makeOrder(items.length), idx: 0, sourceLength: items.length };
+    saveState(state);
+  }
+  function ensureFresh() {
+    if (state.sourceLength !== items.length) {
+      state = { order: makeOrder(items.length), idx: 0, sourceLength: items.length };
+      saveState(state);
+    }
+  }
+  function next() {
+    ensureFresh();
+    if (state.idx >= state.order.length) {
+      state.order = makeOrder(items.length);
+      state.idx = 0;
+      state.sourceLength = items.length;
+    }
+    const resultIndex = state.order[state.idx++];
+    saveState(state);
+    return items[resultIndex];
+  }
+  return { next, reset: () => { state = { order: makeOrder(items.length), idx: 0, sourceLength: items.length }; saveState(state);} };
+}
+
+const backgroundsShuffler = createShuffler('backgrounds', BACKGROUNDS);
+const dogsShuffler = createShuffler('dogs', ANIMALS.dogs);
+const catsShuffler = createShuffler('cats', ANIMALS.cats);
+const birdsShuffler = createShuffler('birds', ANIMALS.birds);
+const butterfliesShuffler = createShuffler('butterflies', ANIMALS.butterflies);
+
+
+
+
+
+let knowledgeIndex = 0;
+
+function getNextKnowledgeItem() {
+  if (!KNOWLEDGE_ITEMS.length) return null;
+
+  const item = KNOWLEDGE_ITEMS[knowledgeIndex];
+
+  // move to next
+  knowledgeIndex++;
+
+  // loop back to start
+  if (knowledgeIndex >= KNOWLEDGE_ITEMS.length) {
+    knowledgeIndex = 0;
+  }
+
+  return item;
+}
+
+
+
+
+
+
+
+/* =========================
+   AUDIO: WebAudio Master Mix
+   ========================= */
+const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+function ensureAudioCtx(){
+  if(!audioCtx){
+    audioCtx = new AudioContextClass();
+    audioCtx.masterGain = audioCtx.createGain();
+    audioCtx.masterGain.gain.value = 1;
+    audioCtx.masterDest = audioCtx.createMediaStreamDestination();
+    audioCtx.masterGain.connect(audioCtx.masterDest);
+    audioCtx.masterGain.connect(audioCtx.destination);
+  }
+  if(audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+  return audioCtx;
+}
+
+let currentBgSource = null;
+let currentBgGain = null;
+let uploadedVoiceBuffer = null;
+let uploadedVoiceSource = null;
+let micStreamNode = null;
+let micStreamTrack = null;
+
+
+function stopCurrentBgTrack(){
+  try{ if(currentBgSource){ currentBgSource.stop(); currentBgSource.disconnect(); currentBgSource=null; } }catch(e){}
+  if(currentBgGain){ try{ currentBgGain.disconnect(); }catch(e){} currentBgGain=null; }
+}
+
+
+async function enableMicMixing(){
+  try{
+    if(micStreamNode) return;
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    micStreamTrack = stream.getAudioTracks()[0];
+    const ctx = ensureAudioCtx();
+    const source = ctx.createMediaStreamSource(new MediaStream([micStreamTrack]));
+    source.connect(ctx.masterGain);
+    micStreamNode = source;
+    statusEl.textContent = 'Microphone connected and will be embedded.';
+  }catch(err){
+    console.warn('Mic not available', err);
+    statusEl.textContent = 'Microphone permission denied or unavailable.';
+  }
+}
+
+function disableMicMixing(){
+  if(micStreamNode){ try{ micStreamNode.disconnect(); }catch(e){} micStreamNode = null; }
+  if(micStreamTrack){ try{ micStreamTrack.stop(); }catch(e){} micStreamTrack = null; }
+}
+
+/* =========================
+   Asset loaders & scene helpers (from B)
+   ========================= */
+function loadImg(url){ return new Promise((res,rej)=>{ const i=new Image(); i.crossOrigin='anonymous'; i.onload=()=>res(i); i.onerror=()=>rej(new Error('Image load error '+url)); i.src=url; }); }
+
+function loadVideo(url) {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video');
+    video.crossOrigin = 'anonymous';
+    video.preload = 'auto';
+    video.muted = true;
+    video.loop = true;
+    video.playsInline = true;
+    video.oncanplaythrough = () => { video.play().catch(()=>{}); resolve(video); };
+    video.onerror = () => reject(new Error('Video load error ' + url));
+    video.src = '';
+    video.load();
+    video.src = url;
+    video.load();
+  });
+}
+
+function spawnEmojis(count = 20) { 
+  scene.emojis = [];
+  for (let i = 0; i < count; i++) {
+    scene.emojis.push({
+      ch: EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
+      x: Math.random() * CANVAS_W,
+      y: Math.random() * CANVAS_H,
+      vx: (Math.random() * 2 - 1) * 0.6,
+      vy: -(0.3 + Math.random() * 0.9) - (Math.random() * 4 + 2),
+      size: 20 + Math.random() * 36,
+      rot: Math.random() * Math.PI * 2,
+      rotV: (Math.random() * 2 - 1) * 0.03
+    });
+  }
+}
+
+function spawnFlyingAnimals() {
+  scene.flying = [];
+  for (const group of [ANIMALS.birds, ANIMALS.butterflies, ANIMALS.exotic]) {
+    for (const url of group) {
+      scene.flying.push({
+        type: 'animal',
+        imgUrl: url,
+        x: Math.random() > 0.5 ? -50 - Math.random() * 300 : CANVAS_W + 50 + Math.random() * 300,
+        y: 50 + Math.random() * (CANVAS_H / 2),
+        vx: (Math.random() > 0.5 ? 0.5 : -0.5) + Math.random() * 1.5,
+        vy: Math.sin(Math.random() * 2 * Math.PI) * 0.3,
+        size: 50 + Math.random() * 50,
+        img: null
+      });
+    }
+  }
+}
+
+function spawnClouds(n=6){ scene.clouds=[]; for(let i=0;i<n;i++){ scene.clouds.push({x:Math.random()*CANVAS_W, y:Math.random()*(CANVAS_H/2), w:100+Math.random()*150, h:40+Math.random()*30, speed:0.2+Math.random()*0.3}); } }
+
+/* =========================
+   Scene & drawing (combined)
+   ========================= */
+let scene = {
+  backgroundImg: null,
+  backgroundVideo: null,
+  bgName: '',
+  clouds: [],
+  animalA: {img:null, x:CANVAS_W*0.12, y:CANVAS_H-320, w:180, h:180, bounceTimer:0},
+  animalB: {img:null, x:CANVAS_W*0.62, y:CANVAS_H-300, w:150, h:150, bounceTimer:0},
+  flying: [],
+  emojis: [],
+  bubble: {text:'Welcome!', x:CANVAS_W*0.5, y:120},
+  subtitle: {text:'', x:CANVAS_W*0.5, y:CANVAS_H - 120}
+  
+   
+  
+};
+
+
+
+
+const bgAnimationPresets = [
+  // Basic pans
+  { dx: 0.1, dy: 0, dscale: 0 },       { dx: -0.1, dy: 0, dscale: 0 },
+  { dx: 0, dy: 0.1, dscale: 0 },       { dx: 0, dy: -0.1, dscale: 0 },
+  { dx: 0.05, dy: 0.05, dscale: 0 },   { dx: -0.05, dy: 0.05, dscale: 0 },
+  { dx: 0.05, dy: -0.05, dscale: 0 },  { dx: -0.05, dy: -0.05, dscale: 0 },
+
+  // Zooms
+  { dx: 0, dy: 0, dscale: 0.001 },     { dx: 0, dy: 0, dscale: -0.001 },
+  { dx: 0.02, dy: 0.02, dscale: 0.0005 },   { dx: -0.02, dy: -0.02, dscale: -0.0005 },
+  { dx: 0.03, dy: -0.01, dscale: 0.0007 },   { dx: -0.03, dy: 0.01, dscale: -0.0007 },
+
+  // Wobble / jitter
+  { dx: 0.03, dy: 0.03, dscale: 0.0003 },    { dx: -0.03, dy: 0.02, dscale: 0.0002 },
+  { dx: 0.02, dy: -0.03, dscale: -0.0002 },  { dx: 0.01, dy: 0.015, dscale: 0.0001 },
+  { dx: -0.015, dy: -0.02, dscale: -0.0001 },
+
+  // Spiral / circular
+  { dx: 0.02, dy: 0.02, dscale: 0.0008 },    { dx: -0.02, dy: -0.02, dscale: -0.0008 },
+  { dx: 0.015, dy: 0.025, dscale: 0.0006 },  { dx: -0.025, dy: 0.015, dscale: 0.0006 },
+  { dx: 0.02, dy: -0.02, dscale: 0.0007 },   { dx: -0.02, dy: 0.02, dscale: -0.0007 },
+
+  // Oscillating / easing
+  { dx: 0.05, dy: 0, dscale: 0.0002 },       { dx: -0.05, dy: 0, dscale: -0.0002 },
+  { dx: 0, dy: 0.05, dscale: 0.0002 },       { dx: 0, dy: -0.05, dscale: -0.0002 },
+  { dx: 0.03, dy: -0.03, dscale: 0.0004 },   { dx: -0.03, dy: 0.03, dscale: -0.0004 },
+  { dx: 0.04, dy: 0.02, dscale: 0 },         { dx: -0.04, dy: -0.02, dscale: 0 },
+  { dx: 0.01, dy: 0.03, dscale: 0.0003 },    { dx: 0.03, dy: 0.01, dscale: -0.0003 },
+];
+
+// Mix all presets into one combined animation
+function getMixedBgAnimation() {
+  let dx = 0, dy = 0, dscale = 0;
+
+  // Shuffle all presets and mix a random number of them (3–6)
+  const shuffled = bgAnimationPresets.sort(() => Math.random() - 0.5);
+  const count = Math.floor(Math.random() * 4) + 3; // 3 to 6 presets combined
+
+  for (let i = 0; i < count; i++) {
+    dx += shuffled[i].dx;
+    dy += shuffled[i].dy;
+    dscale += shuffled[i].dscale;
+  }
+
+  return { dx, dy, dscale };
+}
+
+// Assign initial background animation
+scene.bgAnim = getMixedBgAnimation();
+scene.bgAnim.x = 0;      // starting X position
+scene.bgAnim.y = 0;      // starting Y position
+scene.bgAnim.scale = 1;  // starting scale
+
+
+
+
+function splitText(context, text, maxWidth) {
+  if(!text) return [];
+  const words = text.split(' ');
+  let lines = [];
+  let currentLine = words[0] || '';
+  for (let i = 1; i < words.length; i++) {
+    const word = words[i];
+    const testLine = currentLine + " " + word;
+    if (context.measureText(testLine).width > maxWidth) {
+      lines.push(currentLine);
+      currentLine = word;
+    } else currentLine = testLine;
+  }
+  lines.push(currentLine);
+  return lines;
+}
+
+function drawRoundRect(x, y, w, h, r, fill, stroke, lw = 4) {
+  if (typeof r === 'number') r = {tl:r,tr:r,br:r,bl:r};
+  ctx.beginPath();
+  ctx.moveTo(x + r.tl, y);
+  ctx.lineTo(x + w - r.tr, y);
+  ctx.arcTo(x + w, y, x + w, y + r.tr, r.tr);
+  ctx.lineTo(x + w, y + h - r.br);
+  ctx.arcTo(x + w, y + h, x + w - r.br, y + h, r.br);
+  ctx.lineTo(x + r.bl, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r.bl, r.bl);
+  ctx.lineTo(x, y + r.tl);
+  ctx.arcTo(x, y, x + r.tl, y, r.tl);
+  ctx.closePath();
+  if(fill){ ctx.fillStyle = fill; ctx.fill(); }
+  if(stroke){ ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke(); }
+}
+
+
+
+
+function drawSwahiliBubble(){
+  const text = (scene.bubble && (scene.bubble.text || (scene.bubble.item && scene.bubble.item.textSW))) || '';
+  if (!text) return;
+
+  ctx.save(); // 🔥 isolate EVERYTHING
+
+  const x = CANVAS_W * 0.5;
+  const y = CANVAS_H * 0.16; // moved lower from top
+
+  const padding = 22;
+  const fontSize = 35;
+
+  ctx.font = `${fontSize}px "Patrick Hand", Arial`;
+
+  const wrapped = splitText(ctx, text, CANVAS_W - 100);
+  const lineH = fontSize * 1.15;
+
+  const textW = wrapped.reduce((max, line) => Math.max(max, ctx.measureText(line).width), 0);
+  const totalH = wrapped.length * lineH;
+
+  const rectW = textW + padding * 2;
+  const rectH = totalH + padding * 2;
+
+  const rectX = x - rectW / 2;
+  const rectY = y - rectH / 2;
+
+  const radius = 18;
+
+  ctx.shadowColor = 'rgba(0,0,0,0.45)';
+  ctx.shadowBlur = 10;
+  ctx.shadowOffsetX = 4;
+  ctx.shadowOffsetY = 4;
+
+  drawRoundRect(rectX, rectY, rectW, rectH, radius, 'white', '#222', 4);
+
+  // text
+  ctx.fillStyle = '#000';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  let startY = rectY + padding + lineH / 2 - 4;
+  for (let i = 0; i < wrapped.length; i++) {
+    ctx.fillText(wrapped[i], x, startY + i * lineH);
+  }
+
+  ctx.restore(); // 🔥 RESTORE EVERYTHING
+}
+
+
+
+
+let logoX = 0;
+const logoText = 'For more information about our preachings or Church of God, call/WhatsApp +254769255782. 🎓 Online Tuition: @Sh600 P.M (Kenya) | Install Elimu Connect app from Play Store. 💻 Need a Website from Sh8,000? WhatsApp +254769255782.';
+
+function drawSlidingLogo(time) {
+  ctx.font = 'bold 30px "Patrick Hand", Arial';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'left';
+
+  const textWidth = ctx.measureText(logoText).width;
+  const rectH = 70;
+  const rectY = CANVAS_H - rectH - 80;
+  const rectW = CANVAS_W;
+
+  // 🚀 Increase speed for smoother motion
+  const speed = 1.5; // Try between 2.0–3.0 for ideal speed
+  logoX -= speed;
+  if (logoX <= -textWidth) logoX += textWidth; // wrap cleanly
+
+  // 🟦 Background bar (light, clean)
+  drawRoundRect(0, rectY, rectW, rectH, 20, 'rgba(255,255,255,0.92)', 'rgba(0,0,0,0.1)', 2);
+
+  // 🌈 Gradient text for modern look
+  const grad = ctx.createLinearGradient(0, rectY, rectW, rectY + rectH);
+  grad.addColorStop(0, '#ff8c00');
+  grad.addColorStop(1, '#1976d2');
+  ctx.fillStyle = grad;
+
+  // ✨ Draw the text twice to create seamless scrolling
+  ctx.fillText(logoText, logoX, rectY + rectH / 2);
+  ctx.fillText(logoText, logoX + textWidth, rectY + rectH / 2);
+}
+
+
+
+
+
+  
+function drawTimerArc(progress){
+  const cx = CANVAS_W - 100, cy = 100, r = 70;
+  const start = -Math.PI/2;
+  const end = start + progress * 2 * Math.PI;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2*Math.PI); ctx.strokeStyle = "rgba(0,0,0,0.2)"; ctx.lineWidth = 10; ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx, cy, r, end, start, true); ctx.strokeStyle = "#FFD700"; ctx.lineWidth = 10; ctx.stroke();
+  ctx.font = "bold 60px 'Patrick Hand', Arial"; ctx.fillStyle = "#FFD700"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(Math.ceil(progress*CLIP_DURATION_S), cx, cy);
+  ctx.font = "24px 'Patrick Hand', Arial"; ctx.fillStyle = "white"; ctx.fillText("Clip: " + currentClip, cx, cy + r + 25);
+}
+
+
+function drawScene(t){
+  ctx.clearRect(0,0,CANVAS_W,CANVAS_H);
+
+  // ---------- Background ----------
+  if(scene.backgroundVideo){
+    try { 
+      ctx.drawImage(scene.backgroundVideo, 0, 0, CANVAS_W, CANVAS_H); 
+    } catch(e){} 
+  } 
+  else if(scene.backgroundImg){
+    // in drawScene() -> backgroundImg section
+scene.bgAnim.x += scene.bgAnim.dx * 6;  // increase multiplier
+scene.bgAnim.y += scene.bgAnim.dy * 6;
+scene.bgAnim.scale += scene.bgAnim.dscale * 6;
+
+// Occasionally (e.g., every 5 sec) pick a new random animation mix
+if (!scene.lastAnimChange || t - scene.lastAnimChange > 5000) {
+    const newAnim = getMixedBgAnimation();
+    // smooth transition
+    scene.bgAnim.dx = (scene.bgAnim.dx + newAnim.dx) / 2;
+    scene.bgAnim.dy = (scene.bgAnim.dy + newAnim.dy) / 2;
+    scene.bgAnim.dscale = (scene.bgAnim.dscale + newAnim.dscale) / 2;
+    scene.lastAnimChange = t;
+}
+
+
+
+
+
+
+
+    const iw = scene.backgroundImg.width * scene.bgAnim.scale;
+    const ih = scene.backgroundImg.height * scene.bgAnim.scale;
+    const ix = -scene.bgAnim.x % iw;  // loop horizontally
+    const iy = -scene.bgAnim.y % ih;  // loop vertically
+
+    // draw image with animation/panning
+    ctx.drawImage(scene.backgroundImg, ix, iy, iw, ih);
+
+    // optional: draw a second copy for seamless looping
+    if(ix > 0) ctx.drawImage(scene.backgroundImg, ix - iw, iy, iw, ih);
+    if(iy > 0) ctx.drawImage(scene.backgroundImg, ix, iy - ih, iw, ih);
+    if(ix > 0 && iy > 0) ctx.drawImage(scene.backgroundImg, ix - iw, iy - ih, iw, ih);
+  }
+  else {
+    ctx.fillStyle='#88d';
+    ctx.fillRect(0,0,CANVAS_W,CANVAS_H);
+  }
+
+
+  // clouds
+  for(const c of scene.clouds){
+    c.x += c.speed*(1+Math.sin(t/200));
+    if(c.x>CANVAS_W+200) c.x=-250;
+    ctx.save(); ctx.fillStyle='rgba(255,255,255,0.95)'; ctx.beginPath();
+    ctx.ellipse(c.x,c.y,c.w*0.6,c.h*0.6,0,0,2*Math.PI);
+    ctx.ellipse(c.x+c.w*0.4,c.y-10,c.w*0.5,c.h*0.45,0,0,2*Math.PI);
+    ctx.ellipse(c.x+c.w*0.7,c.y+6,c.w*0.35,c.h*0.33,0,0,2*Math.PI);
+    ctx.fill(); ctx.restore();
+  }
+  // flying animals
+  for(const f of scene.flying){
+    f.x += f.vx*(1+Math.sin((performance.now()+f.y*0.01)/600));
+    f.y += Math.sin((performance.now()/500 + f.x*0.01))*0.5 + f.vy*0.5;
+    if(f.vx>0 && f.x>CANVAS_W+150){ f.x=-150; f.y=50+Math.random()*(CANVAS_H/2); }
+    if(f.vx<0 && f.x<-150){ f.x=CANVAS_W+150; f.y=50+Math.random()*(CANVAS_H/2); }
+    if(f.y<30) f.y=30; if(f.y>CANVAS_H/2) f.y=CANVAS_H/2;
+    if(f.img){ ctx.save(); ctx.translate(f.x+f.size/2,f.y+f.size/2); ctx.rotate(Math.sin(f.x/50)*0.15); ctx.drawImage(f.img,-f.size/2,-f.size/2,f.size,f.size); ctx.restore(); }
+  }
+  // animals
+  function drawAnimal(a){ const bounce=Math.sin((t+(a.bounceTimer||0))/300)*12; ctx.save(); ctx.beginPath(); ctx.ellipse(a.x+a.w/2,a.y+bounce+a.h-20,a.w*0.3,12,0,0,2*Math.PI); ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.fill(); if(a.img) ctx.drawImage(a.img,a.x,a.y+bounce,a.w,a.h); ctx.restore(); }
+  scene.animalA.x=CANVAS_W*0.12; scene.animalB.x=CANVAS_W*0.62;
+  drawAnimal(scene.animalA); drawAnimal(scene.animalB);
+  // emojis
+  for(const e of scene.emojis){
+    e.x+=e.vx; e.y+=e.vy; e.vy+=0.01; e.rot+=e.rotV;
+    if(e.y<-120||e.y>CANVAS_H+120||e.x<-80||e.x>CANVAS_W+80){ e.y=Math.random()*CANVAS_H; e.x=Math.random()*CANVAS_W; e.vy=-0.3-Math.random()*0.9; e.vx=(Math.random()*2-1)*0.6; }
+    ctx.save(); ctx.translate(e.x,e.y); ctx.rotate(e.rot); ctx.font=`${e.size}px "Patrick Hand", Arial`; ctx.fillText(e.ch,0,0); ctx.restore();
+  }
+ 
+ 
+ // --- Top text --- (FORCED RESET)
+ctx.save(); // isolate style changes
+
+ctx.fillStyle = 'rgba(255,255,255,0.9)';
+ctx.font = 'bold 28px "Patrick Hand", Arial'; // 👈 choose final size here
+ctx.textAlign = 'center';
+ctx.textBaseline = 'top';
+
+// draw
+ctx.fillText("PREACHINGS/MAHUBIRI", CANVAS_W / 2, 40);
+
+ctx.restore(); // prevents leaking into other text
+ 
+ 
+ 
+
+// --- Swahili bubble ---
+drawSwahiliBubble();
+
+// --- Subtitle / bubble text (center) ---
+const subtitleText = (scene.subtitle && scene.subtitle.text) ? scene.subtitle.text : '';
+
+ctx.font='35px "Patrick Hand", Arial';
+ctx.textAlign='center';
+ctx.textBaseline='middle';
+
+// Wrap text
+const lines = splitText(ctx, subtitleText, CANVAS_W - 80);
+const lineH = 64;
+const totalH = lines.length * lineH;
+let startY = CANVAS_H * 0.5 - totalH / 2 + 30;
+
+// Draw black background for the subtitle
+const paddingX = 40;
+const paddingY = 30;
+const rectWidth = CANVAS_W - 80;
+const rectHeight = totalH + paddingY * 2;
+
+ctx.fillStyle = 'rgba(0,0,0,0.75)';
+ctx.fillRect(
+  CANVAS_W/2 - rectWidth/2,
+  startY - paddingY,
+  rectWidth,
+  rectHeight
+);
+
+// Draw subtitle text on top
+ctx.fillStyle = 'yellow';
+for (let i = 0; i < lines.length; i++) {
+  ctx.fillText(lines[i], CANVAS_W / 2, startY + i * lineH);
+}
+ 
+ 
+ 
+// --- Sliding logo ---
+drawSlidingLogo(t);
+
+// --- Timer arc if needed ---
+if(currentClip > 0) drawTimerArc(timerProgress);
+
+}
+
+/* ---------- animation loop controls ---------- */
+function startAnimationLoop(){
+  if(animationFrameId) return;
+  let last = performance.now();
+  function loop(now){
+    animationFrameId = requestAnimationFrame(loop);
+    drawScene(now);
+    last = now;
+  }
+  animationFrameId = requestAnimationFrame(loop);
+}
+
+function stopAnimationLoop(){
+  if(animationFrameId){ cancelAnimationFrame(animationFrameId); animationFrameId = null; }
+}
+
+
+
+
+
+
+function convertBookNumber(num, lang) {
+  const n = Number(num);
+
+  if (lang === "sw") {
+    if (n === 1) return "wa kwanza";
+    if (n === 2) return "wa pili";
+    if (n === 3) return "wa tatu";
+    return num;
+  }
+
+  // English
+  if (n === 1) return "First";
+  if (n === 2) return "Second";
+  if (n === 3) return "Third";
+  return num;
+}
+
+
+
+
+function verseToSwahili(verse) {
+  if (!verse) return "";
+
+  const parts = verse.trim().split(" ");
+  const numbers = parts.pop(); // "1:3"
+  let bookParts = parts;
+
+  // detect leading number (e.g. "1 Thessalonians")
+  let bookNumber = null;
+  if (!isNaN(parts[0])) {
+    bookNumber = parts[0];
+    bookParts = parts.slice(1);
+  }
+
+  const bookName = bookParts.join(" ");
+
+  if (!numbers || !numbers.includes(":")) return verse;
+
+  const [chapter, verseNum] = numbers.split(":");
+
+  // only kwanza / pili rule
+  function convert(num) {
+    if (Number(num) === 1) return "kwanza";
+    if (Number(num) === 2) return "pili";
+    return num;
+  }
+
+  const chapterSW = convert(chapter);
+  const verseSW = convert(verseNum);
+
+  let finalBook = bookName;
+
+  if (bookNumber) {
+    finalBook = `${bookName} ${convertBookNumber(bookNumber, "sw")}`;
+  }
+
+  return `${finalBook} sura ya ${chapterSW} mstari wa ${verseSW}`;
+}
+
+
+
+
+
+
+function verseToEnglish(verse) {
+  if (!verse) return "";
+
+  const parts = verse.trim().split(" ");
+  const numbers = parts.pop();
+  let bookParts = parts;
+
+  let bookNumber = null;
+  if (!isNaN(parts[0])) {
+    bookNumber = parts[0];
+    bookParts = parts.slice(1);
+  }
+
+  const bookName = bookParts.join(" ");
+
+  if (!numbers || !numbers.includes(":")) return verse;
+
+  const [chapter, verseNum] = numbers.split(":");
+
+  let finalBook = bookName;
+
+  if (bookNumber) {
+    finalBook = `${convertBookNumber(bookNumber, "en")} ${bookName}`;
+  }
+
+  return `${finalBook} chapter ${chapter} verse ${verseNum}`;
+}
+
+
+
+
+
+
+function waitForVoices() {
+  return new Promise(resolve => {
+    let voices = speechSynthesis.getVoices();
+    if (voices.length) return resolve(voices);
+
+    speechSynthesis.onvoiceschanged = () => {
+      voices = speechSynthesis.getVoices();
+      resolve(voices);
+    };
+  });
+}
+
+
+
+
+function getBestVoice(lang, voices) {
+  if (!voices || !voices.length) return null;
+
+  if (lang === "sw") {
+    return (
+      voices.find(v => v.lang.includes("sw")) ||
+      voices.find(v => v.lang.includes("sw-KE")) ||
+      null
+    );
+  }
+
+  // English preference order
+  const kenyaFemale = voices.find(v =>
+    v.lang === "en-KE"
+  );
+
+  const femaleEnglish = voices.find(v =>
+    v.lang.startsWith("en") &&
+    (v.name.toLowerCase().includes("female") ||
+     v.name.toLowerCase().includes("woman") ||
+     v.name.toLowerCase().includes("zira") ||
+     v.name.toLowerCase().includes("susan"))
+  );
+
+  const anyEnglish = voices.find(v =>
+    v.lang.startsWith("en")
+  );
+
+  return kenyaFemale || femaleEnglish || anyEnglish || null;
+}
+
+
+
+
+
+
+
+
+async function prepareScene() {
+  assetsLoaded = false;
+  statusEl.textContent = 'Loading assets for next clip...';
+  try {
+    const bg = (backgroundsShuffler.next() || { name: "Default", url: null, type: 'image' });
+    scene.bgName = bg.name;
+
+    // Reset previous background
+    if(scene.backgroundVideo){ try{ scene.backgroundVideo.pause(); scene.backgroundVideo.src = ''; }catch(e){} scene.backgroundVideo = null; }
+    scene.backgroundImg = null;
+
+    if (bg.type === 'video' && bg.url) {
+      scene.backgroundVideo = await loadVideo(bg.url).catch(()=>null);
+    } else if (bg.type === 'image' && bg.url) {
+      scene.backgroundImg = await loadImg(bg.url).catch(()=>null);
+      // reset animation state
+      scene.bgAnim = { x: 0, y: 0, scale: 1, dx: 0.1, dy: 0.05, dscale: 0.0005 };
+    }
+
+    // Then continue with animals, clouds, emojis, knowledge, audio...
+    const dogUrl = dogsShuffler.next() || null;
+    const catUrl = catsShuffler.next() || null;
+    scene.animalA.img = dogUrl ? await loadImg(dogUrl).catch(()=>null) : null;
+    scene.animalB.img = catUrl ? await loadImg(catUrl).catch(()=>null) : null;
+    spawnFlyingAnimals();
+    await Promise.all(scene.flying.map(f => f.imgUrl ? loadImg(f.imgUrl).then(img => f.img = img).catch(()=>null) : Promise.resolve()));
+    spawnClouds(6); spawnEmojis(18);
+
+
+
+
+const lang = document.getElementById("langSelect").value;
+const nextItem = getNextKnowledgeItem();
+
+// =====================
+// SAFE TEXT
+// =====================
+const englishText = nextItem?.en || "";
+const swahiliText = nextItem?.sw || "";
+
+// 🔥 NEW: separate verses
+const verseEN = nextItem?.verse_en || "";
+const verseSW = nextItem?.verse_sw || "";
+
+// Normalize language safely for the Voice/Audio
+const isSwahili = (lang || "").toLowerCase().startsWith("sw");
+
+// =====================
+// UI ASSIGNMENT
+// =====================
+
+// 1. TOP (English + English verse)
+scene.bubble.item = nextItem;
+scene.bubble.text = verseEN 
+  ? `${englishText}\n📖 ${verseEN}` 
+  : englishText;
+
+// 2. MIDDLE (Swahili + Swahili verse)
+scene.subtitle.item = nextItem;
+scene.subtitle.text = verseSW 
+  ? `${swahiliText}\n📖 ${verseSW}` 
+  : swahiliText;
+
+// =====================
+// SPEECH
+// =====================
+const voices = await waitForVoices();
+
+const speech = new SpeechSynthesisUtterance();
+speech.rate = 0.9;
+
+// 🔥 UPDATED SPEECH LOGIC
+let speechText;
+
+if (isSwahili) {
+  const verseRead = verseSW ? verseToSwahili(verseSW) : "";
+  speechText = verseRead
+    ? `${swahiliText}. ${verseRead}`
+    : swahiliText;
+} else {
+  const verseRead = verseEN ? verseToEnglish(verseEN) : "";
+  speechText = verseRead
+    ? `${englishText}. ${verseRead}`
+    : englishText;
+}
+
+speech.text = speechText;
+
+// =====================
+// VOICE SETTINGS
+// =====================
+if (isSwahili) {
+  speech.lang = "sw-KE";
+  speech.voice = getBestVoice("sw", voices);
+} else {
+  speech.lang = "en-GB";
+  speech.voice = getBestVoice("en", voices);
+}
+
+speechSynthesis.cancel();
+setTimeout(() => speechSynthesis.speak(speech), 80);
+    
+
+    if (canvas) { canvas.style.animation = 'flash 0.6s ease-out'; setTimeout(()=>canvas.style.animation='',600); }
+    assetsLoaded = true;
+    statusEl.textContent = `Prepared: ${scene.bgName}`;
+  } catch(err){
+    console.error("Scene preparation failed:", err);
+    statusEl.textContent = 'Error preparing clip — using fallback visuals.';
+    assetsLoaded = true;
+  }
+}
+
+
+
+
+
+async function loadNextBackground() {
+  const bg = backgroundsShuffler.next(); // pick next random background
+  scene.bgName = bg.name;
+  scene.backgroundVideo = null;
+  scene.backgroundImg = null;
+  scene.bgAnim = { x:0, y:0, scale:1, ...getMixedBgAnimation() }; // new animation
+
+  if(bg.type === 'video' || bg.url.endsWith('.mp4')) {
+    try {
+      scene.backgroundVideo = await loadVideo(bg.url);
+      console.log('Video background loaded:', bg.name);
+    } catch(e) {
+      console.warn('Video failed, fallback to image', e);
+      scene.backgroundImg = await loadImg(bg.url);
+    }
+  } else {
+    try {
+      scene.backgroundImg = await loadImg(bg.url);
+      console.log('Image background loaded:', bg.name);
+    } catch(e) {
+      console.warn('Image load failed', e);
+    }
+  }
+}
+
+
+
+
+async function startNextClip() {
+  currentClip++;
+  await loadNextBackground();
+  spawnClouds();
+  spawnFlyingAnimals();
+  spawnEmojis();
+  clipStartTime = performance.now();
+}
+
+
+
+
+
+
+/* =========================
+   Clips cycle & timing
+   ========================= */
+async function cycleClips() {
+  if (currentClip >= TOTAL_CLIPS) {
+    clearInterval(clipCycleInterval);
+    clipCycleInterval = null;
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    return;
+  }
+  currentClip++;
+  try {
+    await prepareScene();
+    clipStartTime = performance.now();
+    // set timer progress animation per CLIP_DURATION_S
+    timerProgress = 1;
+    // animate timer countdown using a simple interval that updates timerProgress
+    const start = performance.now();
+    const tick = setInterval(()=>{
+      const elapsed = (performance.now() - start)/1000;
+      timerProgress = Math.max(1 - elapsed/CLIP_DURATION_S, 0);
+      if(timerProgress <= 0) clearInterval(tick);
+    }, 200);
+    // update status
+    const remainingTimeS = (TOTAL_CLIPS - currentClip) * CLIP_DURATION_S;
+    const remainingMinutes = Math.floor(remainingTimeS / 60);
+    const remainingSeconds = remainingTimeS % 60;
+    let baseStatus = `Recording Clip ${currentClip}/${TOTAL_CLIPS}.`;
+    if (currentClip < TOTAL_CLIPS) baseStatus += ` Next transition in ${CLIP_DURATION_S}s.`;
+    baseStatus += ` Total remaining: ${remainingMinutes}m ${remainingSeconds}s.`;
+    statusEl.textContent = baseStatus;
+  } catch (err) {
+    console.error(`Failed to prepare clip ${currentClip}:`, err);
+    statusEl.textContent = `Error on Clip ${currentClip}. Continuing...`;
+  }
+}
+
+/* =========================
+   Media Recorder: combine canvas + audio into webm
+   ========================= */
+
+
+
+
+async function enableMicMixing() {
+  const ctx = ensureAudioCtx();
+  try {
+    // We explicitly turn OFF echoCancellation and noiseSuppression
+    // so the mic CAN hear the speakers playing the AI voice.
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false
+      }
+    });
+
+    micStream = stream;
+    micSource = ctx.createMediaStreamSource(stream);
+    
+    // Connect the mic to the master destination
+    micSource.connect(ctx.masterDest); 
+    
+    console.log("Mic mixing enabled (AEC Disabled)");
+  } catch (err) {
+    console.error("Mic mixing failed:", err);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+async function startLongRecording() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') return;
+  currentClip = 0;
+  recordedChunks = [];
+  downloadLink.classList.add('hidden');
+  recordBtn.disabled = true;
+  genBtn.disabled = true;
+  stopAnimationLoop();
+  
+  try {
+    // We default to 'mic' to capture the "Reading Aloud" voice 
+    // coming out of the speakers since the dropdown was removed.
+    const method = 'mic'; 
+    const ctx = ensureAudioCtx();
+
+    // Re-enabling your upload logic safely
+    if(method === 'upload' && typeof uploadedVoiceBuffer !== 'undefined' && uploadedVoiceBuffer){
+      uploadedVoiceSource = ctx.createBufferSource();
+      uploadedVoiceSource.buffer = uploadedVoiceBuffer;
+      uploadedVoiceSource.loop = true;
+      const ug = ctx.createGain(); ug.gain.value = 1;
+      uploadedVoiceSource.connect(ug); ug.connect(ctx.masterGain);
+      try{ uploadedVoiceSource.start(); }catch(e){}
+    }
+
+    // Capture the environment (AI Voice + Mic)
+    await enableMicMixing();
+    
+    // Grab canvas stream and connect to Master Audio Destination
+    const canvasStream = canvas.captureStream(30);
+    const audioStream = ctx.masterDest.stream;
+    const combinedStream = new MediaStream();
+    
+    const vTrack = canvasStream.getVideoTracks()[0];
+    const aTrack = audioStream.getAudioTracks()[0];
+    
+    if(vTrack) combinedStream.addTrack(vTrack);
+    if(aTrack) combinedStream.addTrack(aTrack);
+    
+    videoTrack = vTrack; 
+    audioTrack = aTrack;
+
+    const options = { mimeType: 'video/webm; codecs=vp9,opus' };
+    mediaRecorder = new MediaRecorder(combinedStream, options);
+    
+    mediaRecorder.ondataavailable = (ev) => { 
+      if(ev.data && ev.data.size > 0) recordedChunks.push(ev.data); 
+    };
+
+    mediaRecorder.onstop = () => {
+      // CLEANUP: Removed reference to stopCurrentBgTrack to avoid crash
+      if(uploadedVoiceSource){ 
+        try{ uploadedVoiceSource.stop(); uploadedVoiceSource.disconnect(); }catch(e){} 
+        uploadedVoiceSource = null; 
+      }
+      
+      disableMicMixing();
+      clearInterval(clipCycleInterval);
+      clearTimeout(longRecordingTimeout);
+      stopAnimationLoop();
+      
+      statusEl.textContent = 'Finalizing 5-Minute Video...';
+
+      if(videoTrack) try{ videoTrack.stop(); }catch(e){}
+      if(audioTrack) try{ audioTrack.stop(); }catch(e){}
+
+      const blob = new Blob(recordedChunks, { type: 'video/webm' });
+      const url = URL.createObjectURL(blob);
+      downloadLink.href = url;
+      downloadLink.download = `Elimu_Video_${Date.now()}.webm`;
+      downloadLink.textContent = `✅ Download Video (${(blob.size/(1024*1024)).toFixed(2)} MB)`;
+      downloadLink.classList.remove('hidden');
+      
+      recordBtn.disabled = false; 
+      genBtn.disabled = false;
+      statusEl.textContent = 'Recording complete. Download link ready.';
+      currentClip = 0; 
+      timerProgress = 1;
+      genBtn.click();
+    };
+
+    // start
+    mediaRecorder.start();
+    startAnimationLoop();
+    await cycleClips();
+    
+    clipCycleInterval = setInterval(cycleClips, CLIP_DURATION_S * 1000);
+    longRecordingTimeout = setTimeout(() => {
+      if(mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    }, TOTAL_DURATION_MS);
+
+  } catch(err) {
+    console.error('Error starting recording', err);
+    statusEl.textContent = 'Error: Ensure Microphone permissions are allowed.';
+    recordBtn.disabled = false; 
+    genBtn.disabled = false;
+    
+    disableMicMixing();
+    if(uploadedVoiceSource){ try{ uploadedVoiceSource.stop(); }catch(e){} uploadedVoiceSource=null; }
+    clearInterval(clipCycleInterval); 
+    clearTimeout(longRecordingTimeout);
+    stopAnimationLoop();
+    currentClip = 0;
+  }
+}
+
+
+
+/* =========================
+   Event listeners & boot
+   ========================= */
+genBtn.addEventListener('click', async () => {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') { 
+    statusEl.textContent = 'Please wait for recording to finish.'; 
+    return; 
+  }
+  stopAnimationLoop();
+  
+  // FIXED: Removed stopCurrentBgTrack() to prevent crashes
+  currentClip = 1; 
+  timerProgress = 1;
+  
+  await prepareScene();
+  startAnimationLoop();
+  clipStartTime = performance.now();
+  statusEl.textContent = `Previewing Clip ${currentClip}/${TOTAL_CLIPS}. Click Start Record for full video.`;
+});
+
+recordBtn.addEventListener('click', startLongRecording);
+
+/* Unlock audio on first gesture (helpful for mobile/Chrome) */
+function unlockAudioOnGesture(){
+  const init = async ()=>{
+    ensureAudioCtx();
+    if(audioCtx && audioCtx.state === 'suspended') try{ await audioCtx.resume(); }catch(e){}
+    document.body.removeEventListener('click', init);
+    document.body.removeEventListener('keydown', init);
+    statusEl.textContent = 'Audio unlocked — ready.';
+  };
+  document.body.addEventListener('click', init);
+  document.body.addEventListener('keydown', init);
+}
+unlockAudioOnGesture();
+
+
+/* On load: initialize scene preview */
+window.addEventListener('load', async ()=>{
+  // small initial scene
+  spawnClouds(6);
+  spawnEmojis(22);
+  scene.animalA.img = await loadImg('https://i.imgur.com/5n6R2vI.png').catch(()=>null);
+  scene.animalB.img = await loadImg('https://i.imgur.com/9Y7kzKZ.png').catch(()=>null);
+  // spawn a few flying animals using placeholder lists
+  spawnFlyingAnimals();
+  for(const f of scene.flying){ if(f.imgUrl) f.img = await loadImg(f.imgUrl).catch(()=>null); }
+  startAnimationLoop();
+  ensureAudioCtx();
+  genBtn.click();
+});
+</script>
+</body>
+</html>

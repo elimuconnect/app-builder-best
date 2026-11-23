@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Smart Assignment System</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+  <style>
+    body { font-family: Arial; margin: 20px; background:#f4f7fb; }
+    h2, h3, h4 { color: darkblue; }
+    .section { border: 1px solid #ccc; padding: 15px; margin: 10px; border-radius:10px; background:#fff; }
+    button { padding: 6px 12px; margin-top: 5px; }
+    textarea, select, input { margin: 5px 0; padding: 6px; width: 95%; }
+    .question { padding: 5px; border-bottom: 1px solid #eee; }
+    .correct { color: green; font-weight: bold; }
+    .wrong { color: red; font-weight: bold; }
+    .student-block { border:1px solid #ddd; padding:5px; margin:5px 0; border-radius:5px; background:#f9f9f9; }
+  </style>
+</head>
+<body>
+
+<h2>Smart Assignment System</h2>
+
+<!-- Login/Signup -->
+<div id="authDiv" class="section">
+  <h3>Login / Signup</h3>
+  <input type="email" id="email" placeholder="Email"><br>
+  <input type="password" id="password" placeholder="Password"><br>
+  <select id="role">
+    <option value="student">Student</option>
+    <option value="teacher">Teacher</option>
+  </select><br>
+  <button onclick="signup()">Sign Up</button>
+  <button onclick="login()">Login</button>
+</div>
+
+<!-- TEACHER PHASE -->
+<div id="teacherPhase" class="section" style="display:none;">
+  <h3>Teacher Phase</h3>
+  
+  <h4>Create Assignment</h4>
+  <select id="schoolSelect"><option value="">Select School</option></select><br>
+  <input type="text" id="grade" placeholder="Grade"><br>
+  <input type="text" id="subject" placeholder="Subject"><br>
+  
+  <h4>Type New Question:</h4>
+  <textarea id="newQuestion" placeholder="Type a new question"></textarea><br>
+  <button onclick="addTypedQuestion()">Add Question</button><br>
+  
+  <h4>Or Select From Bank:</h4>
+  <select id="bankSelect"></select><br>
+  <button onclick="addBankQuestion()">Add From Bank</button><br>
+  
+  <h4>Assignment Preview:</h4>
+  <div id="assignmentPreview"></div><br>
+  <button onclick="saveAssignment()">Save Homework</button>
+
+  <hr>
+  <h4>Filter Submissions to Mark:</h4>
+  <select id="filterGrade"><option value="">All Grades</option></select><br>
+  <select id="filterSubject"><option value="">All Subjects</option></select><br>
+  
+  <div id="markingArea"></div>
+  <button onclick="submitMarks()">Return Marks</button>
+</div>
+
+<!-- STUDENT PHASE -->
+<div id="studentPhase" class="section" style="display:none;">
+  <h3>Student Phase</h3>
+  <input type="text" id="studentName1" placeholder="Enter First Name" required><br>
+  <input type="text" id="studentName2" placeholder="Enter Second Name" required><br>
+
+  <h4>Filter Your Homework:</h4>
+  <select id="studentSchoolSelect"><option value="">Select School</option></select><br>
+  <select id="studentGradeSelect"><option value="">Select Grade</option></select><br>
+  <select id="studentSubjectSelect"><option value="">Select Subject</option></select><br>
+
+  <div id="studentAssignment"></div>
+  <button onclick="submitAnswers()">Submit Answers</button>
+
+  <h4>Results:</h4>
+  <div id="studentResults"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+import { getDatabase, ref, set, push, get, child } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDR5lDNlf5yiP57BcgwlD8mZTyugD7SSng",
+  authDomain: "homework-2e4cf.firebaseapp.com",
+  databaseURL: "https://homework-2e4cf-default-rtdb.firebaseio.com",
+  projectId: "homework-2e4cf",
+  storageBucket: "homework-2e4cf.appspot.com",
+  messagingSenderId: "352776491020",
+  appId: "1:352776491020:web:65f9b37fbe5c1b0f96de29"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+let currentUserRole = null;
+let assignmentQuestions = [];
+let currentAssignmentKey = null;
+
+const questionBank = ["What is 2+2?", "Define photosynthesis.", "Explain gravity."];
+const schoolsList = ["Nairobi High School", "Kisumu Academy", "Mombasa Girls School", "Eldoret Boys School"];
+
+// ------------------ Populate school dropdown for teachers ------------------
+const schoolSelect = document.getElementById("schoolSelect");
+schoolsList.forEach(school => {
+  let opt = document.createElement("option");
+  opt.value = school;
+  opt.text = school;
+  schoolSelect.add(opt);
+});
+
+// ------------------ Sign up / Login ------------------
+window.signup = async function() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const role = document.getElementById("role").value;
+  try {
+    const userCred = await createUserWithEmailAndPassword(auth, email, password);
+    await set(ref(db, "users/" + userCred.user.uid), { email, role });
+    alert("Signed up! Now login.");
+  } catch(err) { alert(err.message); }
+};
+
+// ------------------ Auto-login handling ------------------
+onAuthStateChanged(auth, async (user) => {
+  if(user){
+    const snap = await get(child(ref(db), "users/" + user.uid));
+    if(snap.exists()){
+      currentUserRole = snap.val().role;
+      document.getElementById("authDiv").style.display="none";
+      if(currentUserRole==="teacher"){
+        document.getElementById("teacherPhase").style.display="block";
+        fillTeacherFilters();
+      } else {
+        document.getElementById("studentPhase").style.display="block";
+        loadStudentFilters();
+      }
+    }
+  }
+});
+
+window.login = async function() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    alert("Logged in! Refresh page to load data.");
+  } catch(err) { alert("Login failed: "+err.message); }
+};
+
+// ------------------ Teacher: Add Questions ------------------
+window.addTypedQuestion = function(){
+  let q = document.getElementById("newQuestion").value.trim();
+  if(q){ assignmentQuestions.push(q); updatePreview(); document.getElementById("newQuestion").value=""; }
+};
+window.addBankQuestion = function(){
+  let q = document.getElementById("bankSelect").value;
+  if(q){ assignmentQuestions.push(q); updatePreview(); }
+};
+function updatePreview(){
+  document.getElementById("assignmentPreview").innerHTML = assignmentQuestions.map(q=>"<div class='question'>"+q+"</div>").join("");
+}
+
+// ------------------ Save Assignment ------------------
+window.saveAssignment = function(){
+  const school = document.getElementById("schoolSelect").value;
+  const grade = document.getElementById("grade").value.trim();
+  const subject = document.getElementById("subject").value.trim();
+  if(!school || !grade || !subject || assignmentQuestions.length===0){ alert("Fill all fields and add questions."); return; }
+  const newAssignRef = push(ref(db,"assignments/"));
+  set(newAssignRef, { school, grade, subject, questions: assignmentQuestions });
+  assignmentQuestions = [];
+  updatePreview();
+  alert("Homework Saved!");
+};
+
+// ------------------ Student Filters ------------------
+async function loadStudentFilters() {
+  const snap = await get(child(ref(db),"assignments/"));
+  if(!snap.exists()) return;
+  const schools = new Set(), grades = new Set(), subjects = new Set();
+  snap.forEach(a => {
+    const d = a.val();
+    schools.add(d.school); grades.add(d.grade); subjects.add(d.subject);
+  });
+  const schoolSel = document.getElementById("studentSchoolSelect");
+  const gradeSel = document.getElementById("studentGradeSelect");
+  const subjectSel = document.getElementById("studentSubjectSelect");
+  schools.forEach(s => schoolSel.add(new Option(s,s)));
+  grades.forEach(g => gradeSel.add(new Option(g,g)));
+  subjects.forEach(sub => subjectSel.add(new Option(sub,sub)));
+
+  schoolSel.onchange = filterAssignments;
+  gradeSel.onchange = filterAssignments;
+  subjectSel.onchange = filterAssignments;
+
+  if(schoolSel.value && gradeSel.value && subjectSel.value){
+    filterAssignments();
+  }
+}
+
+// ------------------ Student: Filter Assignments ------------------
+async function filterAssignments() {
+  const school = document.getElementById("studentSchoolSelect").value;
+  const grade = document.getElementById("studentGradeSelect").value;
+  const subject = document.getElementById("studentSubjectSelect").value;
+  if(!school || !grade || !subject){
+    document.getElementById("studentAssignment").innerHTML = "<p>Select school, grade, and subject.</p>";
+    return;
+  }
+
+  const snap = await get(child(ref(db),"assignments/"));
+  const container = document.getElementById("studentAssignment");
+  container.innerHTML = "";
+  assignmentQuestions = [];
+
+  if(snap.exists()){
+    snap.forEach(assign => {
+      const d = assign.val();
+      if(d.school === school && d.grade === grade && d.subject === subject){
+        assignmentQuestions = d.questions || [];
+        currentAssignmentKey = assign.key;
+
+        container.innerHTML += `<b>School:</b> ${d.school}<br>
+                                <b>Grade:</b> ${d.grade}<br>
+                                <b>Subject:</b> ${d.subject}<br>` +
+          assignmentQuestions.map((q,i) => 
+            `<div>${q}<br><input id='ans${i}' placeholder='Your Answer'></div>`
+          ).join("");
+
+        showResults(auth.currentUser.uid);
+      }
+    });
+  }
+}
+
+// ------------------ Student: Submit Answers ------------------
+window.submitAnswers = async function(){
+  const name1 = document.getElementById("studentName1").value.trim();
+  const name2 = document.getElementById("studentName2").value.trim();
+  if(!name1 || !name2){ alert("Enter both names."); return; }
+  if(!currentAssignmentKey){ alert("No assignment selected."); return; }
+
+  const answers = assignmentQuestions.map((q,i)=>({
+    question: q,
+    answer: document.getElementById(`ans${i}`).value || ""
+  }));
+
+  await set(ref(db,"submissions/"+currentAssignmentKey+"/"+auth.currentUser.uid), {
+    name1, name2, answers
+  });
+  alert("Answers Submitted!");
+  showResults(auth.currentUser.uid);
+};
+
+// ------------------ Teacher: Fill Filter Dropdowns ------------------
+async function fillTeacherFilters(){
+  const snap = await get(child(ref(db), "assignments/"));
+  const gradeSet = new Set();
+  const subjectSet = {};
+
+  if(snap.exists()){
+    snap.forEach(assign=>{
+      const data = assign.val();
+      if(data.grade) gradeSet.add(data.grade);
+      if(data.grade && data.subject){
+        if(!subjectSet[data.grade]) subjectSet[data.grade] = new Set();
+        subjectSet[data.grade].add(data.subject);
+      }
+    });
+  }
+
+  const filterGrade = document.getElementById("filterGrade");
+  const filterSubject = document.getElementById("filterSubject");
+
+  gradeSet.forEach(g => filterGrade.add(new Option(g,g)));
+  filterGrade.onchange = ()=>{
+    const selectedGrade = filterGrade.value;
+    filterSubject.innerHTML = '<option value="">All Subjects</option>';
+    if(subjectSet[selectedGrade]){
+      subjectSet[selectedGrade].forEach(sub => filterSubject.add(new Option(sub, sub)));
+    }
+    loadFilteredSubmissions();
+  };
+  filterSubject.onchange = loadFilteredSubmissions;
+}
+
+// ------------------ Load Submissions ------------------
+async function loadFilteredSubmissions(){
+  const grade = document.getElementById("filterGrade").value;
+  const subject = document.getElementById("filterSubject").value;
+  const snap = await get(child(ref(db), "assignments/"));
+  const area = document.getElementById("markingArea");
+  area.innerHTML = "";
+
+  if(snap.exists()){
+    snap.forEach(assign=>{
+      const d = assign.val();
+      const key = assign.key;
+      if((grade===""||d.grade===grade) && (subject===""||d.subject===subject)){
+        area.innerHTML += `<h4>Grade: ${d.grade} | Subject: ${d.subject}</h4>
+                           <div id="markingArea_${key}"></div>`;
+        loadSubmissionsForAssignment(key, d.questions);
+      }
+    });
+  }
+}
+
+// ------------------ Load submissions per assignment ------------------
+async function loadSubmissionsForAssignment(assignKey, questions){
+  const snap = await get(child(ref(db), "submissions/" + assignKey));
+  let html = "";
+  if(snap.exists()){
+    snap.forEach(stud=>{
+      const student1 = stud.val().name1 || "Unknown";
+      const student2 = stud.val().name2 || "Unknown";
+      const answers = stud.val().answers || [];
+      html += `<div class="student-block"><b>Students:</b> ${student1} & ${student2}<br>`;
+      answers.forEach((a,i)=>{
+        html += `<div>
+          <b>Q${i+1}:</b> <span id="qtext_${i}_${assignKey}">${questions[i]}</span><br>
+          <b>Student Answer:</b> <span>${a.answer}</span><br>
+          <b>Mark:</b>
+          <select id='mark_${stud.key}_${i}_${assignKey}' onchange="toggleCorrectInput('${stud.key}',${i},'${assignKey}','${a.answer}')">
+            <option value="correct">✔ Correct</option>
+            <option value="wrong">✘ Wrong</option>
+          </select><br>
+          <input type="text" id='correct_${stud.key}_${i}_${assignKey}' placeholder="Type correct answer" style="display:none; margin-top:3px;" data-student-answer="${a.answer}">
+        </div>`;
+      });
+      html += `</div>`;
+    });
+  } else {
+    html = "<p>No submissions yet for this assignment.</p>";
+  }
+  document.getElementById("markingArea_" + assignKey).innerHTML = html;
+}
+
+// Show/hide correct answer input
+window.toggleCorrectInput = function(uid,index,assignKey,studAns){
+  const sel = document.getElementById(`mark_${uid}_${index}_${assignKey}`);
+  const input = document.getElementById(`correct_${uid}_${index}_${assignKey}`);
+  input.style.display = sel.value==="wrong" ? "inline-block" : "none";
+  if(sel.value==="wrong") input.value = studAns;
+};
+
+// Submit marks
+window.submitMarks = async function(){
+  const allSelects = document.querySelectorAll("[id^='mark_']");
+  const marksByAssign = {};
+
+  allSelects.forEach(sel=>{
+    const [_, uid, idx, assignKey] = sel.id.split("_");
+    const index = parseInt(idx);
+    const correctInput = document.getElementById(`correct_${uid}_${index}_${assignKey}`);
+    if(!marksByAssign[assignKey]) marksByAssign[assignKey] = {};
+    if(!marksByAssign[assignKey][uid]) marksByAssign[assignKey][uid] = [];
+    const questionText = document.getElementById(`qtext_${index}_${assignKey}`).innerText;
+    const isCorrect = sel.value==="correct";
+    marksByAssign[assignKey][uid].push({
+      question: questionText,
+      answer: correctInput?.dataset.studentAnswer || "",
+      correct: isCorrect,
+      correctAnswer: isCorrect ? correctInput?.dataset.studentAnswer || "" : (correctInput?.value || "")
+    });
+  });
+
+  for(const assignKey in marksByAssign){
+    for(const uid in marksByAssign[assignKey]){
+      await set(ref(db,"results/"+assignKey+"/"+uid), {
+        answers: marksByAssign[assignKey][uid],
+        graded:true
+      });
+    }
+  }
+  alert("Marks returned!");
+};
+
+// Show student results
+async function showResults(uid){
+  if(!uid || !currentAssignmentKey) return;
+  const resSnap = await get(child(ref(db),"results/"+currentAssignmentKey+"/"+uid));
+  const container = document.getElementById("studentResults");
+  container.innerHTML="";
+  if(resSnap.exists()){
+    resSnap.val().answers.forEach((ans,i)=>{
+      container.innerHTML += `<div style="border:1px solid #ccc; padding:5px; margin:5px;">
+        <p><b>Q${i+1}:</b> ${ans.question}</p>
+        <p><b>Your Answer:</b> ${ans.answer}</p>
+        <p><b>Marked:</b> ${ans.correct ? "✔ Correct" : "✘ Wrong"}</p>
+        <p><b>Correct Answer:</b> ${ans.correctAnswer}</p>
+      </div>`;
+    });
+  } else {
+    container.innerHTML = "<p>No results yet.</p>";
+  }
+}
+
+// Load question bank
+document.addEventListener("DOMContentLoaded", ()=>{
+  const bankSel = document.getElementById("bankSelect");
+  questionBank.forEach(q=>{
+    let opt = document.createElement("option");
+    opt.text = opt.value = q;
+    bankSel.add(opt);
+  });
+});
+</script>
+</body>
+</html>

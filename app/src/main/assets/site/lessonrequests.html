@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin – Smart Tutor Students</title>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    th {
+      background: #007BFF;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+
+    .requests {
+      font-size: 13px;
+      color: #444;
+      margin-top: 5px;
+    }
+
+    #loginBox {
+      max-width: 320px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #fff;
+      border: 1px solid #ddd;
+      text-align: center;
+      border-radius: 8px;
+    }
+
+    #googleBtn {
+      width: 100%;
+      padding: 10px;
+      background: #db4437;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>📊 Smart Tutor – Student Records</h1>
+
+<!-- LOGIN BOX -->
+<div id="loginBox">
+  <h3>Admin Login</h3>
+  <p>Sign in with Google</p>
+  <button id="googleBtn">🔑 Sign in with Google</button>
+  <p id="loginStatus" style="font-size:12px;color:red;"></p>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Phone</th>
+      <th>Rating</th>
+      <th>Lesson Requests</th>
+    </tr>
+  </thead>
+
+  <tbody id="studentsTable"></tbody>
+</table>
+
+<script>
+console.log("🚀 Admin script loaded");
+
+// ---------- FIREBASE CONFIG ----------
+const firebaseConfig = {
+  apiKey: "AIzaSyCAiOSHmURDyAAYm5EmoomLkZ_Aud7iXIQ",
+  authDomain: "cbc-general.firebaseapp.com",
+  databaseURL: "https://cbc-general-default-rtdb.firebaseio.com",
+  projectId: "cbc-general",
+  storageBucket: "cbc-general.firebasestorage.app",
+  messagingSenderId: "764732839741",
+  appId: "1:764732839741:web:ab829af54839de91359754"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+console.log("🔥 Firebase initialized");
+
+const db = firebase.database();
+const auth = firebase.auth();
+const provider = new firebase.auth.GoogleAuthProvider();
+
+const tableBody = document.getElementById("studentsTable");
+const loginBox = document.getElementById("loginBox");
+const loginStatus = document.getElementById("loginStatus");
+
+// ---------- GOOGLE LOGIN ----------
+document.getElementById("googleBtn").onclick = () => {
+  auth.signInWithPopup(provider)
+    .then(result => {
+      console.log("✅ Logged in:", result.user.email);
+      loginBox.style.display = "none";
+      loadStudents();
+    })
+    .catch(err => {
+      console.error(err);
+      loginStatus.textContent = err.message;
+    });
+};
+
+// ---------- LOAD STUDENTS ----------
+function loadStudents() {
+
+  db.ref("students").on("value", snapshot => {
+
+    console.log("📡 Data received:", snapshot.val());
+
+    tableBody.innerHTML = "";
+
+    if (!snapshot.exists()) {
+      tableBody.innerHTML = `
+        <tr><td colspan="5">No student data found</td></tr>
+      `;
+      return;
+    }
+
+    snapshot.forEach(child => {
+      const data = child.val();
+
+      let requestsHtml = "<i>No requests</i>";
+
+      if (data.requests) {
+        const list = Object.values(data.requests);
+
+        requestsHtml = list.map(r => {
+          const text = r.text || "No text";
+          const time = r.timestamp
+            ? new Date(r.timestamp).toLocaleString()
+            : "No time";
+
+          return `
+            <div class="requests">
+              • ${text}
+              <span style="color:gray;font-size:12px">(${time})</span>
+            </div>
+          `;
+        }).join("");
+      }
+
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${data.name || "-"}</td>
+        <td>${data.email || "-"}</td>
+        <td>${data.phone || "-"}</td>
+        <td>${data.rating ? data.rating + "⭐" : "-"}</td>
+        <td>${requestsHtml}</td>
+      `;
+
+      tableBody.appendChild(tr);
+    });
+  });
+}
+
+// ---------- AUTO LOGIN CHECK ----------
+auth.onAuthStateChanged(user => {
+  if (user) {
+    console.log("🔐 Already logged in:", user.email);
+    loginBox.style.display = "none";
+    loadStudents();
+  }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,2783 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Smart Assignment System</title>
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Segoe UI,Arial,sans-serif;
+    background:#eef3f9;
+    color:#333;
+    padding:20px;
+    line-height:1.5;
+}
+
+html,
+body{
+    width:100%;
+    overflow-x:hidden;
+}
+
+
+   
+h2{
+    text-align:center;
+    color:#0b4ea2;
+    margin-bottom:25px;
+    font-size:2rem;
+}
+
+h3{
+    color:#0b4ea2;
+    margin-bottom:15px;
+}
+
+h4{
+    color:#0b4ea2;
+    margin:20px 0 10px;
+}
+
+.section{
+    width:100%;
+    max-width:1000px;
+    margin:20px auto;
+    background:#fff;
+    border-radius:16px;
+    padding:25px;
+    box-shadow:0 8px 25px rgba(0,0,0,.08);
+    border:none;
+    overflow-x:auto;
+}
+
+input,
+select,
+textarea,
+button{
+    width:100%;
+    max-width:100%;
+
+    padding:12px;
+    margin-top:8px;
+    margin-bottom:15px;
+    border:1px solid #cfd8e3;
+    border-radius:10px;
+    font-size:15px;
+    transition:.25s;
+    background:#fff;
+}
+
+
+.question,
+.student-block,
+#studentAssignment,
+#markingArea,
+#studentResults{
+    word-wrap:break-word;
+    overflow-wrap:anywhere;
+}
+
+
+
+   
+textarea{
+    min-height:120px;
+    resize:vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+    outline:none;
+    border-color:#1565c0;
+    box-shadow:0 0 0 3px rgba(21,101,192,.15);
+}
+
+button{
+    padding:12px 18px;
+    border:none;
+    border-radius:10px;
+    background:#1565c0;
+    color:white;
+    font-size:15px;
+    cursor:pointer;
+    transition:.3s;
+    margin:5px 5px 5px 0;
+}
+
+button:hover{
+    background:#0d47a1;
+    transform:translateY(-2px);
+}
+
+button:active{
+    transform:scale(.98);
+}
+
+button[style*="background:red"]{
+    background:#d32f2f !important;
+}
+
+button[style*="background:red"]:hover{
+    background:#b71c1c !important;
+}
+
+.question{
+    background:#f7fbff;
+    border-left:5px solid #1565c0;
+    padding:12px;
+    margin:10px 0;
+    border-radius:8px;
+}
+
+.student-block{
+    background:#fafafa;
+    border:1px solid #ddd;
+    border-radius:12px;
+    padding:15px;
+    margin:15px 0;
+}
+
+.correct{
+    color:#0b8b3f;
+    font-weight:bold;
+}
+
+.wrong{
+    color:#d32f2f;
+    font-weight:bold;
+}
+
+#assignmentPreview,
+#studentAssignment,
+#studentResults,
+#markingArea{
+    margin-top:15px;
+}
+
+hr{
+    border:none;
+    border-top:1px solid #ddd;
+    margin:30px 0;
+}
+
+p{
+    margin:8px 0;
+}
+
+b{
+    color:#0b4ea2;
+}
+
+#teacherSchoolName,
+#studentSchoolName{
+    color:#1565c0;
+    font-weight:bold;
+}
+
+/* Responsive tables if any */
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+table td,
+table th{
+    padding:10px;
+}
+
+/* Mobile */
+
+@media (max-width:768px){
+
+body{
+    padding:10px;
+}
+
+.section{
+    padding:18px;
+    border-radius:12px;
+}
+
+h2{
+    font-size:1.6rem;
+}
+
+h3{
+    font-size:1.2rem;
+}
+
+button{
+    width:100%;
+    margin:8px 0;
+}
+
+button[style*="float:right"]{
+    float:none !important;
+    width:100%;
+    margin-bottom:20px;
+}
+
+input,
+select,
+textarea{
+    font-size:16px;
+}
+
+.question{
+    font-size:15px;
+}
+
+.student-block{
+    padding:12px;
+}
+
+}
+@media (max-width:768px){
+
+body{
+    padding:8px;
+}
+
+.section{
+    width:100%;
+    margin:10px 0;
+    padding:15px;
+    border-radius:10px;
+}
+
+h2{
+    font-size:1.5rem;
+}
+
+h3{
+    font-size:1.15rem;
+}
+
+h4{
+    font-size:1rem;
+}
+
+input,
+select,
+textarea,
+button{
+    width:100%;
+    font-size:16px;
+}
+
+button{
+    margin-top:10px;
+}
+
+button[style*="float:right"]{
+    float:none !important;
+    margin-bottom:15px;
+}
+
+}
+</style>
+</head>
+<body>
+
+<h2>📘 School Smart Assignment System</h2>
+<p style="text-align:center;color:#666;margin-bottom:25px;">
+Homework • Submission • Marking • Results
+</p>
+
+
+
+
+<div id="authDiv" class="section">
+
+    <h3>🎓 Learner Login / Signup</h3>
+
+    <input
+        type="text"
+        id="signupName1"
+        placeholder="First Name"
+    ><br>
+
+    <input
+        type="text"
+        id="signupName2"
+        placeholder="Second Name"
+    ><br>
+
+    <input
+        type="email"
+        id="email"
+        placeholder="Email"
+    ><br>
+
+    <input
+        type="password"
+        id="password"
+        placeholder="Password"
+    ><br>
+
+    <select id="schoolSelect">
+        <option value="">
+            Select Your School
+        </option>
+    </select><br>
+
+    <button onclick="signup()">
+        📝 Sign Up
+    </button>
+
+    <button onclick="login()">
+        🔐 Login
+    </button>
+
+</div>
+
+
+
+
+
+
+  <div id="studentPhase" class="section" style="display:none;">
+
+    <button onclick="logout()" style="float:right;">
+        Logout
+    </button>
+
+    <h3>Student Panel</h3>
+
+    <!-- Saved learner information -->
+    <p>
+        <b>Learner:</b>
+        <span id="studentFullName"></span>
+    </p>
+
+    <p>
+        <b>School:</b>
+        <span id="studentSchoolName"></span>
+    </p>
+
+    <h4>Pick Your Homework</h4>
+
+    <select id="studentGradeSelect">
+        <option value="">Select Grade</option>
+    </select><br>
+
+    <select id="studentSubjectSelect">
+        <option value="">Select Subject</option>
+    </select><br>
+
+    <label for="studentAssignmentDate">
+        <b>📅 Select Homework Date:</b>
+    </label><br>
+
+    <input
+        type="date"
+        id="studentAssignmentDate"
+    ><br>
+
+    <div id="studentAssignment"></div>
+
+    <button onclick="submitAnswers()">
+        Submit Answers
+    </button>
+
+    <h4>
+        Results
+        (filter assignment again to view your results -
+        if results are sent, you will see them)
+    </h4>
+
+    <div id="studentResults"></div>
+
+</div>
+
+ <script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"; 
+
+// ==============================
+// SUPABASE CONFIG
+// ==============================
+const SUPABASE_URL = "https://hhtplinfcdwgahlhurhx.supabase.co";
+
+const SUPABASE_ANON_KEY = "sb_publishable_cOXipkG4wSKIkIHwkP04JA_KunvG7T5";
+
+const supabase = createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+);
+
+
+// ==============================
+// GLOBAL VARIABLES
+// ==============================
+let currentUserRole = null;
+let assignmentQuestions = [];
+let currentAssignmentKey = null; 
+
+let currentSchoolId = null;
+let currentSchoolName = "";
+let currentStudentName1 = "";
+
+let currentStudentName2 = "";
+
+
+
+
+// ============================================================
+// LOAD SCHOOLS FOR LEARNER SIGNUP
+// ============================================================
+
+async function loadSchoolsForSignup(){
+
+    const schoolSelect =
+        document.getElementById("schoolSelect");
+
+    if(!schoolSelect) return;
+
+    schoolSelect.innerHTML =
+        '<option value="">Select Your School</option>';
+
+    const { data, error } = await supabase
+
+        .from("school_tool_accounts")
+
+        .select("id, school_name")
+
+        .order("school_name");
+
+    if(error){
+
+        console.error(
+            "Error loading schools:",
+            error
+        );
+
+        schoolSelect.innerHTML =
+            '<option value="">Unable to load schools</option>';
+
+        return;
+    }
+
+    if(!data || data.length === 0){
+
+        schoolSelect.innerHTML =
+            '<option value="">No schools available</option>';
+
+        return;
+    }
+
+    data.forEach(school => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = school.id;
+
+        option.textContent = school.school_name;
+
+        schoolSelect.appendChild(option);
+
+    });
+
+}
+
+
+
+
+// ============================================================
+// LEARNER SIGN UP
+// School selected ONCE during registration
+// ============================================================
+
+window.signup = async function () {
+
+    const name1 =
+        document.getElementById("signupName1")
+        .value
+        .trim();
+
+    const name2 =
+        document.getElementById("signupName2")
+        .value
+        .trim();
+
+    const email =
+        document.getElementById("email")
+        .value
+        .trim();
+
+    const password =
+        document.getElementById("password")
+        .value;
+
+    const schoolId =
+        document.getElementById("schoolSelect")
+        .value;
+
+
+    // -----------------------------
+    // VALIDATION
+    // -----------------------------
+
+    if(!name1 || !name2){
+
+        alert("Please enter your first and second name.");
+
+        return;
+    }
+
+    if(!email){
+
+        alert("Please enter your email.");
+
+        return;
+    }
+
+    if(!password){
+
+        alert("Please enter your password.");
+
+        return;
+    }
+
+    if(!schoolId){
+
+        alert("Please select your school.");
+
+        return;
+    }
+
+
+    // -----------------------------
+    // VERIFY SCHOOL
+    // -----------------------------
+
+    const {
+        data: school,
+        error: schoolError
+    } = await supabase
+
+        .from("school_tool_accounts")
+
+        .select("id, school_name")
+
+        .eq("id", schoolId)
+
+        .single();
+
+
+    if(schoolError || !school){
+
+        console.error(
+            "School verification failed:",
+            schoolError
+        );
+
+        alert("Invalid school selected.");
+
+        return;
+    }
+
+
+    // -----------------------------
+    // CREATE AUTH ACCOUNT
+    // -----------------------------
+
+    const {
+    data,
+    error
+} = await supabase.auth.signUp({
+
+    email: email,
+
+    password: password,
+
+    options: {
+
+        data: {
+
+            first_name: name1,
+
+            second_name: name2,
+
+            school_id: school.id,
+
+            role: "student"
+
+        }
+
+    }
+
+});
+
+
+    if(error){
+
+        alert(
+            "Signup failed: " +
+            error.message
+        );
+
+        return;
+    }
+
+
+    // -----------------------------
+    // CREATE LEARNER PROFILE
+    // -----------------------------
+
+    if(data.user){
+
+        const {
+            error: profileError
+        } = await supabase
+
+           .from("homework_users")
+.insert({
+
+    id: data.user.id,
+
+    email: email,
+
+    role: "student",
+
+    school_id: school.id,
+
+    first_name: name1,
+
+    second_name: name2
+
+});
+
+        if(profileError){
+
+            console.error(
+                "Profile creation error:",
+                profileError
+            );
+
+            alert(
+                "Account created, but learner profile could not be created: " +
+                profileError.message
+            );
+
+            return;
+        }
+
+    }
+
+
+    alert(
+        "Account created successfully!\n\n" +
+        "School: " +
+        school.school_name +
+        "\n\nYou can now log in."
+    );
+
+
+    // Clear signup fields
+
+    document.getElementById("signupName1").value = "";
+    document.getElementById("signupName2").value = "";
+    document.getElementById("email").value = "";
+    document.getElementById("password").value = "";
+
+    document.getElementById("schoolSelect").value = "";
+
+};
+
+
+
+
+
+
+// ------------------ Login ------------------
+window.login = async function () {
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    alert("Login failed: " + error.message);
+  }
+
+};
+
+// ============================================================
+// CHECK LEARNER SESSION
+// Automatically restores learner after refresh
+// ============================================================
+
+async function checkSession(){
+
+    const {
+        data: {
+            session
+        }
+    } = await supabase.auth.getSession();
+
+
+    // ========================================================
+    // NOT LOGGED IN
+    // ========================================================
+
+    if(!session){
+
+        document.getElementById("authDiv").style.display =
+            "block";
+
+        document.getElementById("studentPhase").style.display =
+            "none";
+
+        return;
+    }
+
+
+    const user =
+        session.user;
+
+
+    // ========================================================
+    // GET LEARNER PROFILE
+    // ========================================================
+
+    const {
+        data: profile,
+        error: profileError
+    } = await supabase
+
+        .from("homework_users")
+
+        .select(`
+            role,
+            school_id,
+            first_name,
+            second_name
+        `)
+
+        .eq("id", user.id)
+
+        .single();
+
+
+    if(profileError || !profile){
+
+        console.error(
+            "Learner profile error:",
+            profileError
+        );
+
+        alert(
+            "Your learner profile could not be found."
+        );
+
+        await supabase.auth.signOut();
+
+        return;
+    }
+
+
+    // ========================================================
+    // MAKE SURE THIS IS A LEARNER
+    // ========================================================
+
+    if(profile.role !== "student"){
+
+        alert(
+            "This portal is for learners only."
+        );
+
+        await supabase.auth.signOut();
+
+        return;
+    }
+
+
+    // ========================================================
+    // SCHOOL MUST EXIST
+    // ========================================================
+
+    if(!profile.school_id){
+
+        alert(
+            "Your account is not linked to a school. " +
+            "Please contact your school administrator."
+        );
+
+        return;
+    }
+
+
+    // ========================================================
+    // NAME MUST EXIST
+    // ========================================================
+
+    if(
+        !profile.first_name ||
+        !profile.second_name
+    ){
+
+        alert(
+            "Your learner name is missing. " +
+            "Please contact your school administrator."
+        );
+
+        return;
+    }
+
+
+    // ========================================================
+    // SAVE CURRENT USER INFORMATION
+    // ========================================================
+
+    currentUserRole =
+        "student";
+
+    currentSchoolId =
+        profile.school_id;
+
+    currentStudentName1 =
+        profile.first_name;
+
+    currentStudentName2 =
+        profile.second_name;
+
+
+    // ========================================================
+    // GET SCHOOL INFORMATION
+    // ========================================================
+
+    const {
+        data: school,
+        error: schoolError
+    } = await supabase
+
+        .from("school_tool_accounts")
+
+        .select("id, school_name")
+
+        .eq("id", currentSchoolId)
+
+        .single();
+
+
+    if(schoolError || !school){
+
+        console.error(
+            "School lookup failed:",
+            schoolError
+        );
+
+        alert(
+            "Your school could not be identified."
+        );
+
+        return;
+    }
+
+
+    currentSchoolName =
+        school.school_name;
+
+
+    // ========================================================
+    // OPEN LEARNER PANEL AUTOMATICALLY
+    // ========================================================
+
+    document.getElementById("authDiv").style.display =
+        "none";
+
+   
+
+    document.getElementById("studentPhase").style.display =
+        "block";
+
+
+    // ========================================================
+    // DISPLAY LEARNER NAME
+    // ========================================================
+
+    document.getElementById(
+        "studentFullName"
+    ).textContent =
+        currentStudentName1 +
+        " " +
+        currentStudentName2;
+
+
+    // ========================================================
+    // DISPLAY LOCKED SCHOOL
+    // ========================================================
+
+    document.getElementById(
+        "studentSchoolName"
+    ).textContent =
+        currentSchoolName;
+
+
+    // ========================================================
+    // LOAD HOMEWORK FOR THIS SCHOOL ONLY
+    // ========================================================
+
+    await loadStudentFilters();
+
+}
+
+
+   
+// ------------------ Logout ------------------
+window.logout = async function () {
+
+  await supabase.auth.signOut();
+
+  alert("Logged out!");
+
+};
+
+
+
+
+
+
+
+ 
+
+window.addTypedQuestion = function(){
+
+    const q =
+        document
+        .getElementById("newQuestion")
+        .value
+        .trim();
+
+
+    if(!q){
+
+        alert("Type a question first.");
+
+        return;
+
+    }
+
+
+    assignmentQuestions.push({
+
+        id: null,
+
+        question: q,
+
+        correctAnswer: "",
+
+        marks: 1,
+
+        topic: "",
+
+        difficulty: "Medium",
+
+        questionType: "Short Answer",
+
+        source: "teacher"
+
+    });
+
+
+    updatePreview();
+
+
+    document
+        .getElementById("newQuestion")
+        .value = "";
+
+};
+
+
+
+
+
+// ✅ Delete question
+window.deleteQuestion = function(index){
+
+  assignmentQuestions.splice(index,1);
+
+  updatePreview();
+
+};
+
+
+function updatePreview(){
+
+    const container =
+        document.getElementById(
+            "assignmentPreview"
+        );
+
+
+    const assignmentDate =
+        document.getElementById(
+            "assignmentDate"
+        )?.value || "";
+
+
+    container.innerHTML =
+
+        assignmentQuestions
+        .map((q,i) => {
+
+            const questionText =
+                typeof q === "string"
+                ? q
+                : q.question;
+
+
+            const source =
+                typeof q === "object" &&
+                q.source === "question_bank"
+                ? "📚 Question Bank"
+                : "✍ Teacher";
+
+
+            return `
+
+                <div
+                    class="question"
+                    style="
+                        border:1px solid #ddd;
+                        padding:10px;
+                        margin-bottom:8px;
+                        border-radius:8px;
+                    "
+                >
+
+                    <b>Q${i + 1}</b>
+
+                    <span
+                        style="
+                            font-size:12px;
+                            margin-left:8px;
+                            color:#666;
+                        "
+                    >
+                        ${source}
+                    </span>
+
+                    <p>
+                        ${questionText}
+                    </p>
+
+                    <button
+                        onclick="deleteQuestion(${i})"
+                        style="color:red;"
+                    >
+                        Delete
+                    </button>
+
+                </div>
+
+            `;
+
+        })
+        .join("");
+
+
+    if(assignmentDate){
+
+        container.innerHTML =
+            `<div style="
+                background:#eef7ff;
+                padding:10px;
+                margin-bottom:10px;
+                border-radius:8px;
+            ">
+                <b>📅 Homework Date:</b>
+                ${assignmentDate}
+            </div>`
+            +
+            container.innerHTML;
+    }
+
+}
+
+
+
+
+// ------------------ Save Assignment ------------------
+window.saveAssignment = async function(){
+
+    const school_id =
+        currentSchoolId;
+
+    const grade =
+        document.getElementById("grade").value;
+
+    const subject =
+        document.getElementById("subject").value;
+
+    const assignmentDate =
+        document.getElementById("assignmentDate").value;
+
+
+    // -----------------------------
+    // VALIDATION
+    // -----------------------------
+
+    if(!school_id){
+
+        alert("School not identified.");
+
+        return;
+    }
+
+
+    if(!currentSchoolName){
+
+        alert(
+            "School information has not loaded yet. " +
+            "Please refresh and try again."
+        );
+
+        return;
+    }
+
+
+    if(!grade){
+
+        alert("Please select a grade.");
+
+        return;
+    }
+
+
+    if(!subject){
+
+        alert("Please select a subject.");
+
+        return;
+    }
+
+
+    if(!assignmentDate){
+
+        alert("Please select the homework date.");
+
+        return;
+    }
+
+
+    if(assignmentQuestions.length === 0){
+
+        alert(
+            "Please add at least one question."
+        );
+
+        return;
+    }
+
+
+    // -----------------------------
+    // SAVE ASSIGNMENT
+    // -----------------------------
+
+    const { error } = await supabase
+
+        .from("homework_assignments")
+
+        .insert({
+
+            school_id: school_id,
+
+            school: currentSchoolName,
+
+            grade: grade,
+
+            subject: subject,
+
+            assignment_date: assignmentDate,
+
+            questions: assignmentQuestions
+
+        });
+
+
+    if(error){
+
+        console.error(
+            "Error saving homework:",
+            error
+        );
+
+        alert(error.message);
+
+        return;
+    }
+
+
+    // -----------------------------
+    // CLEAR ASSIGNMENT
+    // -----------------------------
+
+    assignmentQuestions = [];
+
+    updatePreview();
+
+
+    // Reset date
+
+    document.getElementById(
+        "assignmentDate"
+    ).value = "";
+
+
+    await loadStudentFilters();
+
+    await fillTeacherFilters();
+
+    await loadFilteredSubmissions();
+
+
+    alert(
+        "Homework Saved for " +
+        assignmentDate
+    );
+
+};
+
+// ------------------ Student Filters ------------------
+
+
+
+async function loadStudentFilters(){
+
+    const { data, error } = await supabase
+
+        .from("homework_assignments")
+
+        .select("grade, subject")
+
+        .eq("school_id", currentSchoolId);
+
+    if(error || !data){
+
+        console.error(error);
+
+        return;
+
+    }
+
+    const grades = [
+        ...new Set(
+            data
+                .map(a => a.grade)
+                .filter(Boolean)
+        )
+    ];
+
+    const gradeSel =
+        document.getElementById(
+            "studentGradeSelect"
+        );
+
+    const subjectSel =
+        document.getElementById(
+            "studentSubjectSelect"
+        );
+
+    gradeSel.innerHTML =
+        "<option value=''>Select Grade</option>";
+
+    subjectSel.innerHTML =
+        "<option value=''>Select Subject</option>";
+
+    grades.forEach(g => {
+
+        gradeSel.add(
+            new Option(g, g)
+        );
+
+    });
+
+    // Grade controls available subjects
+    gradeSel.onchange = function(){
+
+        const selectedGrade =
+            this.value;
+
+        subjectSel.innerHTML =
+            "<option value=''>Select Subject</option>";
+
+        if(!selectedGrade){
+
+            return;
+
+        }
+
+        const subjects = [
+            ...new Set(
+                data
+                    .filter(
+                        a =>
+                            a.grade ===
+                            selectedGrade
+                    )
+                    .map(
+                        a => a.subject
+                    )
+                    .filter(Boolean)
+            )
+        ];
+
+        subjects.forEach(subject => {
+
+            subjectSel.add(
+                new Option(
+                    subject,
+                    subject
+                )
+            );
+
+        });
+
+        // Clear assignment until subject selected
+        document
+            .getElementById(
+                "studentAssignment"
+            )
+            .innerHTML =
+                "<p>Select a subject.</p>";
+
+    };
+
+    subjectSel.onchange =
+        filterAssignments;
+
+const studentDate =
+    document.getElementById(
+        "studentAssignmentDate"
+    );
+
+if(studentDate){
+
+    studentDate.value =
+        new Date()
+            .toISOString()
+            .split("T")[0];
+
+}
+
+  
+}
+
+
+
+
+// ------------------ Student: Filter Assignments ------------------
+
+
+async function filterAssignments(){
+
+    const school =
+        currentSchoolId;
+
+    const grade =
+        document.getElementById(
+            "studentGradeSelect"
+        ).value;
+
+    const subject =
+        document.getElementById(
+            "studentSubjectSelect"
+        ).value;
+
+    const assignmentDate =
+        document.getElementById(
+            "studentAssignmentDate"
+        ).value;
+
+
+    const container =
+        document.getElementById(
+            "studentAssignment"
+        );
+
+
+    // -----------------------------
+    // VALIDATION
+    // -----------------------------
+
+    if(!school || !grade || !subject){
+
+        container.innerHTML =
+            "<p>Select grade and subject.</p>";
+
+        return;
+    }
+
+
+    if(!assignmentDate){
+
+        container.innerHTML =
+            "<p>📅 Select a homework date.</p>";
+
+        return;
+    }
+
+
+    // -----------------------------
+    // LOAD ASSIGNMENT
+    // -----------------------------
+
+    const {
+        data,
+        error
+    } = await supabase
+
+        .from("homework_assignments")
+
+        .select("*")
+
+        .eq(
+            "school_id",
+            currentSchoolId
+        )
+
+        .eq(
+            "grade",
+            grade
+        )
+
+        .eq(
+            "subject",
+            subject
+        )
+
+        .eq(
+            "assignment_date",
+            assignmentDate
+        )
+
+        .order(
+            "created_at",
+            {
+                ascending: true
+            }
+        );
+
+
+    container.innerHTML = "";
+
+    assignmentQuestions = [];
+
+    currentAssignmentKey = null;
+
+
+    if(error){
+
+        console.error(
+            "Error loading assignment:",
+            error
+        );
+
+        container.innerHTML =
+            "<p>Error loading homework.</p>";
+
+        return;
+    }
+
+
+    if(!data || data.length === 0){
+
+        container.innerHTML = `
+
+            <div style="
+                padding:15px;
+                border:1px solid #ddd;
+                border-radius:8px;
+                background:#fff8e1;
+            ">
+
+                <b>📅 ${assignmentDate}</b>
+
+                <p>
+                    No homework was assigned for
+                    this date.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    // -----------------------------
+    // DISPLAY ASSIGNMENTS
+    // -----------------------------
+
+    data.forEach(assign => {
+
+        assignmentQuestions =
+            assign.questions || [];
+
+        currentAssignmentKey =
+            assign.id;
+
+
+        container.innerHTML += `
+
+            <div style="
+                padding:12px;
+                margin-bottom:15px;
+                border:1px solid #ddd;
+                border-radius:8px;
+            ">
+
+                <b>School:</b>
+                ${currentSchoolName}
+                <br>
+
+                <b>Grade:</b>
+                ${assign.grade}
+                <br>
+
+                <b>Subject:</b>
+                ${assign.subject}
+                <br>
+
+                <b>📅 Date:</b>
+                ${assign.assignment_date}
+
+            </div>
+
+
+            ${assignmentQuestions.map((q, i) => {
+
+                const questionText =
+                    typeof q === "string"
+                        ? q
+                        : q.question;
+
+
+                return `
+
+                    <div style="
+                        margin:15px 0;
+                        padding:12px;
+                        border:1px solid #ddd;
+                        border-radius:8px;
+                    ">
+
+                        <b>Q${i + 1}.</b>
+
+                        ${questionText}
+
+                        <br><br>
+
+                        <input
+                            type="text"
+                            id="ans${i}"
+                            placeholder="Your Answer"
+                            style="
+                                width:100%;
+                                padding:8px;
+                            "
+                        >
+
+                    </div>
+
+                `;
+
+            }).join("")}
+
+        `;
+
+
+        // -----------------------------
+        // LOAD RESULTS
+        // -----------------------------
+
+        supabase.auth.getUser()
+            .then(({data}) => {
+
+                if(data.user){
+
+                    showResults(
+                        data.user.id,
+                        assign.id
+                    );
+
+                }
+
+            });
+
+    });
+
+}
+
+
+   
+// ------------------ Student: Submit Answers ------------------
+window.submitAnswers = async function(){
+
+    const name1 = currentStudentName1.trim();
+    const name2 = currentStudentName2.trim();
+
+    if(!name1 || !name2){
+        alert("Learner name is missing. Please log in again.");
+        return;
+    }
+
+    if(!currentAssignmentKey){
+        alert("No assignment selected.");
+        return;
+    }
+
+    const {
+        data: { user }
+    } = await supabase.auth.getUser();
+
+    if(!user){
+        alert("Please login first.");
+        return;
+    }
+
+    const answers = assignmentQuestions.map((q,i)=>({
+        question:
+            typeof q === "string"
+                ? q
+                : q.question,
+
+        answer:
+            document.getElementById(`ans${i}`).value || ""
+    }));
+
+    const { error } = await supabase
+        .from("homework_submissions")
+        .upsert({
+            assignment_id: currentAssignmentKey,
+            user_id: user.id,
+            name1: name1,
+            name2: name2,
+            answers: answers
+        },{
+            onConflict: "assignment_id,user_id"
+        });
+
+    if(error){
+        alert(error.message);
+        return;
+    }
+
+    alert("Answers Submitted!");
+
+    showResults(
+        user.id,
+        currentAssignmentKey
+    );
+};
+// ------------------ Teacher Filters + Marking ------------------
+async function fillTeacherFilters(){
+
+  const { data, error } = await supabase
+   .from("homework_assignments")
+.select("*")
+.eq("school_id", currentSchoolId);
+
+  if(error || !data) return;
+
+  const gradeSet = new Set();
+  const subjectSet = {};
+
+  data.forEach(assign=>{
+
+    if(assign.grade)
+      gradeSet.add(assign.grade);
+
+    if(assign.grade && assign.subject){
+
+      if(!subjectSet[assign.grade])
+        subjectSet[assign.grade] = new Set();
+
+      subjectSet[assign.grade].add(assign.subject);
+
+    }
+
+  });
+
+  const filterGrade = document.getElementById("filterGrade");
+  const filterSubject = document.getElementById("filterSubject");
+
+filterGrade.innerHTML =
+'<option value="">All Grades</option>';
+
+filterSubject.innerHTML =
+'<option value="">All Subjects</option>';
+  
+
+  gradeSet.forEach(g=>filterGrade.add(new Option(g,g)));
+
+  filterGrade.onchange = ()=>{
+
+    filterSubject.innerHTML =
+      '<option value="">All Subjects</option>';
+
+    if(subjectSet[filterGrade.value]){
+
+      subjectSet[filterGrade.value].forEach(sub=>{
+
+        filterSubject.add(new Option(sub,sub));
+
+      });
+
+    }
+
+    loadFilteredSubmissions();
+
+  };
+
+  filterSubject.onchange = loadFilteredSubmissions;
+
+}
+
+async function loadFilteredSubmissions(){
+
+  const grade = document.getElementById("filterGrade").value;
+  const subject = document.getElementById("filterSubject").value;
+
+ let query =
+supabase
+.from("homework_assignments")
+.select("*")
+.eq("school_id", currentSchoolId);
+  if(grade)
+      query = query.eq("grade",grade);
+
+  if(subject)
+      query = query.eq("subject",subject);
+
+  const { data, error } = await query;
+
+  const area = document.getElementById("markingArea");
+
+  area.innerHTML = "";
+
+  if(error || !data) return;
+
+  data.forEach(assign=>{
+
+    area.innerHTML +=
+  `<h4>
+      ${currentSchoolName}
+      - Grade: ${assign.grade}
+      | Subject: ${assign.subject}
+      | 📅 Date: ${assign.assignment_date || "No date"}
+   </h4>
+
+   <div id="markingArea_${assign.id}"></div>`;
+    loadSubmissionsForAssignment(assign.id, assign.questions);
+
+  });
+
+}
+
+ async function loadSubmissionsForAssignment(assignKey, questions){
+
+  const { data: submissions, error } = await supabase
+    .from("homework_submissions")
+    .select("*")
+    .eq("assignment_id", assignKey);
+
+  let html = "";
+
+  if(error){
+    console.error(error);
+    document.getElementById("markingArea_" + assignKey).innerHTML =
+      "<p>Error loading submissions.</p>";
+    return;
+  }
+
+ if(submissions && submissions.length){
+    submissions.forEach(stud=>{
+
+      const student1 = stud.name1 || "Unknown";
+      const student2 = stud.name2 || "Unknown";
+      const answers = stud.answers || [];
+
+      html += `<div class="student-block">
+                <b>Students:</b> ${student1} & ${student2}<br>`;
+
+      answers.forEach((a,i)=>{
+
+       html += `
+        <div>
+
+          <b>Q${i+1}:</b>
+          <span id="qtext_${i}_${assignKey}">
+            ${
+                typeof questions[i] === "string"
+                    ? questions[i]
+                    : questions[i]?.question || ""
+            }
+          </span><br>
+
+          <b>Student Answer:</b>
+          <span>${a.answer}</span><br>
+
+          <b>Mark:</b>
+
+          <select
+            id="mark_${stud.user_id}_${i}_${assignKey}"
+            onchange="toggleCorrectInput('${stud.user_id}',${i},'${assignKey}','${a.answer}')">
+
+            <option value="correct">✔ Correct</option>
+            <option value="wrong">✘ Wrong</option>
+
+          </select><br>
+
+          <input
+            type="text"
+            id="correct_${stud.user_id}_${i}_${assignKey}"
+            placeholder="Type correct answer"
+            style="display:none;margin-top:3px;"
+            data-student-answer="${a.answer}">
+
+        </div>`;
+
+      });
+
+      html += `</div>`;
+
+    });
+
+  }else{
+
+    html = "<p>No submissions yet for this assignment.</p>";
+
+  }
+
+  document.getElementById("markingArea_" + assignKey).innerHTML = html;
+
+}
+
+
+window.toggleCorrectInput = function(uid,index,assignKey,studAns){
+
+  const sel =
+    document.getElementById(`mark_${uid}_${index}_${assignKey}`);
+
+  const input =
+    document.getElementById(`correct_${uid}_${index}_${assignKey}`);
+
+  input.style.display =
+    sel.value==="wrong" ? "inline-block" : "none";
+
+  if(sel.value==="wrong")
+    input.value = studAns;
+
+};
+
+
+window.submitMarks = async function(){
+
+  const allSelects =
+    document.querySelectorAll("[id^='mark_']");
+
+  const marksByAssign = {};
+
+  allSelects.forEach(sel=>{
+
+    const [_,uid,idx,assignKey] = sel.id.split("_");
+
+    const index = parseInt(idx);
+
+    const correctInput =
+      document.getElementById(
+        `correct_${uid}_${index}_${assignKey}`
+      );
+
+    if(!marksByAssign[assignKey])
+      marksByAssign[assignKey] = {};
+
+    if(!marksByAssign[assignKey][uid])
+      marksByAssign[assignKey][uid] = [];
+
+    const questionText =
+      document.getElementById(
+        `qtext_${index}_${assignKey}`
+      ).innerText;
+
+    const isCorrect = sel.value==="correct";
+
+    marksByAssign[assignKey][uid].push({
+
+      question:questionText,
+
+      answer:correctInput?.dataset.studentAnswer || "",
+
+      correct:isCorrect,
+
+      correctAnswer:isCorrect
+        ? correctInput?.dataset.studentAnswer || ""
+        : (correctInput?.value || "")
+
+    });
+
+  });
+
+
+  for(const assignKey in marksByAssign){
+
+    for(const uid in marksByAssign[assignKey]){
+
+ const { error } = await supabase
+  .from("homework_results")
+  .upsert({
+    assignment_id: assignKey,
+    user_id: uid,
+    answers: marksByAssign[assignKey][uid],
+    graded: true
+  },{
+    onConflict: "assignment_id,user_id"
+  });
+
+if(error){
+  console.error(error);
+  alert(error.message);
+  return;
+}
+    }
+  }
+alert("Marks returned!");
+};
+
+async function showResults(uid,assignmentKey){
+
+  if(!uid || !assignmentKey) return;
+
+  const { data, error } = await supabase
+    .from("homework_results")
+    .select("*")
+    .eq("assignment_id",assignmentKey)
+    .eq("user_id",uid)
+    .single();
+
+  const container =
+    document.getElementById("studentResults");
+
+  container.innerHTML="";
+
+  if(!error && data){
+
+    data.answers.forEach((ans,i)=>{
+
+      container.innerHTML += `
+
+      <div style="border:1px solid #ccc;padding:5px;margin:5px;">
+
+        <p><b>Q${i+1}:</b> ${ans.question}</p>
+
+        <p><b>Your Answer:</b> ${ans.answer}</p>
+
+        <p><b>Marked:</b>
+
+        ${
+          ans.correct
+          ? "<span class='correct'>✔ Correct</span>"
+          : "<span class='wrong'>✘ Wrong</span>"
+        }
+
+        </p>
+
+        <p><b>Correct Answer:</b> ${ans.correctAnswer}</p>
+
+      </div>`;
+
+    });
+
+  }else{
+
+    container.innerHTML =
+      "<p>No results yet for this assignment.</p>";
+
+  }
+
+}
+
+// ============================================================
+// SUPABASE QUESTION BANK
+// ============================================================
+
+const bankGradeSelect =
+    document.getElementById("bankGradeSelect");
+
+const subjectSelectBank =
+    document.getElementById("subjectSelectBank");
+
+const topicSelectBank =
+    document.getElementById("topicSelectBank");
+
+const difficultySelectBank =
+    document.getElementById("difficultySelectBank");
+
+const questionSearch =
+    document.getElementById("questionSearch");
+
+const questionBankResults =
+    document.getElementById("questionBankResults");
+
+
+// ------------------------------------------------------------
+// Load subjects
+// ------------------------------------------------------------
+
+async function loadQuestionBankSubjects(){
+
+    const grade =
+        bankGradeSelect.value;
+
+    subjectSelectBank.innerHTML =
+        '<option value="">Select Subject</option>';
+
+    topicSelectBank.innerHTML =
+        '<option value="">All Topics</option>';
+
+    questionBankResults.innerHTML =
+        '<p>Select a subject.</p>';
+
+    if(!grade) return;
+
+
+    const { data, error } = await supabase
+
+        .from("homework_question_bank")
+
+        .select("subject")
+
+        .eq("grade", grade)
+
+        .order("subject");
+
+
+    if(error){
+
+        console.error(error);
+
+        questionBankResults.innerHTML =
+            "<p>Error loading subjects.</p>";
+
+        return;
+    }
+
+
+    const subjects =
+        [...new Set(
+            (data || []).map(x => x.subject)
+        )];
+
+
+    subjects.forEach(subject => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = subject;
+
+        option.textContent = subject;
+
+        subjectSelectBank.appendChild(option);
+
+    });
+
+}
+
+
+// ------------------------------------------------------------
+// Load topics
+// ------------------------------------------------------------
+
+async function loadQuestionBankTopics(){
+
+    const grade =
+        bankGradeSelect.value;
+
+    const subject =
+        subjectSelectBank.value;
+
+
+    topicSelectBank.innerHTML =
+        '<option value="">All Topics</option>';
+
+
+    if(!grade || !subject){
+
+        loadQuestionBankQuestions();
+
+        return;
+    }
+
+
+    const { data, error } = await supabase
+
+        .from("homework_question_bank")
+
+        .select("topic")
+
+        .eq("grade", grade)
+
+        .eq("subject", subject)
+
+        .order("topic");
+
+
+    if(error){
+
+        console.error(error);
+
+        return;
+    }
+
+
+    const topics =
+        [...new Set(
+            (data || [])
+            .map(x => x.topic)
+            .filter(Boolean)
+        )];
+
+
+    topics.forEach(topic => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = topic;
+
+        option.textContent = topic;
+
+        topicSelectBank.appendChild(option);
+
+    });
+
+
+    loadQuestionBankQuestions();
+
+}
+
+
+// ------------------------------------------------------------
+// Load questions
+// ------------------------------------------------------------
+
+async function loadQuestionBankQuestions(){
+
+    const grade =
+        bankGradeSelect.value;
+
+    const subject =
+        subjectSelectBank.value;
+
+    const topic =
+        topicSelectBank.value;
+
+    const difficulty =
+        difficultySelectBank.value;
+
+    const search =
+        questionSearch.value.trim();
+
+
+    if(!grade || !subject){
+
+        questionBankResults.innerHTML =
+            "<p>Select a grade and subject.</p>";
+
+        return;
+    }
+
+
+    let query = supabase
+
+        .from("homework_question_bank")
+
+        .select("*")
+
+        .eq("grade", grade)
+
+        .eq("subject", subject)
+
+        .order("created_at", {
+            ascending:false
+        });
+
+
+    if(topic){
+
+        query =
+            query.eq("topic", topic);
+
+    }
+
+
+    if(difficulty){
+
+        query =
+            query.eq("difficulty", difficulty);
+
+    }
+
+
+    if(search){
+
+        query =
+            query.ilike(
+                "question",
+                `%${search}%`
+            );
+
+    }
+
+
+    const { data, error } =
+        await query;
+
+
+    if(error){
+
+        console.error(error);
+
+        questionBankResults.innerHTML =
+            "<p>Error loading questions.</p>";
+
+        return;
+    }
+
+
+    if(!data || data.length === 0){
+
+        questionBankResults.innerHTML =
+            "<p>No questions found.</p>";
+
+        return;
+    }
+
+
+    questionBankResults.innerHTML =
+
+        data.map((q,index) => `
+
+            <div
+                style="
+                    border:1px solid #ddd;
+                    padding:12px;
+                    margin-bottom:8px;
+                    border-radius:8px;
+                    background:#fafafa;
+                "
+            >
+
+                <label
+                    style="
+                        display:flex;
+                        gap:10px;
+                        align-items:flex-start;
+                        cursor:pointer;
+                    "
+                >
+
+                    <input
+                        type="checkbox"
+                        class="bankQuestionCheckbox"
+                        value="${q.id}"
+                    >
+
+                    <span>
+
+                        <b>
+                            Q${index + 1}.
+                        </b>
+
+                        ${q.question}
+
+                        <br>
+
+                        <small>
+
+                            Topic:
+                            ${q.topic || "General"}
+
+                            |
+
+                            Difficulty:
+                            ${q.difficulty}
+
+                            |
+
+                            Marks:
+                            ${q.marks}
+
+                        </small>
+
+                    </span>
+
+                </label>
+
+            </div>
+
+        `).join("");
+
+}
+
+
+// ------------------------------------------------------------
+// Add selected questions
+// ------------------------------------------------------------
+
+async function addSelectedBankQuestions(){
+
+    const selected =
+        [...document.querySelectorAll(
+            ".bankQuestionCheckbox:checked"
+        )].map(cb => cb.value);
+
+
+    if(selected.length === 0){
+
+        alert(
+            "Select at least one question."
+        );
+
+        return;
+    }
+
+
+    const { data, error } = await supabase
+
+        .from("homework_question_bank")
+
+        .select("*")
+
+        .in("id", selected);
+
+
+    if(error){
+
+        alert(
+            "Unable to load selected questions: "
+            + error.message
+        );
+
+        return;
+    }
+
+
+    data.forEach(q => {
+
+        assignmentQuestions.push({
+
+            id: q.id,
+
+            question: q.question,
+
+            correctAnswer:
+                q.correct_answer,
+
+            marks:
+                q.marks,
+
+            topic:
+                q.topic,
+
+            difficulty:
+                q.difficulty,
+
+            questionType:
+                q.question_type,
+
+            source:
+                "question_bank"
+
+        });
+
+    });
+
+
+    updatePreview();
+
+
+    // Uncheck questions
+
+    document
+        .querySelectorAll(
+            ".bankQuestionCheckbox"
+        )
+        .forEach(cb => {
+
+            cb.checked = false;
+
+        });
+
+
+    alert(
+        `${data.length} question(s) added.`
+    );
+
+}
+
+
+// ------------------------------------------------------------
+// Events
+// ------------------------------------------------------------
+
+// ============================================================
+// QUESTION BANK EVENTS
+// ============================================================
+
+// Question Bank Grade
+if (bankGradeSelect) {
+
+    bankGradeSelect.addEventListener(
+        "change",
+        async function(){
+
+            const assignmentGrade =
+                document.getElementById("grade");
+
+            // Keep Assignment Grade synchronized
+            if(assignmentGrade){
+
+                assignmentGrade.value =
+                    this.value;
+
+                await loadAssignmentSubjects();
+
+            }
+
+            // Load Question Bank subjects
+            await loadQuestionBankSubjects();
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// QUESTION BANK SUBJECT
+// ============================================================
+
+if (subjectSelectBank) {
+
+    subjectSelectBank.addEventListener(
+        "change",
+        async function(){
+
+            // Automatically use Question Bank subject
+            // as the Assignment subject
+
+            const assignmentSubject =
+                document.getElementById("subject");
+
+            if(assignmentSubject){
+
+                assignmentSubject.value =
+                    this.value;
+
+            }
+
+            // Load topics
+            await loadQuestionBankTopics();
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// QUESTION BANK TOPIC
+// ============================================================
+
+if (topicSelectBank) {
+
+    topicSelectBank.addEventListener(
+        "change",
+        loadQuestionBankQuestions
+    );
+
+}
+
+
+// ============================================================
+// QUESTION BANK DIFFICULTY
+// ============================================================
+
+if (difficultySelectBank) {
+
+    difficultySelectBank.addEventListener(
+        "change",
+        loadQuestionBankQuestions
+    );
+
+}
+
+
+// ============================================================
+// QUESTION BANK SEARCH
+// ============================================================
+
+if (questionSearch) {
+
+    questionSearch.addEventListener(
+        "input",
+        loadQuestionBankQuestions
+    );
+
+}
+
+
+// ============================================================
+// LOAD ASSIGNMENT SUBJECTS FROM QUESTION BANK
+// ============================================================
+
+async function loadAssignmentSubjects(){
+
+    const gradeElement =
+        document.getElementById("grade");
+
+    const subjectSelect =
+        document.getElementById("subject");
+
+
+    // Make sure elements exist
+    if(!gradeElement || !subjectSelect){
+
+        console.warn(
+            "Assignment grade or subject element not found."
+        );
+
+        return;
+
+    }
+
+
+    const grade =
+        gradeElement.value;
+
+
+    // Reset subjects
+
+    subjectSelect.innerHTML =
+        '<option value="">Select Subject</option>';
+
+
+    if(!grade){
+
+        return;
+
+    }
+
+
+    // Load subjects from Question Bank
+
+    const {
+        data,
+        error
+    } = await supabase
+
+        .from("homework_question_bank")
+
+        .select("subject")
+
+        .eq("grade", grade)
+
+        .order("subject");
+
+
+    if(error){
+
+        console.error(
+            "Error loading assignment subjects:",
+            error
+        );
+
+        alert(
+            "Unable to load subjects."
+        );
+
+        return;
+
+    }
+
+
+    // Remove duplicates
+
+    const subjects = [
+        ...new Set(
+            (data || [])
+                .map(q => q.subject)
+                .filter(Boolean)
+        )
+    ];
+
+
+    // Add subjects
+
+    subjects.forEach(subject => {
+
+        const option =
+            document.createElement("option");
+
+        option.value =
+            subject;
+
+        option.textContent =
+            subject;
+
+        subjectSelect.appendChild(
+            option
+        );
+
+    });
+
+}
+
+
+// ============================================================
+// ASSIGNMENT GRADE EVENTS
+// ============================================================
+
+const assignmentGradeElement =
+    document.getElementById("grade");
+
+
+if(assignmentGradeElement){
+
+    assignmentGradeElement.addEventListener(
+        "change",
+        async function(){
+
+            // Keep Question Bank grade synchronized
+
+            if(bankGradeSelect){
+
+                bankGradeSelect.value =
+                    this.value;
+
+            }
+
+
+            // Load Assignment subjects
+
+            await loadAssignmentSubjects();
+
+
+            // Load Question Bank subjects
+
+            await loadQuestionBankSubjects();
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// ASSIGNMENT SUBJECT EVENTS
+// ============================================================
+
+const assignmentSubjectElement =
+    document.getElementById("subject");
+
+
+if(assignmentSubjectElement){
+
+    assignmentSubjectElement.addEventListener(
+        "change",
+        async function(){
+
+            // Keep Question Bank subject synchronized
+
+            if(subjectSelectBank){
+
+                subjectSelectBank.value =
+                    this.value;
+
+            }
+
+
+            // Load Question Bank topics
+
+            await loadQuestionBankTopics();
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// STUDENT HOMEWORK DATE
+// ============================================================
+
+const studentAssignmentDateElement =
+    document.getElementById(
+        "studentAssignmentDate"
+    );
+
+
+if(studentAssignmentDateElement){
+
+    studentAssignmentDateElement.addEventListener(
+        "change",
+        filterAssignments
+    );
+
+}
+
+
+// ============================================================
+// MAKE ADD SELECTED QUESTIONS AVAILABLE TO HTML
+// ============================================================
+
+window.addSelectedBankQuestions =
+    addSelectedBankQuestions;
+
+
+// ============================================================
+// PAGE INITIALIZATION
+// ============================================================
+
+// Load schools for new learners
+
+loadSchoolsForSignup();
+
+
+// Automatically restore logged-in learner
+
+checkSession();
+
+
+// ============================================================
+// LISTEN FOR LOGIN / LOGOUT / SESSION CHANGES
+// ============================================================
+
+supabase.auth.onAuthStateChange(
+    () => {
+
+        checkSession();
+
+    }
+);
+
+  </script>
+</body>
+</html>

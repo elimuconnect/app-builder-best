@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ELIMU CONNECT - Trial Tools Access</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #4CAF50, #81C784);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .container {
+      background-color: #fff;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      max-width: 800px;
+      width: 95%;
+      margin: 40px auto;
+    }
+
+    h1 {
+      color: #4CAF50;
+      text-align: center;
+    }
+
+    #message-area {
+      text-align: left;
+      margin-top: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+      border-top: 1px solid #ddd;
+      padding-top: 20px;
+    }
+
+    .message {
+      margin-bottom: 15px;
+      line-height: 1.6;
+    }
+
+    .countdown {
+      font-weight: bold;
+      color: #e65100;
+    }
+
+    a {
+      color: #007BFF;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    a:hover {
+      text-decoration: underline;
+      color: #0056b3;
+    }
+
+    #tools-ui {
+      display: none;
+      margin-top: 30px;
+    }
+
+    #tools-ui h3 {
+      font-size: 24px;
+      font-weight: bold;
+      color: #4CAF50;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    #mainDropdown, .category select {
+      width: 100%;
+      padding: 16px;
+      margin-bottom: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .category {
+      display: none;
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Welcome to ELIMU CONNECT WEBSITE</h1>
+    <p>You are eligible for a 7-day free trial. Messages will appear below:</p>
+    <div id="message-area"></div>
+
+    <!-- Tools UI -->
+    <div id="tools-ui">
+      <h3>Select a Tool Category</h3>
+      <select id="mainDropdown" onchange="showCategory()">
+        <option value="">Select a category...</option>
+        <option value="resources">Past Papers, Videos, eBooks</option>
+        <option value="quizes">Quizzes</option>
+        <option value="math">Mathematics</option>
+        <option value="chemistry">Chemistry</option>
+        <option value="biology">Biology</option>
+        <option value="physics">Physics</option>
+        <option value="kiswahili">Kiswahili</option>
+        <option value="english">English</option>
+      </select>
+
+      <div id="resources" class="category">
+        <select onchange="openLink(this)">
+          <option value="">Select resources...</option>
+          <option value="https://www.socialcreator.com/pastpapersandquizes">ALL RESOURCES</option>
+        </select>
+      </div>
+
+      <div id="quizes" class="category">
+        <select onchange="openLink(this)">
+          <option value="">Select a quiz...</option>
+          <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/quizes">ALL QUIZZES</option>
+        </select>
+      </div>
+
+     
+<div id="math" class="category" style="display:none">
+    <select onchange="openLink(this)">
+      <option value="">Select a Math tool...</option>
+       <option value="">Select a math tool...</option>
+            <option value="mathformulars.html">Math Formulas</option>
+            <option value="mathgraphs.html">Math Graphs</option>
+            <option value="transformation.html">Transformation</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/tables">Math Tables</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/trigonometry">Trigonometry (Unit Circle)</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/sohcahtoa">Trigonometry (SOHCAHTOA)</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/areas">Area</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/volumes">Volume</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/quadraticsolver">Quadratic Solver</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/statistics">Statistics</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/vectors">Vectors</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/matrix1">Matrix 1</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/matrix2">Matrix 2</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/long&lat">Longitude & Latitude</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/differentiate&integrate">Differentiation & Integration</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/area%20approximation">Mid-ordinate & Trapezium</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/integrationarea">Integration Area Approx.</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/error">Error</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/logs">Logarithms</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/commercial1">Interest (Simple & Compound)</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/incometax">Income Tax</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/variations">Variations</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/binomial">Binomial Expansion</option>
+    </select>
+  </div>
+
+  <div id="chemistry" class="category" style="display:none">
+    <select onchange="openLink(this)">
+      <option value="">Select a Chemistry tool...</option>
+
+      <option value="chemreactions.html">Chem Reactions</option>
+            <option value="moleconcept.html">Mole Concept</option>
+            <option value="organicchem.html">Organic Chemistry</option>
+            <option value="periodictable.html">Periodic Table</option>
+            <option value="commongases.html">Common Gases</option>
+      <option value="chemgraphs.html">Chem Graphs</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/chemformulars">Chem Formulas</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/chemicalformula&quations">Chemical Formulas & Equations</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/gaslaws">Gas Laws</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/diffusionlaw">Diffusion Law</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/ram">R.A.M</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/molesmassmm">Moles, Mass, Molar Mass</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/empiricalmolecular">Empirical & Molecular</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/titrations">Titrations</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/radioactivity">Radioactivity</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/solubility">Solubility</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/bondenergies">Bond Energies</option>
+      <option value="https://elimuconnect.github.io/ELIMU-CONNECT-/thermochemistry">Thermochemistry</option>
+    </select>
+  </div>
+
+  <div id="biology" class="category" style="display:none">
+    <select onchange="openLink(this)">
+      <option value="">Select a Biology tool...</option>
+      <option value="bones.html">Bones</option>
+            <option value="humanandfishanatomy.html">Human and Fish Anatomy</option>
+            <option value="plantantomy.html">Plant Anatomy</option>
+    </select>
+  </div>
+
+  <div id="physics" class="category" style="display:none">
+    <select onchange="openLink(this)">
+      <option value="">Select a Physics tool...</option>
+      <option value="physicsformulars.html">Physics Formulas</option>
+      <option value="physicsprinciplesexplorer.html">Principles Explorer</option>
+      <option value="unitconverter.html">Unit Converter</option>
+    </select>
+  </div>
+
+  <div id="kiswahili" class="category" style="display:none">
+    <select onchange="openLink(this)">
+      <option value="">Select a Kiswahili tool...</option>
+      <option value="kamusi.html">Kamusi</option>
+      <option value="methali.html">Methali</option>
+      <option value="nahaunamisema.html">Nahau na Misemo</option>
+    </select>
+  </div>
+
+  <div id="english" class="category" style="display:none">
+    <select onchange="openLink(this)">
+      <option value="">Select an English tool...</option>
+      <option value="dictionary.html">Dictionary</option>
+      <option value="ideoms.html">Idioms</option>
+      <option value="proverbs.html">Proverbs</option>
+      <option value="similiesandmetaphors.html">Similes and Metaphors</option>
+   
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const messageArea = document.getElementById("message-area");
+    const toolsUI = document.getElementById("tools-ui");
+
+    function displayMessage(msg, isCountdown = false) {
+      const div = document.createElement("div");
+      div.classList.add("message");
+      if (isCountdown) div.classList.add("countdown");
+      div.innerHTML = msg;
+      messageArea.appendChild(div);
+      messageArea.scrollTop = messageArea.scrollHeight;
+    }
+
+    function formatCountdown(ms) {
+      const days = Math.floor(ms / (24 * 60 * 60 * 1000));
+      const hours = Math.floor((ms % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+      const minutes = Math.floor((ms % (60 * 60 * 1000)) / (60 * 1000));
+      const seconds = Math.floor((ms % (60 * 1000)) / 1000);
+      return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    }
+
+    function startTrialCheck() {
+      const trialKey = "trial-start-time";
+      const trialLockKey = "trial-locked";
+      const trialDuration = 7 * 24 * 60 * 60 * 1000;
+      const trialStart = localStorage.getItem(trialKey);
+
+      if (trialStart) {
+        const trialEnd = parseInt(trialStart) + trialDuration;
+        const now = Date.now();
+
+        if (now < trialEnd) {
+          displayMessage("✅ Your trial is active.");
+          toolsUI.style.display = "block";
+
+          const interval = setInterval(() => {
+            const remaining = trialEnd - Date.now();
+            if (remaining <= 0) {
+              clearInterval(interval);
+              displayMessage("❌ Your free trial has expired. Please subscribe to continue.", true);
+              localStorage.setItem(trialLockKey, "true");
+              toolsUI.style.display = "none";
+            } else {
+              const lastCountdown = document.querySelector(".countdown");
+              const countdownText = `⏳ Trial ends in: <span>${formatCountdown(remaining)}</span>`;
+              if (lastCountdown) {
+                lastCountdown.innerHTML = countdownText;
+              } else {
+                displayMessage(countdownText, true);
+              }
+            }
+          }, 1000);
+
+        } else {
+          displayMessage("❌ Your free trial has expired. Please subscribe to continue.");
+        }
+      } else {
+        const now = Date.now();
+        localStorage.setItem(trialKey, now);
+        displayMessage("🎉 Welcome! Your 7-day free trial has started.");
+        displayMessage("Enjoy full access during this period.");
+        startTrialCheck(); // Re-run now that trial has started
+      }
+    }
+
+    function showCategory() {
+      const categories = document.querySelectorAll(".category");
+      categories.forEach(cat => cat.style.display = "none");
+      const selected = document.getElementById("mainDropdown").value;
+      if (selected) {
+        const cat = document.getElementById(selected);
+        if (cat) cat.style.display = "block";
+      }
+    }
+
+    function openLink(selectElement) {
+      const value = selectElement.value;
+      if (value) {
+        window.open(value, '_blank');
+        selectElement.selectedIndex = 0;
+      }
+    }
+
+    window.onload = startTrialCheck;
+  </script>
+</body>
+</html>

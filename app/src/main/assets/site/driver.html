@@ -1,0 +1,749 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>School Bus Driver</title>
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  >
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f1f5f9;
+      color: #172033;
+    }
+
+    .header {
+      background: #123b70;
+      color: white;
+      padding: 22px 16px;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 650px;
+      margin: 22px auto;
+      padding: 0 14px;
+    }
+
+    .card {
+      background: white;
+      padding: 22px;
+      border-radius: 15px;
+      box-shadow: 0 5px 18px #0000000d;
+      margin-bottom: 16px;
+    }
+
+    h2 { margin-top: 0; }
+
+    input, select {
+      width: 100%;
+      padding: 13px;
+      margin: 8px 0 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 16px;
+      background: white;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border: 0;
+      border-radius: 9px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 9px;
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .start { background: #15803d; color: white; }
+    .end { background: #b91c1c; color: white; }
+    .secondary { background: #e2e8f0; color: #172033; }
+    .primary { background: #123b70; color: white; }
+
+    .switch {
+      color: #123b70;
+      background: transparent;
+      text-decoration: underline;
+      padding: 8px;
+    }
+
+    #map {
+      height: 300px;
+      border-radius: 12px;
+      margin-top: 14px;
+    }
+
+    #status, #authStatus {
+      padding: 12px;
+      border-radius: 8px;
+      background: #eff6ff;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .muted {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .value {
+      overflow-wrap: anywhere;
+      font-weight: bold;
+    }
+
+    [hidden] { display: none !important; }
+  </style>
+</head>
+
+<body>
+  <header class="header">
+    <h1>School Bus Tracking</h1>
+    <p>Driver Portal</p>
+  </header>
+
+  <main class="container">
+
+    <!-- SIGN UP -->
+    <section class="card" id="signupPanel">
+      <h2>Create Driver Account</h2>
+      <p class="muted">Register before tracking your school bus.</p>
+
+      <label for="signupName">Full name</label>
+      <input
+        id="signupName"
+        type="text"
+        placeholder="Enter your full name"
+        autocomplete="name"
+        required
+      >
+
+      <label for="signupEmail">Email address</label>
+      <input
+        id="signupEmail"
+        type="email"
+        placeholder="Enter your email"
+        autocomplete="email"
+        required
+      >
+
+      <label for="signupPhone">Phone number</label>
+      <input
+        id="signupPhone"
+        type="tel"
+        placeholder="Enter your phone number"
+        autocomplete="tel"
+      >
+
+      <label for="signupSchool">Select your school</label>
+      <select id="signupSchool" required>
+        <option value="">Loading schools...</option>
+      </select>
+
+      <button id="signupBtn" class="primary">Sign Up</button>
+
+      <p>Already registered?</p>
+      <button id="showLoginBtn" class="switch">Login here</button>
+
+      <div id="signupStatus" role="status" aria-live="polite"></div>
+    </section>
+
+    <!-- LOGIN -->
+    <section class="card" id="loginPanel" hidden>
+      <h2>Driver Login</h2>
+      <p class="muted">Enter the email and school you registered with.</p>
+
+      <label for="loginEmail">Email address</label>
+      <input
+        id="loginEmail"
+        type="email"
+        placeholder="Registered email"
+        autocomplete="email"
+        required
+      >
+
+      <label for="loginSchool">Select your school</label>
+      <select id="loginSchool" required>
+        <option value="">Choose your school</option>
+      </select>
+
+      <button id="loginBtn" class="primary">Login</button>
+
+      <p>Don't have an account?</p>
+      <button id="showSignupBtn" class="switch">Sign up here</button>
+
+      <div id="loginStatus" role="status" aria-live="polite"></div>
+    </section>
+
+    <!-- DRIVER DETAILS AND JOURNEY -->
+    <section class="card" id="driverDetails" hidden>
+      <h2>Welcome, <span id="driverName"></span></h2>
+
+      <p>Phone: <span id="driverPhone" class="value"></span></p>
+      <p>School: <span id="schoolName" class="value"></span></p>
+      
+
+      <button id="startBtn" class="start">Start Journey</button>
+      <button id="endBtn" class="end" disabled>End Journey</button>
+      <button id="logoutBtn" class="secondary">Log Out</button>
+    </section>
+
+    <section class="card">
+      <h2>Journey Status</h2>
+      <div id="status">Please sign up or log in to continue.</div>
+      <div id="map"></div>
+    </section>
+
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    const SUPABASE_URL =
+      "https://hhtplinfcdwgahlhurhx.supabase.co";
+
+    const SUPABASE_ANON_KEY =
+      "sb_publishable_cOXipkG4wSKIkIHwkP04JA_KunvG7T5";
+
+    const db = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+
+    let driver = null;
+    let watchId = null;
+    let currentLocationId = null;
+    let lastPosition = null;
+    let journeyStarting = false;
+    let journeyEnding = false;
+    let schools = [];
+
+    const $ = id => document.getElementById(id);
+
+    const map = L.map("map").setView([-1.2864, 36.8172], 6);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap contributors"
+    }).addTo(map);
+
+    const marker = L.marker([-1.2864, 36.8172]).addTo(map);
+
+    function setStatus(message) {
+      $("status").textContent = message;
+    }
+
+    function setAuthStatus(panel, message) {
+      $(panel).textContent = message;
+    }
+
+    function showPanel(panel) {
+      $("signupPanel").hidden = panel !== "signup";
+      $("loginPanel").hidden = panel !== "login";
+      $("driverDetails").hidden = panel !== "driver";
+    }
+
+    function populateSchools(select) {
+      select.replaceChildren();
+
+      const first = document.createElement("option");
+      first.value = "";
+      first.textContent = "Choose your school";
+      select.appendChild(first);
+
+      schools.forEach(school => {
+        const option = document.createElement("option");
+        option.value = school.id;
+        option.textContent = school.school_name;
+        select.appendChild(option);
+      });
+    }
+
+    async function loadSchools() {
+      try {
+        const { data, error } = await db.rpc("get_bus_schools");
+
+        if (error) throw error;
+
+        schools = data || [];
+
+        populateSchools($("signupSchool"));
+        populateSchools($("loginSchool"));
+
+        if (!schools.length) {
+          setAuthStatus("signupStatus", "No schools were found.");
+        }
+      } catch (error) {
+        console.error(error);
+        setAuthStatus(
+          "signupStatus",
+          "Could not load schools. Check your Supabase SQL function and permissions."
+        );
+      }
+    }
+
+    // ------------------------------------------
+    // SWITCH BETWEEN SIGNUP AND LOGIN
+    // ------------------------------------------
+
+    $("showLoginBtn").addEventListener("click", () => {
+      $("loginEmail").value = $("signupEmail").value.trim().toLowerCase();
+      $("loginSchool").value = $("signupSchool").value;
+
+      showPanel("login");
+      setAuthStatus("loginStatus", "");
+    });
+
+    $("showSignupBtn").addEventListener("click", () => {
+      showPanel("signup");
+      setAuthStatus("signupStatus", "");
+    });
+
+    // ------------------------------------------
+    // DRIVER SIGNUP
+    // ------------------------------------------
+
+    async function signUpDriver() {
+      const name = $("signupName").value.trim();
+      const email = $("signupEmail").value.trim().toLowerCase();
+      const phone = $("signupPhone").value.trim();
+      const schoolId = $("signupSchool").value;
+
+      if (!name || !email || !schoolId) {
+        setAuthStatus(
+          "signupStatus",
+          "Please enter your name, valid email and school."
+        );
+        return;
+      }
+
+      $("signupBtn").disabled = true;
+      setAuthStatus("signupStatus", "Creating your driver account...");
+
+      try {
+        const { data, error } = await db.rpc("register_bus_driver", {
+          p_name: name,
+          p_email: email,
+          p_phone: phone || null,
+          p_school_id: schoolId
+        });
+
+        if (error) throw error;
+
+        $("loginEmail").value = email;
+        $("loginSchool").value = schoolId;
+
+        showPanel("login");
+        setAuthStatus(
+          "loginStatus",
+          "Registration completed. Log in using your registered email and school."
+        );
+      } catch (error) {
+        console.error(error);
+
+        if (error.code === "23505") {
+          setAuthStatus(
+            "signupStatus",
+            "This email is already registered for that school. Please log in."
+          );
+        } else {
+          setAuthStatus(
+            "signupStatus",
+            "Registration failed: " + error.message
+          );
+        }
+      } finally {
+        $("signupBtn").disabled = false;
+      }
+    }
+
+    // ------------------------------------------
+    // DRIVER LOGIN
+    // ------------------------------------------
+
+    
+async function loginDriver() {
+  const email = $("loginEmail").value.trim().toLowerCase();
+  const schoolId = $("loginSchool").value.trim();
+
+  if (!email || !schoolId) {
+    setAuthStatus(
+      "loginStatus",
+      "Enter your email and select your school."
+    );
+    return;
+  }
+
+  $("loginBtn").disabled = true;
+  setAuthStatus("loginStatus", "Checking your driver record...");
+
+  console.log("Login email:", email);
+  console.log("Selected school ID:", schoolId);
+
+  try {
+    // First, find records matching the email.
+    const { data: drivers, error } = await db
+      .from("drivers")
+      .select("id, name, email, phone, school_id")
+      .ilike("email", email)
+      .limit(10);
+
+    if (error) {
+      console.error("Supabase driver lookup error:", error);
+
+      setAuthStatus(
+        "loginStatus",
+        "Database error: " + error.message +
+        (error.code ? " (Code: " + error.code + ")" : "")
+      );
+      return;
+    }
+
+    console.log("Drivers matching email:", drivers);
+
+    if (!drivers || drivers.length === 0) {
+      setAuthStatus(
+        "loginStatus",
+        "Supabase returned no driver for this email. " +
+        "Check the email stored in the database."
+      );
+      return;
+    }
+
+    // Check whether the email belongs to the selected school.
+    const driverMatch = drivers.find(
+      item =>
+        item.school_id &&
+        item.school_id.toLowerCase() === schoolId.toLowerCase()
+    );
+
+    if (!driverMatch) {
+      const registeredSchools = drivers
+        .map(item => item.school_id)
+        .join(", ");
+
+      console.warn("School ID mismatch.", {
+        selectedSchoolId: schoolId,
+        registeredSchoolIds: registeredSchools
+      });
+
+      setAuthStatus(
+        "This email exists, but its registered school ID does not " +
+        "match your selection. Registered school ID: " +
+        registeredSchools
+      );
+      return;
+    }
+
+   
+    // Login succeeded: display driver details.
+    driver = driverMatch;
+    localStorage.setItem("busDriverId", driver.id);
+
+    const school = schools.find(
+      item =>
+        item.id.toLowerCase() === driver.school_id.toLowerCase()
+    );
+
+    $("driverName").textContent = driver.name;
+    $("driverPhone").textContent = driver.phone || "Not provided";
+    $("schoolName").textContent =
+      school?.school_name || "School name unavailable";
+
+    $("startBtn").disabled = false;
+    $("endBtn").disabled = true;
+
+    showPanel("driver");
+    setStatus("Welcome! You can now start your journey.");
+
+  } catch (error) {
+    console.error("Unexpected login error:", error);
+
+    setAuthStatus(
+      "loginStatus",
+      "Login error: " + (error.message || String(error))
+    );
+  } finally {
+    $("loginBtn").disabled = false;
+  }
+}
+
+
+
+
+async function restoreDriverSession() {
+  const savedDriverId = localStorage.getItem("busDriverId");
+
+  if (!savedDriverId) {
+    showPanel("login");
+    return;
+  }
+
+  try {
+    setStatus("Restoring your driver session...");
+
+    const { data, error } = await db
+      .from("drivers")
+      .select("id, name, email, phone, school_id")
+      .eq("id", savedDriverId)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (!data) {
+      localStorage.removeItem("busDriverId");
+      showPanel("login");
+      setStatus("Please log in to continue.");
+      return;
+    }
+
+    driver = data;
+
+    const school = schools.find(
+      item => item.id === driver.school_id
+    );
+
+    $("driverName").textContent = driver.name;
+    $("driverPhone").textContent = driver.phone || "Not provided";
+    $("schoolName").textContent =
+      school?.school_name || "School name unavailable";
+
+    $("startBtn").disabled = false;
+    $("endBtn").disabled = true;
+
+    showPanel("driver");
+    setStatus("Welcome back! You are logged in.");
+
+  } catch (error) {
+    console.error("Session restoration failed:", error);
+    showPanel("login");
+    setStatus("Could not restore your session. Please log in.");
+  }
+}
+
+  
+
+
+
+    
+    // ------------------------------------------
+    // GPS LOCATION
+    // ------------------------------------------
+
+    function showPosition(position) {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+
+      lastPosition = { lat, lng };
+
+      marker.setLatLng([lat, lng]);
+      map.setView([lat, lng], 16);
+
+      setStatus(
+        "Journey active. GPS: " +
+        lat.toFixed(6) + ", " + lng.toFixed(6)
+      );
+    }
+
+    async function saveLocation(position) {
+      if (!driver || !currentLocationId) return;
+
+      const payload = {
+        driver_id: driver.id,
+        school_id: driver.school_id,
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+        is_active: true,
+        updated_at: new Date().toISOString()
+      };
+
+      try {
+        const { error } = await db
+          .from("school_bus_locations")
+          .upsert(payload, { onConflict: "driver_id" });
+
+        if (error) throw error;
+
+        showPosition(position);
+      } catch (error) {
+        console.error(error);
+        setStatus(
+          "GPS received, but saving location failed: " + error.message
+        );
+      }
+    }
+
+    function gpsError(error) {
+      const messages = {
+        1: "Location permission denied. Please allow GPS access.",
+        2: "Your current location is unavailable.",
+        3: "Getting your location timed out."
+      };
+
+      setStatus(messages[error.code] || "Unable to get GPS location.");
+    }
+
+    // ------------------------------------------
+    // START JOURNEY
+    // ------------------------------------------
+
+    async function startJourney() {
+      if (!driver || journeyStarting || watchId !== null) return;
+
+      if (!navigator.geolocation) {
+        setStatus("This browser does not support GPS tracking.");
+        return;
+      }
+
+      journeyStarting = true;
+      $("startBtn").disabled = true;
+      setStatus("Getting your location...");
+
+      try {
+        const position = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(
+            resolve,
+            reject,
+            {
+              enableHighAccuracy: true,
+              timeout: 20000,
+              maximumAge: 0
+            }
+          );
+        });
+
+        const payload = {
+          driver_id: driver.id,
+          school_id: driver.school_id,
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          is_active: true,
+          updated_at: new Date().toISOString()
+        };
+
+        const { error } = await db
+          .from("school_bus_locations")
+          .upsert(payload, { onConflict: "driver_id" });
+
+        if (error) throw error;
+
+        currentLocationId = driver.id;
+        showPosition(position);
+        $("endBtn").disabled = false;
+
+        watchId = navigator.geolocation.watchPosition(
+          saveLocation,
+          gpsError,
+          {
+            enableHighAccuracy: true,
+            maximumAge: 5000,
+            timeout: 20000
+          }
+        );
+
+        setStatus("Journey started. Your location is being updated.");
+      } catch (error) {
+        console.error(error);
+        setStatus(
+          "Could not start journey: " +
+          (error.message || "Check GPS permissions and Supabase settings.")
+        );
+        $("startBtn").disabled = false;
+      } finally {
+        journeyStarting = false;
+      }
+    }
+
+    // ------------------------------------------
+    // END JOURNEY
+    // ------------------------------------------
+
+    async function endJourney() {
+      if (!driver || journeyEnding) return;
+
+      journeyEnding = true;
+      $("endBtn").disabled = true;
+
+      try {
+        if (watchId !== null) {
+          navigator.geolocation.clearWatch(watchId);
+          watchId = null;
+        }
+
+        const { error } = await db
+          .from("school_bus_locations")
+          .update({
+            is_active: false,
+            updated_at: new Date().toISOString()
+          })
+          .eq("driver_id", driver.id);
+
+        if (error) throw error;
+
+        currentLocationId = null;
+        $("startBtn").disabled = false;
+        setStatus("Journey ended. Live tracking has stopped.");
+      } catch (error) {
+        console.error(error);
+        setStatus("Could not end journey: " + error.message);
+        $("endBtn").disabled = false;
+      } finally {
+        journeyEnding = false;
+      }
+    }
+
+    // ------------------------------------------
+    // LOGOUT
+    // ------------------------------------------
+
+    function logoutDriver() {
+      // Stop tracking when leaving the driver session.
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+      }
+
+      driver = null;
+      localStorage.removeItem("busDriverId");
+      currentLocationId = null;
+
+      showPanel("login");
+      setStatus("You have logged out. Your journey was not automatically ended.");
+    }
+
+    $("signupBtn").addEventListener("click", signUpDriver);
+    $("loginBtn").addEventListener("click", loginDriver);
+    $("startBtn").addEventListener("click", startJourney);
+    $("endBtn").addEventListener("click", endJourney);
+    $("logoutBtn").addEventListener("click", logoutDriver);
+
+    $("signupEmail").addEventListener("keydown", event => {
+      if (event.key === "Enter") signUpDriver();
+    });
+
+    $("loginEmail").addEventListener("keydown", event => {
+      if (event.key === "Enter") loginDriver();
+    });
+
+    showPanel("login");
+
+loadSchools().then(() => {
+  restoreDriverSession();
+});
+  </script>
+</body>
+</html>

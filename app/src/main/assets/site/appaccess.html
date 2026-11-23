@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ELIMU CONNECT APP - Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #4CAF50, #81C784);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .login-container {
+      background-color: white;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .login-container h2 {
+      margin-bottom: 25px;
+      color: #4CAF50;
+      font-size: 1.8em;
+    }
+
+    .role-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .role-buttons button {
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+
+    .role-buttons button:hover {
+      background-color: #45a049;
+      transform: translateY(-2px);
+    }
+
+    .footer-note {
+      margin-top: 25px;
+      font-size: 14px;
+      color: #888;
+    }
+
+    .messages {
+  margin-top: 15px;
+  text-align: left;
+  max-height: 150px;
+  overflow-y: auto;
+  border-top: 1px solid #eee;
+  padding-top: 8px;
+}
+
+.chat-message {
+  padding: 8px;
+  margin-bottom: 6px;
+  border-radius: 6px;
+}
+
+.bot-message {
+  background-color: #f0f0f0;
+}
+
+
+
+h3 {
+  margin-top: 25px;
+  color: #2E7D32;
+  font-size: 1.2em;
+  border-bottom: 2px solid #81C784;
+  padding-bottom: 5px;
+  text-align: left;
+}
+
+
+  </style>
+</head>
+<body>
+
+<div class="login-container">
+  
+
+  <h3>🎓 Students</h3>
+  <div class="role-buttons">
+    <button onclick="sendMessage('student-free')">Student Free Features</button>
+    <button onclick="sendMessage('student-paid')">Student Paid features</button>
+  </div>
+  <div id="student-messages" class="messages"></div>
+
+  <h3>📚 Tutors</h3>
+  <div class="role-buttons">
+    <button onclick="sendMessage('tutor-free')">Tutor Free Features</button>
+    <button onclick="sendMessage('tutor-paid')">Paid features </button>
+  </div>
+  <div id="tutor-messages" class="messages"></div>
+
+  <h3>👨‍👩‍👧 Parents</h3>
+  <div class="role-buttons">
+    <button onclick="sendMessage('parent')">Parent Dashboard(Free)</button>
+  </div>
+  <div id="parent-messages" class="messages"></div>
+</div>
+
+
+<script>
+    let chatboxBody = document.getElementById("chatbox-body");
+
+    // ✅ Your existing passwords list here
+    const passwords = [ "pS9hJk!hPmD0bF7T", "Qw4$KiH6dFg8L2Zn", "M5a#Hq9oLpD1g0Fj", "R!3hP8LsE6kZyTf7",
+            "Xj2zU!hYqW8mK9Rn", "ZnD5oFq#XlT1hHs7", "P@0xWq2yLoS3tGb8", "Ym9bZqJk!5R2fX7Tc", "7Vq#9tE0yPjKn3Gs",
+            "B2FpZ#6dSk8CwLJ9", "WmR1!Yd9q8TzJ7p5", "N2xL5rPv@z6oK7iF", "QeJ8iP1#FzR2tCw0", "YpW5L7sT2h3Xo9kG",
+            "O4b6jQsN@r9V3YwT", "R#7yX9sTz0J4wKvG", "i2Xy6D$LqY7CmFvR", "P8yK0sZf9w6N3H2iL", "S3QzT9x5aX7pW!2v",
+            "zT3X1y4Mv#Ls7q0P", "iD7T6H2rX3kVbW9G", "fYz9p0B4ZxK8@W6t", "K5PqX9cL2V3#hYt7", "P9Lm#vF0Q8gR2tJ3",
+            "uZ6fM9jY8t0p5W2S", "F3vPz9hJ7B0Yx2R1", "wG7D5kX2lZ8F1rQj", "q5J7kL0xS3yFz1pY", "A8wQ9P7fK2R1!zTx",
+            "v9H0G7Uq2Z#5nL3F", "Kp2J4tQyR8wV5mF1", "Z3vN6kF2T9Xr4sB0", "wL2vY1X9Z7fTpG3M", "j6sQ8W5P1Fz0iR2C",
+            "bF9Y3kL1Rz5vH2oT", "Q3K7T9vN1g6pFz0m", "s8Yq3oR1V9pLz7gD", "F2mV6iW9zX1P0rT7", "N4g9X3L2sQk7vWzJ",
+            "vR5pY1G2mZ7s9B0W", "Q9X1tK0L2y5mF7Pz", "k8WzN2V7yF3jL0X1", "Y2tM9P1gL6X0vF7R", "f4T3JbK7h9Z2N0pV",
+            "V1m5zP9L8rY3Kj0X", "G6V9oQ2Z1p8XyR3T", "w9Y1gF4Tz2P7H0mL", "L9P7tX2Bq6vY1Wz3", "V1X2L5Tz9rF0b3Y7",
+            "Q7X6t1zP9f3yV2J5", "rP5zK2W8Q1F7yL0t", "v9X2F4T3k7J1Y0Qm", "sR1P7zF6L2X0y9jT", "B2t8kF6X5Zq1V0m7",
+            "Q9W6tL5y1G2s0X3J", "F3z0R7m5B2X8t9Y1", "K6Q4zP7f5R1Xy9T0", "F1T9W7p2Y6kXrL0m", "D9g7B6v1J2F0tX3P",
+            "m8L9F3V1X2pY4W0t", "j0T6X3K9L1B5vP2Y", "Y3R2tP7F1X6L9v0W", "sT5X9yP0F2K1L7Qm", "J2F7vT8P1X5L9Y0k",
+            "B4X2F7W1t9mL3R6p", "L9Y0vX5t2P3J1F6k", "R7B9zF2L1X6P3t0Y", "F5X2mR9Y1pL7V3tK", "K9Y6pR7L3z2F1X0t",
+            "Z4F7T1P9X3Y8L5m0", "V2kX5T1L3F9pY0R7", "qB8R9Y1mX2L5P3F0", "B9F2X1Y5L7T3v0mP", "V1L7X9p2R0Y6B3tF",
+            "L5X2F1T9Y0R6pK3m", "F1R7T6X0P3Y9L2B5", "Y7B2X5L9T1F6m3P0", "Q3X1F7Y5R2L0T9K8", "K9P1X2Y5F3L6R7t0",
+            "T7X9F1L3Y0R2B5k6", "Q1X9T2Y7F3P6L0R5", "Z3T9L2F5Y0X6P1B7", "X5Y9F7L0T2K3R1P6", "B9T1X0Y7L3F5K2R6",
+ "P7Y9X3L2T0F5R6K1", "L2X9Y0P5T6R1F7K3", "Y1L9F7X2T0R5P3K6",  
+        ];
+
+
+
+  function validatePassword(password) {
+    return passwords.includes(password);
+  }
+
+  function sendMessage(role) {
+    if (role.endsWith("paid")) {
+      const paidAccessKey = role + "-access-start";
+      const passwordValidatedKey = role + "-passwordValidated";
+      const paidDuration = 30 * 24 * 60 * 60 * 1000;
+
+      let paidAccessStart = localStorage.getItem(paidAccessKey);
+      let passwordValidated = localStorage.getItem(passwordValidatedKey);
+
+      // ✅ Check if expired
+      if (paidAccessStart && Date.now() > Number(paidAccessStart) + paidDuration) {
+        // Clear old access
+        localStorage.removeItem(paidAccessKey);
+        localStorage.removeItem(passwordValidatedKey);
+        paidAccessStart = null;
+        passwordValidated = null;
+        alert("⚠️ Your subscription has expired. Please re-enter a valid password.");
+      }
+
+      if (!passwordValidated) {
+        const inputPassword = prompt("Enter your password:");
+        if (validatePassword(inputPassword)) {
+          const now = Date.now();
+          localStorage.setItem(paidAccessKey, now);
+          localStorage.setItem(passwordValidatedKey, "true");
+          openPaid(role);
+          startPaidFeaturesCountdown(role, now);
+        } else {
+          alert("❌ Invalid or expired password. Please subscribe.");
+        }
+      } else {
+        // ✅ Still valid, just open
+        openPaid(role);
+        startPaidFeaturesCountdown(role, paidAccessStart);
+      }
+    }
+    else if (role.endsWith("free")) {
+      if (role.startsWith("student")) {
+        window.location.href = "go:free";
+      } else {
+        window.location.href = "go:tutorfree";
+      }
+    }
+    else if (role === "parent") {
+      window.location.href = "go:parent";
+    }
+  }
+
+  function openPaid(role) {
+    if (role.startsWith("student")) {
+      window.location.href = "go:bot1";
+    } else {
+      window.location.href = "go:bot2";
+    }
+  }
+
+  function startPaidFeaturesCountdown(role, startTime) {
+    const paidDuration = 30 * 24 * 60 * 60 * 1000;
+    const paidAccessEnd = Number(startTime) + paidDuration;
+
+    function updateCountdown() {
+      const now = Date.now();
+      const remainingTime = paidAccessEnd - now;
+
+      if (remainingTime <= 0) {
+        displayMessage(
+          role,
+          "⚠️ Your paid features have expired. Please <a href='go:subscribe1' target='_blank'>renew your subscription</a>.",
+          "bot",
+          role + "-countdown"
+        );
+        localStorage.removeItem(role + "-access-start");
+        localStorage.removeItem(role + "-passwordValidated");
+        clearInterval(countdownInterval);
+        return;
+      }
+
+      const days = Math.floor(remainingTime / (24 * 60 * 60 * 1000));
+      const hours = Math.floor((remainingTime % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+      const minutes = Math.floor((remainingTime % (60 * 60 * 1000)) / (60 * 1000));
+      const seconds = Math.floor((remainingTime % (60 * 1000)) / 1000);
+
+      displayMessage(
+        role,
+        `⏳ Your paid features expire in: <b>${days}d ${hours}h ${minutes}m ${seconds}s</b>.`,
+        "bot",
+        role + "-countdown"
+      );
+    }
+
+    updateCountdown();
+    const countdownInterval = setInterval(updateCountdown, 1000);
+  }
+
+  // ✅ Message display function stays the same
+  function displayMessage(role, message, sender, id = '') {
+    const chatboxBody = document.getElementById(role.split('-')[0] + "-messages");
+    let existingMessage = id ? document.getElementById(id) : null;
+
+    if (existingMessage) {
+      existingMessage.innerHTML = message;
+      return;
+    }
+
+    const messageDiv = document.createElement("div");
+    messageDiv.classList.add("chat-message", `${sender}-message`);
+    messageDiv.innerHTML = message;
+    if (id) messageDiv.id = id;
+    chatboxBody.appendChild(messageDiv);
+    chatboxBody.scrollTop = chatboxBody.scrollHeight;
+  }
+</script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>School Tools Hub</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f8;
+    margin: 0; padding: 0;
+  }
+  header {
+    background-color: #0d47a1;
+    color: #fff;
+    padding: 25px 20px;
+    text-align: center;
+  }
+  header img.logo {
+    display: block;
+    margin: 0 auto 15px;
+    width: 110px;
+    max-width: 40%;
+  }
+  header h1 { margin: 0; font-size: 2.5em; }
+  header p { font-size: 1.1em; max-width: 800px; margin: 10px auto; color: #e0e0e0; line-height: 1.6; }
+
+  .container { max-width: 1400px; margin: auto; padding: 20px; }
+  .categories { display: flex; flex-wrap: wrap; gap: 4%; margin-bottom: 30px; }
+  .category {
+    flex: 0 0 48%;
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: 0.3s;
+  }
+  .category:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+  .category-header {
+    background-color: #1976d2;
+    color: #fff;
+    padding: 20px;
+    font-weight: bold;
+    font-size: 1.5em;
+    text-align: center;
+  }
+  .tools {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+    padding: 20px;
+  }
+  .tools a {
+    display: block;
+    padding: 15px;
+    background-color: #e3f2fd;
+    text-decoration: none;
+    color: #0d47a1;
+    text-align: center;
+    border-radius: 10px;
+    transition: 0.3s;
+    font-size: 1.1em;
+    font-weight: 600;
+  }
+  .tools a:hover { background-color: #bbdefb; transform: scale(1.05); }
+  @media (max-width: 768px) { .category { flex: 0 0 100%; } }
+
+  footer {
+    text-align: center;
+    padding: 20px 0;
+    background-color: #0d47a1;
+    color: #fff;
+    font-size: 0.9em;
+  }
+  footer a { color: #ffeb3b; text-decoration: none; }
+
+  /* LOGIN OVERLAY */
+  #loginOverlay {
+    position:fixed; inset:0; z-index:10000;
+    background:rgba(255,255,255,0.3);
+    display:flex; align-items:center; justify-content:center;
+    pointer-events:all;
+    font-family:Segoe UI,sans-serif;
+  }
+  #loginOverlay button {
+    background:#4285F4; color:#fff; border:none;
+    padding:14px 22px; border-radius:8px;
+    font-size:16px; font-weight:600; cursor:pointer;
+  }
+
+  /* PAGE LOCK */
+  #pageLock {
+    position:fixed; inset:0; z-index:9998;
+    display:flex; align-items:center; justify-content:center;
+    pointer-events:all;
+  }
+  #pageLock div {
+    background:#fff; padding:12px 18px; border-radius:10px; font-weight:600;
+    box-shadow:0 4px 15px rgba(0,0,0,.2);
+  }
+
+  /* ACCESS MODAL */
+  #accessModal {
+    position:fixed; inset:0; z-index:9999;
+    background:rgba(0,0,0,.6); display:none;
+    align-items:center; justify-content:center;
+  }
+  #accessModal div {
+    background:#fff; padding:25px 30px; border-radius:12px; max-width:400px;
+    text-align:center; color:#033a63; box-shadow:0 6px 20px rgba(0,0,0,0.3);
+  }
+  #accessModal button {
+    background:#0078D7; color:#fff; border:none; padding:12px 20px;
+    border-radius:8px; font-weight:600; cursor:pointer; font-size:1em;
+  }
+
+  /* COUNTDOWN */
+  #accessCountdown {
+    position:fixed; top:100px; left:10px;
+    background:#0078D7; color:#fff; padding:12px 16px; border-radius:8px;
+    display:none; font-weight:600;
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN OVERLAY -->
+<div id="loginOverlay">
+  <button id="googleLoginBtn">Continue with Google</button>
+</div>
+
+<!-- PAGE LOCK -->
+<div id="pageLock">
+  <div>Checking access…</div>
+</div>
+
+<!-- ACCESS MODAL -->
+<div id="accessModal">
+  <div>
+    <p id="accessMessage">Payment required to access resources.</p>
+    <button id="accessBtn" onclick="showPayment()">Pay Now</button>
+  </div>
+</div>
+
+<!-- COUNTDOWN -->
+<div id="accessCountdown"></div>
+
+<header>
+  <img src="https://static.wixstatic.com/media/9ba186_61b351de3531446995b426f1c49950ed~mv2.png" alt="Elimu Connect Logo" class="logo"/>
+  <h1>Smart Elimu Connect</h1>
+  <p>Your centralized education hub. From attendance, competency tracking, and STEM learning, to lesson planning and communication — everything in one place.</p>
+  <p>Access teaching resources, math & science tools, language aids, educational games, and external learning platforms — all organized for easy use.</p>
+</header>
+
+<div class="container">
+
+  <!-- ELIMU CONNECT -->
+  <div class="categories">
+    <div class="category">
+      <div class="category-header">General Tools</div>
+      <div class="tools">
+	   
+  <li><a href="./appaccessdaily.html" target="_blank" title="Get affordable websites for schools and educational institutions.">Affordable Schools Websites</a></li>
+  <li><a href="./register4.html" target="_blank" title="Manage and track student attendance easily with a smart digital register.">Smart Register</a></li>
+  <li><a href="./acbl.html" target="_blank" title="Record, track, and showcase student projects and competency-based learning portfolios.">Projects & CBL Portfolio</a></li>
+  <li><a href="./projects.html" target="_blank" title="Generate activities and projects automatically for classroom use.">Activities/Projects Generator</a></li>
+  <li><a href="./homeworkbest.html" target="_blank" title="Create, assign, and track homework efficiently for your students.">Homework Smart System</a></li>
+  <li><a href="./driver.html" target="_blank" title="Track school bus routes and driver information in real-time.">School Bus Tracking - Driver Phase</a></li>
+  <li><a href="./parents.html" target="_blank" title="Parents can track the school bus and student activities for safety and updates.">School Bus Tracking - Parents Phase</a></li>
+  <li><a href="./competencytracker.html" target="_blank" title="Monitor student competencies and performance across subjects.">Competencies Tracker</a></li>
+  <li><a href="./fortutor4.html" target="_blank" title="AI-powered assistant to help teachers plan lessons and answer queries.">AI Teaching Assistant</a></li>
+  <li><a href="https://wisdomappweb.site/mappingteachers" target="_blank" title="Map teacher-student physical locations for classroom planning and management.">Teacher-student Physical Mapping</a></li>
+  <li><a href="./club.html" target="_blank" title="Manage STEM clubs, track activities, and engage students in science, tech, and innovation.">STEMLa Club</a></li>
+  <li><a href="./parentengagement.html" target="_blank" title="Connect with parents for updates, notifications, and student progress tracking.">Parent Connect</a></li>
+  <li><a href="./aitest.html" target="_blank" title="Test and explore ElimuConnect AI tools for teaching, quizzes, and learning support.">ElimuConnect A.I</a></li>
+  <li><a href="./game.html" target="_blank" title="Engage students with competitive quizzes and interactive games.">Compete & Win</a></li>
+  <li><a href="https://elimuconnect.github.io/ELIMU-CONNECT-/adverts" target="_blank" title="Learn coding and programming skills through interactive lessons and projects.">Learn to Code</a></li>
+
+
+	 </div>
+      </div>
+    
+
+    
+    <div class="category">
+      <div class="category-header">MathX Tools</div>
+       <div class="tools">
+ 
+  
+    <li><a href="./mathformulars.html" target="_blank" title="Access common mathematics formulas for easy reference and calculations.">Math Formulas</a></li>
+    <li><a href="./mathgraphs.html" target="_blank" title="Plot and analyze graphs of different mathematical functions.">Math Graphs</a></li>
+    <li><a href="./transformation.html" target="_blank" title="Explore geometric transformations like translation, rotation, reflection, and scaling.">Transformation</a></li>
+    <li><a href="./tables.html" target="_blank" title="View multiplication, division, and other mathematical tables.">Math Tables</a></li>
+    <li><a href="./trigonometry.html" target="_blank" title="Understand trigonometry using the unit circle.">Trigonometry (Unit Circle)</a></li>
+    <li><a href="./sohcahtoa.html" target="_blank" title="Use SOHCAHTOA to solve right-angle triangle problems.">Trigonometry (SOHCAHTOA)</a></li>
+    <li><a href="./areas.html" target="_blank" title="Calculate areas of various geometric shapes.">Area</a></li>
+    <li><a href="./volumes.html" target="_blank" title="Calculate volumes of 3D objects and solids.">Volume</a></li>
+    <li><a href="./quadraticsolver.html" target="_blank" title="Solve quadratic equations quickly using the solver tool.">Quadratic Solver</a></li>
+    <li><a href="./statistics.html" target="_blank" title="Perform statistical calculations and understand data sets.">Statistics</a></li>
+    <li><a href="./vectors.html" target="_blank" title="Learn and solve vector-related problems in physics and mathematics.">Vectors</a></li>
+    <li><a href="./matrix1.html" target="_blank" title="Perform basic matrix operations like addition and multiplication.">Matrix 1</a></li>
+    <li><a href="./matrix2.html" target="_blank" title="Work with advanced matrix operations including inverses and determinants.">Matrix 2</a></li>
+    <li><a href="./long&lat.html" target="_blank" title="Calculate longitude and latitude values and understand coordinates.">Longitude & Latitude</a></li>
+    <li><a href="./differentiate&integrate.html" target="_blank" title="Perform differentiation and integration for calculus problems.">Differentiation & Integration</a></li>
+    <li><a href="./area approximation.html" target="_blank" title="Use mid-ordinate and trapezium methods to approximate areas.">Mid-ordinate & Trapezium</a></li>
+    <li><a href="./integrationarea.html" target="_blank" title="Calculate approximate area under curves using integration.">Integration Area Approx.</a></li>
+    <li><a href="./error.html" target="_blank" title="Understand and calculate errors in measurements and calculations.">Error</a></li>
+    <li><a href="./logs.html" target="_blank" title="Work with logarithms for calculations and problem solving.">Logarithms</a></li>
+    <li><a href="./commercial1.html" target="_blank" title="Calculate simple and compound interest for financial mathematics.">Interest (Simple & Compound)</a></li>
+    <li><a href="./incometax.html" target="_blank" title="Understand and calculate income tax problems.">Income Tax</a></li>
+    <li><a href="./variations.html" target="_blank" title="Learn direct and inverse variations in algebra.">Variations</a></li>
+    <li><a href="./binomial.html" target="_blank" title="Use binomial expansion to simplify algebraic expressions.">Binomial Expansion</a></li>
+ 
+</div>
+
+      </div>
+   
+ 
+  
+  
+  
+    <div class="category">
+      <div class="category-header">ChemX Tools</div>
+       <div class="tools">
+
+ 
+    <li><a href="./chemreactions.html" target="_blank" title="Explore different chemical reactions, balancing equations and reaction types.">Chem Reactions</a></li>
+    <li><a href="./moleconcept.html" target="_blank" title="Understand the mole concept and calculations involving Avogadro's number.">Mole Concept</a></li>
+    <li><a href="./organicchem.html" target="_blank" title="Study organic chemistry topics including hydrocarbons and functional groups.">Organic Chemistry</a></li>
+    <li><a href="./periodictable.html" target="_blank" title="View the periodic table and understand element properties and groups.">Periodic Table</a></li>
+    <li><a href="./commongases.html" target="_blank" title="Learn about common gases, their properties, and chemical behavior.">Common Gases</a></li>
+    <li><a href="./chemgraphs.html" target="_blank" title="Analyze chemical graphs, concentration curves, and reaction rates.">Chem Graphs</a></li>
+    <li><a href="./chemformulars.html" target="_blank" title="Access essential chemistry formulas for calculations and experiments.">Chem Formulas</a></li>
+    <li><a href="./chemicalformula&quations.html" target="_blank" title="Learn to write and balance chemical formulas and equations.">Chemical Formulas & Equations</a></li>
+    <li><a href="./gaslaws.html" target="_blank" title="Study the different gas laws like Boyle's, Charles', and Avogadro's laws.">Gas Laws</a></li>
+    <li><a href="./diffusionlaw.html" target="_blank" title="Understand diffusion laws and principles in gases and liquids.">Diffusion Law</a></li>
+    <li><a href="./ram.html" target="_blank" title="Learn about relative atomic mass (R.A.M) and molecular mass calculations.">R.A.M</a></li>
+    <li><a href="https://elimuconnect.github.io/ELIMU-CONNECT-/molesmassmm" target="_blank" title="Calculate moles, mass, and molar mass for chemical substances.">Moles, Mass, Molar Mass</a></li>
+    <li><a href="./empiricalmolecular.html" target="_blank" title="Determine empirical and molecular formulas from experimental data.">Empirical & Molecular</a></li>
+    <li><a href="./titrations.html" target="_blank" title="Perform and understand titration experiments and calculations.">Titrations</a></li>
+    <li><a href="./radioactivity.html" target="_blank" title="Study radioactivity, decay, and nuclear reactions.">Radioactivity</a></li>
+    <li><a href="./solubility.html" target="_blank" title="Understand solubility, saturation, and solubility product principles.">Solubility</a></li>
+    <li><a href="./bondenergies.html" target="_blank" title="Learn about bond energies and calculations involving chemical bonds.">Bond Energies</a></li>
+    <li><a href="./thermochemistry.html" target="_blank" title="Explore thermochemistry, enthalpy changes, and energy calculations.">Thermochemistry</a></li>
+ 
+
+      </div>
+    </div>
+ 
+  
+    <!-- Wisdom App -->
+    <div class="category">
+      <div class="category-header">BioX,PhyX,LangX</div>
+      <div class="tools">
+        <!-- Biology Tools -->
+ <div class="bio">Biology
+ 
+    <li><a href="./bones.html" target="_blank" title="Learn about human and animal bones, structure, and functions.">Bones</a></li>
+    <li><a href="./humanandfishanatomy.html" target="_blank" title="Explore human and fish anatomy with illustrations and detailed explanations.">Human and Fish Anatomy</a></li>
+    <li><a href="./plantantomy.html" target="_blank" title="Study plant anatomy, including structure of leaves, stems, roots, and flowers.">Plant Anatomy</a></li>
+
+</div>
+
+<div class="phy">Physics
+  
+    <li><a href="./physicsformulars.html" target="_blank" title="Access essential physics formulas for mechanics, electricity, and more.">Physics Formulas</a></li>
+    <li><a href="./physicsprinciplesexplorer.html" target="_blank" title="Interactive exploration of physics principles and experiments.">Principles Explorer</a></li>
+    <li><a href="./unitconverter.html" target="_blank" title="Convert units across physics measurements for easy calculations.">Unit Converter</a></li>
+ 
+</div>
+
+<div class="kisw">Kiswahili
+ 
+    <li><a href="./kamusi.html" target="_blank" title="Swahili dictionary to understand meanings of words and phrases.">Kamusi</a></li>
+    <li><a href="./methali.html" target="_blank" title="Learn Swahili proverbs and their meanings for effective communication.">Methali</a></li>
+    <li><a href="./nahaunamisema.html" target="_blank" title="Common Swahili sayings and idioms with explanations.">Nahau na Misemo</a></li>
+ 
+</div>
+
+<div class="eng">English
+ 
+    <li><a href="./dictionary.html" target="_blank" title="English dictionary for word meanings and pronunciation.">Dictionary</a></li>
+    <li><a href="./ideoms.html" target="_blank" title="Collection of English idioms with explanations and examples.">Idioms</a></li>
+    <li><a href="./proverbs.html" target="_blank" title="Popular English proverbs and their interpretations.">Proverbs</a></li>
+    <li><a href="./similiesandmetaphors.html" target="_blank" title="Examples of similes and metaphors used in English writing.">Similes and Metaphors</a></li>
+  
+</div>
+
+ </div>
+      </div>
+  
+
+
+
+
+
+
+
+   
+    <div class="category">
+      <div class="category-header"><strong>External Resources</strong><br> – These are trusted external websites and tools designed to help teachers, students<br>
+ , 
+ and educators improve learning, teaching, and exam preparation.<br> Feel free to use them as needed!</div>
+      <div class="tools">
+  <!-- External Education Resources -->
+ 
+  <li>
+  <a href="https://www.calculator.net/scientific-calculator.html" target="_blank" title="Online scientific calculator for complex calculations, including trigonometry, logarithms, and more.">
+    Scientific Calculator
+  </a>
+</li>
+
+  <li><a href="https://worksheetzone.org" target="_blank" title="Provides downloadable worksheets for various subjects and grades.">Worksheet Zone</a></li>
+  <li><a href="https://webflow-dev.quizizz.com/homepage-au?lng=en" target="_blank" title="Interactive quizzes and assessments for students with real-time feedback.">Quizizz</a></li>
+  <li><a href="https://www.labxchange.org/" target="_blank" title="Virtual lab simulations and science resources for hands-on learning.">LabXchange</a></li>
+  <li><a href="https://phet.colorado.edu/" target="_blank" title="Physics, chemistry, and math interactive simulations for classrooms.">PhET Simulations</a></li>
+  <li><a href="https://www.mentimeter.com/" target="_blank" title="Create interactive presentations and polls to engage students.">Mentimeter</a></li>
+  <li><a href="https://kahoot.it/" target="_blank" title="Game-based quizzes and learning competitions to make lessons fun.">Kahoot!</a></li>
+  <li><a href="https://gemini.google.com/app" target="_blank" title="Google AI assistant for generating ideas, summaries, and content.">Google Gemini</a></li>
+  <li><a href="https://chatgpt.com/" target="_blank" title="AI chatbot for explanations, tutoring, lesson ideas, and more.">ChatGPT</a></li>
+  <li><a href="https://classroom.google.com/" target="_blank" title="Organize classes, assignments, and communicate with students online.">Google Classroom</a></li>
+  <li><a href="https://www.instructure.com/" target="_blank" title="Canvas LMS: Manage courses, assignments, grading, and collaboration.">Canvas</a></li>
+  <li><a href="https://nearpod.com/" target="_blank" title="Interactive lessons, quizzes, and virtual classroom engagement tools.">Nearpod</a></li>
+  <li><a href="https://www.peardeck.com/" target="_blank" title="Integrates with slides to make interactive presentations for students.">Pear Deck</a></li>
+  <li><a href="https://www.socrative.com/" target="_blank" title="Real-time quizzes, polls, and assessment tools for classroom feedback.">Socrative</a></li>
+  <li><a href="https://get.plickers.com/" target="_blank" title="Instant student assessments using a camera and printed cards.">Plickers</a></li>
+  <li><a href="https://www.canva.com/education/" target="_blank" title="Create educational graphics, presentations, and collaborative designs.">Canva for Education</a></li>
+  <li><a href="https://docs.google.com/forms/u/0/" target="_blank" title="Build surveys, quizzes, and collect student responses easily.">Google Forms</a></li>
+  <li><a href="https://copilot.microsoft.com/" target="_blank" title="AI assistant integrated with Microsoft 365 to enhance productivity.">Microsoft Copilot</a></li>
+  <li><a href="https://www.microsoft.com/en-us/microsoft-365/powerpoint?msockid=0b39fb68677a6b4a3a2aed3d66f86a3a" target="_blank" title="Create interactive slides, presentations, and learning materials.">Microsoft PowerPoint</a></li>
+  <li><a href="https://edpuzzle.com/" target="_blank" title="Turn videos into interactive lessons with embedded questions.">Edpuzzle</a></li>
+  <li><a href="https://quizlet.com/" target="_blank" title="Flashcards, games, and study sets to reinforce learning.">Quizlet</a></li>
+  <li><a href="https://onenote.cloud.microsoft/" target="_blank" title="Digital notebook for organizing lesson plans and notes.">OneNote</a></li>
+  <li><a href="https://trello.com/" target="_blank" title="Project management tool to organize tasks, lessons, and teamwork.">Trello</a></li>
+  <li><a href="https://ed.ted.com/" target="_blank" title="Curated educational videos with interactive questions for learning.">TED-Ed</a></li>
+  <li><a href="https://www.polleverywhere.com/" target="_blank" title="Live polling and audience interaction during lessons.">Poll Everywhere</a></li>
+  <li><a href="https://answergarden.ch/" target="_blank" title="Create simple online polls or brainstorming word clouds.">AnswerGarden</a></li>
+  <li><a href="https://www.microsoft.com/en/education" target="_blank" title="Microsoft Education portal with resources, lesson plans, and tools.">Microsoft Education</a></li>
+  <li><a href="https://www.socialcreator.com/pastpapersandquizes" target="_blank" title="Access past papers, quizzes, and practice resources for students.">All Resources</a></li>
+  <li><a href="https://kcserevision.com/" target="_blank" title="Past papers, revision notes, and exam preparation for KCSE.">KCSE Revision</a></li>
+  <li><a href="https://teacher.co.ke/" target="_blank" title="Teacher resources, tips, and education news in Kenya.">Teacher.co.ke</a></li>
+
+
+ 
+  
+</div>
+    </div>
+  
+
+
+
+    <!-- Wisdom App -->
+    <div class="category">
+      <div class="category-header">TPAD,TPAY,ZERAKI,TSC WEBSITE</div>
+      <div class="tools">
+  <!-- External Education Resources -->
+ 
+ 
+  <li><a href="https://teachersonline.tsc.go.ke/" target="_blank" title="Official portal for teachers to access personal records,and professional updates.">Teachers Online TSC</a></li>
+  <li><a href="https://tpay.tsc.go.ke/fa392bf9a4692aa0cc/zln" target="_blank" title="Online platform for TSC teachers to access payslips and P9">TPay TSC</a></li>
+  <li><a href="https://tpad2.tsc.go.ke/" target="_blank" title="Teacher Performance Appraisal and Development system to monitor and record teacher performance.">TPAD2 TSC</a></li>
+  <li><a href="https://www.zeraki.app/zeraki-analytics" target="_blank" title="Analytics platform to monitor student performance and school metrics using data dashboards.">Zeraki Analytics</a></li>
+
+
+</div>
+    </div>
+ 
+</div>
+
+
+<footer>
+  &copy; 2025 <strong>Smart Elimu Connect</strong>. All rights reserved.  
+  
+</footer>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+<script>
+/* ================= FIREBASE ================= */
+firebase.initializeApp({
+  apiKey: "AIzaSyCAiOSHmURDyAAYm5EmoomLkZ_Aud7iXIQ",
+  authDomain: "cbc-general.firebaseapp.com",
+  databaseURL: "https://cbc-general-default-rtdb.firebaseio.com",
+  projectId: "cbc-general",
+  storageBucket: "cbc-general.firebasestorage.app",
+  messagingSenderId: "764732839741",
+  appId: "1:764732839741:web:ab829af54839de91359754"
+});
+
+const auth = firebase.auth();
+const db = firebase.database();
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+/* ================= SETTINGS ================= */
+const PAYMENT_LINK = "https://paystack.shop/pay/xa5ez78ywo";
+const ACCESS_DURATION = 24 * 60 * 60 * 1000; // 24h
+
+/* ================= HELPERS ================= */
+function lockPage(){ document.getElementById("pageLock").style.display="flex"; }
+function unlockPage(){ document.getElementById("pageLock").style.display="none"; }
+
+function showAccessModal(msg){
+  const m=document.getElementById("accessModal");
+  document.getElementById("accessMessage").innerHTML=msg;
+  m.style.display="flex";
+  document.getElementById("accessBtn").onclick=()=>location.href=PAYMENT_LINK;
+}
+
+function formatTime(ms){
+  let s=Math.floor(ms/1000),h=Math.floor(s/3600),
+      m=Math.floor((s%3600)/60),sec=s%60;
+  return h?`${h}h ${m}m ${sec}s`:`${m}:${sec.toString().padStart(2,"0")}`;
+}
+
+function getFingerprint(){
+  let fp=localStorage.getItem("fp");
+  if(!fp){
+    fp="fp_"+btoa(navigator.userAgent+screen.width+screen.height+navigator.language);
+    localStorage.setItem("fp",fp);
+  }
+  return fp;
+}
+
+/* ======== EMAIL ENCODE/DECODE ======== */
+function encodeEmail(email){ return email.replace(/\./g, ','); }
+function decodeEmail(key){ return key.replace(/,/g, '.'); }
+
+/* ================= CHECK SCHOOL ACCESS ================= */
+async function checkSchoolAccess(email){
+  email = email.toLowerCase().trim();
+  const now = Date.now();
+  const snap = await db.ref("schooltools").get();
+  let access = { allowed:false, isAdmin:false, schoolId:null, school:null, adminEmail:null };
+
+  snap.forEach(s=>{
+    const school=s.val();
+    if(!school || (school.expiresAt && now>school.expiresAt)) return;
+
+    if(school.adminEmail?.toLowerCase()===email){
+      access={allowed:true, isAdmin:true, schoolId:s.key, school, adminEmail:school.adminEmail};
+    } else if(school.teachers && school.teachers[encodeEmail(email)]){
+      access={allowed:true, isAdmin:false, schoolId:s.key, school, adminEmail:school.adminEmail};
+    }
+  });
+
+  return access;
+}
+
+/* ================= RENDER ADMIN PANEL ================= */
+function renderAdminPanel(schoolId, school){
+  document.body.innerHTML=`
+    <div style="max-width:600px;margin:40px auto;font-family:sans-serif;">
+      <h2>${school.name||"School"} – Admin Panel</h2>
+      <p><b>Teacher limit:</b> ${school.maxTeachers||0}</p>
+      <input id="teacherEmail" placeholder="teacher@email.com" style="padding:8px;width:70%" />
+      <button onclick="addTeacher('${schoolId}')">Add</button>
+      <h3>Teachers</h3>
+      <ul id="teacherList"></ul>
+      <p id="adminCountdown" style="margin-top:10px;color:green;"></p>
+    </div>
+  `;
+  renderTeacherList(schoolId, school.teachers||{});
+}
+
+function renderTeacherList(schoolId, teachers){
+  const ul=document.getElementById("teacherList");
+  ul.innerHTML="";
+  Object.keys(teachers).forEach(encEmail=>{
+    const email=decodeEmail(encEmail);
+    const li=document.createElement("li");
+    li.innerHTML=`${email} <button onclick="removeTeacher('${schoolId}','${email}')">Remove</button>`;
+    ul.appendChild(li);
+  });
+}
+
+/* ================= ADD/REMOVE TEACHERS ================= */
+async function addTeacher(schoolId){
+  const email=document.getElementById("teacherEmail").value.toLowerCase().trim();
+  if(!email) return;
+
+  const ref=db.ref(`schooltools/${schoolId}`);
+  const snap=await ref.get();
+  const school=snap.val();
+
+  const count=school.teachers ? Object.keys(school.teachers).length : 0;
+  if(count>=(school.maxTeachers||0)){ alert("Teacher limit reached"); return; }
+
+  await ref.child(`teachers/${encodeEmail(email)}`).set(true);
+  renderTeacherList(schoolId, {...school.teachers, [encodeEmail(email)]:true});
+  document.getElementById("teacherEmail").value="";
+}
+
+async function removeTeacher(schoolId,email){
+  await db.ref(`schooltools/${schoolId}/teachers/${encodeEmail(email)}`).remove();
+  const snap=await db.ref(`schooltools/${schoolId}`).get();
+  renderTeacherList(schoolId, snap.val().teachers||{});
+}
+
+/* ================= GOOGLE LOGIN ================= */
+document.getElementById("googleLoginBtn").onclick=()=> auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+
+/* ================= MAIN FLOW ================= */
+auth.onAuthStateChanged(async user=>{
+  if(!user) return;
+
+  document.getElementById("loginOverlay").style.display="none";
+  lockPage();
+
+  const email=user.email;
+  const fingerprint=getFingerprint();
+  let reference=new URLSearchParams(location.search).get("reference");
+
+  const access=await checkSchoolAccess(email);
+
+  if(!access.allowed){
+    unlockPage();
+    showAccessModal("Payment required to access tools.");
+    return;
+  }
+
+  async function checkAdminPaid(adminEmail){
+    let active=null;
+    const snap=await db.ref("paystackRefs").orderByChild("email").equalTo(adminEmail).get();
+    snap.forEach(s=>{
+      const v=s.val();
+      if(Date.now()<=v.expiresAt && !active) active=v;
+    });
+    return active;
+  }
+
+  if(access.isAdmin){
+    // Admin must pay
+    let active=await checkAdminPaid(email);
+
+    if(!active){
+      if(!reference){ showAccessModal("Admin must pay to access tools."); return; }
+
+      const refPath=`paystackRefs/${reference}`;
+      const refSnap=await db.ref(refPath).get();
+      if(refSnap.exists()){ showAccessModal("This payment reference was already used."); return; }
+
+      const expiresAt=Date.now()+ACCESS_DURATION;
+      await db.ref(refPath).set({email,fingerprint,expiresAt});
+
+      if(window.history.replaceState){
+        const cleanUrl=window.location.origin+window.location.pathname;
+        window.history.replaceState(null,'',cleanUrl);
+      }
+      active={expiresAt};
+    }
+
+    unlockPage();
+    renderAdminPanel(access.schoolId, access.school);
+
+    const countdown=document.getElementById("adminCountdown");
+    countdown.style.display="block";
+    setInterval(()=>{
+      const r=active.expiresAt-Date.now();
+      if(r<=0) showAccessModal("Admin access expired.");
+      else countdown.textContent="Paid access: "+formatTime(r);
+    },1000);
+
+  } else {
+    // Teacher – check if admin has paid
+    const active=await checkAdminPaid(access.adminEmail);
+    if(!active){
+      showAccessModal("Admin has not paid. Teacher access blocked.");
+      return;
+    }
+
+    // ✅ SHOW TEACHER COUNTDOWN
+    const countdown = document.createElement("p");
+    countdown.id="teacherCountdown";
+    countdown.style.color="blue";
+    countdown.style.marginTop="10px";
+    countdown.textContent="Admin access: "+formatTime(active.expiresAt-Date.now());
+    document.body.appendChild(countdown);
+
+    unlockPage();
+
+    setInterval(()=>{
+      const r=active.expiresAt-Date.now();
+      if(r<=0) showAccessModal("Admin access expired.");
+      else countdown.textContent="Admin access: "+formatTime(r);
+    },1000);
+  }
+});
+</script>
+
+</body>
+</html>

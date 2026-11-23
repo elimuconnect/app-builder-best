@@ -1,0 +1,178 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trial Chatbot</title>
+    <style>
+        /* Basic styling for the chatbot */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .chatbox {
+            width: 300px;
+            height: 400px;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chatbox-header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            text-align: center;
+        }
+
+        .chatbox-body {
+            padding: 10px;
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+
+        .chatbox-input {
+            display: flex;
+            padding: 10px;
+            background-color: #f4f4f9;
+        }
+
+        .chatbox-input input, .chatbox-input button {
+            padding: 10px;
+            margin-right: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .chatbox-input button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        .chatbox-input button:hover {
+            background-color: #45a049;
+        }
+
+        .chat-message {
+            margin: 5px 0;
+        }
+
+        .user-message {
+            text-align: right;
+        }
+
+        .bot-message {
+            text-align: left;
+            background-color: #f0f0f0;
+            padding: 8px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chatbox" id="chatbox">
+        <div class="chatbox-header">
+            <h2>Welcome to Our Trial Chatbot</h2>
+        </div>
+        <div class="chatbox-body" id="chatbox-body">
+            <!-- Messages will be displayed here -->
+        </div>
+    </div>
+
+    <script>
+        let chatboxBody = document.getElementById("chatbox-body");
+
+        // Function to display messages in the chatbox
+        function displayMessage(message, sender) {
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("chat-message", `${sender}-message`);
+            messageDiv.innerHTML = message;
+            chatboxBody.appendChild(messageDiv);
+            chatboxBody.scrollTop = chatboxBody.scrollHeight;  // Scroll to the bottom
+        }
+
+        // Function to format the countdown time
+        function formatCountdown(time) {
+            const days = Math.floor(time / (24 * 60 * 60 * 1000));
+            const hours = Math.floor((time % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+            const minutes = Math.floor((time % (60 * 60 * 1000)) / (60 * 1000));
+            const seconds = Math.floor((time % (60 * 1000)) / 1000);
+            return `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
+        }
+
+        // Function to start the chat and check trial status
+        function startChat() {
+            const trialKey = "trial-start-time";
+            const trialLockKey = "trial-locked";  // Key to lock the trial after 3 days
+            const trialDuration = 3 * 24 * 60 * 60 * 1000;  // 3 days in milliseconds
+            const trialStart = localStorage.getItem(trialKey);
+
+            if (trialStart) {
+                // Trial has started, calculate expiration time
+                const trialEnd = parseInt(trialStart) + trialDuration;
+                const now = Date.now();
+
+                if (now < trialEnd) {
+                    // Trial is still valid, show countdown and premium link
+                    const remainingTime = trialEnd - now;
+                    const countdownMessage = `Your trial ends in: ${formatCountdown(remainingTime)}`;
+                    displayMessage(countdownMessage, "bot");
+
+                    const premiumLinkMessage = "Click here to access premium content: <a href='./tools.html' target='_blank'>Student Paid-TRIAL Features</a>";
+                    displayMessage(premiumLinkMessage, "bot");
+
+                    // Update countdown every second
+                    const countdownInterval = setInterval(() => {
+                        const remainingTime = trialEnd - Date.now();
+                        if (remainingTime <= 0) {
+                            clearInterval(countdownInterval);
+                            displayMessage("Your trial has expired. Please subscribe to continue using the chatbot.", "bot");
+                            // Lock the trial for this browser
+                            localStorage.setItem(trialLockKey, "true");
+                        } else {
+                            const updatedCountdownMessage = `Your trial ends in: ${formatCountdown(remainingTime)}`;
+                            chatboxBody.lastChild.innerHTML = updatedCountdownMessage;
+                        }
+                    }, 1000);
+
+                    // Keep the chat going
+                    displayMessage("How can I assist you today?", "bot");
+                } else {
+                    // Trial expired for this browser, check if locked
+                    if (localStorage.getItem(trialLockKey) === "true") {
+                        displayMessage("Your trial has expired. Please subscribe to continue using the chatbot.", "bot");
+                    } else {
+                        // Trial expired but not locked, prompt user to start a new trial or subscribe
+                        displayMessage("Your trial has expired. Please subscribe to continue using paid features.", "bot");
+                    }
+                }
+            } else {
+                // First time, start a new trial
+                displayMessage("You are starting a 3-day free trial! We will let you know when it's about to expire.", "bot");
+                const trialStartTime = Date.now();
+                localStorage.setItem(trialKey, trialStartTime);
+                displayMessage("Your trial has started! We'll keep track of the time remaining.", "bot");
+            }
+        }
+
+        // Automatically start the chatbot on page load
+        window.onload = startChat;
+    </script>
+
+</body>
+</html>
+
+                    

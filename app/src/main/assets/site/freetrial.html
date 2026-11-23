@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ELIMU CONNECT WEBSITE - Trial Access</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #4CAF50, #81C784);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: #fff;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      max-width: 600px;
+      width: 90%;
+      text-align: center;
+    }
+
+    h1 {
+      color: #4CAF50;
+      margin-bottom: 20px;
+    }
+
+    #message-area {
+      text-align: left;
+      margin-top: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+      border-top: 1px solid #ddd;
+      padding-top: 20px;
+    }
+
+    .message {
+      margin-bottom: 15px;
+      line-height: 1.6;
+    }
+
+    a {
+      color: #4CAF50;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .countdown {
+      font-weight: bold;
+      color: #e65100;
+    }
+
+
+
+
+a {
+  color: #007BFF; /* Bootstrap-like blue */
+  text-decoration: none;
+  font-weight: bold;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: #0056b3; /* Darker blue on hover */
+}
+
+
+
+
+
+
+
+
+
+
+
+    
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Welcome to ELIMU CONNECT APP</h1>
+    <p>You're eligible for a 7-day free trial. Messages will appear below:</p>
+    <div id="message-area"></div>
+  </div>
+
+  <script>
+    const messageArea = document.getElementById("message-area");
+
+    function displayMessage(msg, isCountdown = false) {
+      const div = document.createElement("div");
+      div.classList.add("message");
+      if (isCountdown) div.classList.add("countdown");
+      div.innerHTML = msg;
+      messageArea.appendChild(div);
+      messageArea.scrollTop = messageArea.scrollHeight;
+    }
+
+    function formatCountdown(ms) {
+      const days = Math.floor(ms / (24 * 60 * 60 * 1000));
+      const hours = Math.floor((ms % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+      const minutes = Math.floor((ms % (60 * 60 * 1000)) / (60 * 1000));
+      const seconds = Math.floor((ms % (60 * 1000)) / 1000);
+      return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    }
+
+    function startTrialCheck() {
+      const trialKey = "trial-start-time";
+      const trialLockKey = "trial-locked";
+      const trialDuration = 7 * 24 * 60 * 60 * 1000;
+      const trialStart = localStorage.getItem(trialKey);
+
+      if (trialStart) {
+        const trialEnd = parseInt(trialStart) + trialDuration;
+        const now = Date.now();
+
+        if (now < trialEnd) {
+          displayMessage("✅ Your trial is active.");
+
+          const link = "Click here to access trial features: <a href='./tools.html' target='_blank'>Student/Teacher Trial Features</a>";
+          displayMessage(link);
+
+          const interval = setInterval(() => {
+            const remaining = trialEnd - Date.now();
+            if (remaining <= 0) {
+              clearInterval(interval);
+              displayMessage("❌ Your free trial has expired. Please subscribe to continue.", true);
+              localStorage.setItem(trialLockKey, "true");
+            } else {
+              const lastCountdown = document.querySelector(".countdown");
+              const countdownText = `⏳ Trial ends in: <span>${formatCountdown(remaining)}</span>`;
+              if (lastCountdown) {
+                lastCountdown.innerHTML = countdownText;
+              } else {
+                displayMessage(countdownText, true);
+              }
+            }
+          }, 1000);
+
+          displayMessage("Need help using our tools? Just reach out!");
+        } else {
+          // Trial expired
+          if (localStorage.getItem(trialLockKey) === "true") {
+            displayMessage("❌ Your free trial has expired. Please subscribe to continue.");
+          } else {
+            displayMessage("Your trial has ended. Subscribe for full access.");
+          }
+        }
+      } else {
+        // First-time user
+        const now = Date.now();
+        localStorage.setItem(trialKey, now);
+        displayMessage("🎉 Welcome! Your 7-day free trial has started.");
+        displayMessage("Enjoy full access during this period.");
+        startTrialCheck();  // Restart with trial initialized
+      }
+    }
+
+    window.onload = startTrialCheck;
+  </script>
+</body>
+</html>
+

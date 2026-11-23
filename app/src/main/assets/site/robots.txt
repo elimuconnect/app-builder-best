@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /
+
+Allow: /ELIMU-CONNECT-/elimu.html
+Allow: /ELIMU-CONNECT-/blog.html
+Allow: /ELIMU-CONNECT-/alessonsbest.html
+Allow: /ELIMU-CONNECT-/atutoring.html
+Allow: /ELIMU-CONNECT-/atutoring2.html
+Allow: /ELIMU-CONNECT-/atutoring3.html
+Allow: /ELIMU-CONNECT-/adult.html

@@ -1,0 +1,441 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+<title>SMART Elimu Connect Live Maths Lesson</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#f5f7fb;
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:700px;
+    margin:auto;
+}
+
+.card{
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 5px 20px rgba(0,0,0,.1);
+    text-align:center;
+}
+
+h1{
+    color:#1565c0;
+}
+
+.lesson-info{
+    margin:20px 0;
+    padding:15px;
+    background:#eef5ff;
+    border-radius:10px;
+}
+
+button{
+    background:#1565c0;
+    color:white;
+    border:none;
+    padding:15px 25px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:16px;
+}
+
+button:disabled{
+    opacity:.6;
+}
+
+#accessCountdown{
+    margin-top:15px;
+    font-weight:bold;
+    color:#1565c0;
+}
+
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.6);
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+
+.modal-content{
+    background:white;
+    width:90%;
+    max-width:450px;
+    border-radius:15px;
+    padding:25px;
+    text-align:center;
+}
+
+.modal-content button{
+    margin-top:15px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="card">
+
+        <h1>🎓 SMART Elimu Connect Live Mathematics Lessons</h1>
+
+        <p style="margin-top:-8px;color:#555;font-size:15px;">
+            KCSE Revision & Grade 10 (CBC) Live Online Classes
+        </p>
+
+        <!-- DYNAMIC LESSON DISPLAY -->
+        <div class="lesson-info">
+            <h3>Loading today's lessons...</h3>
+            <p>Please wait while we prepare your schedule.</p>
+        </div>
+
+        <button id="studentBtn">
+            🔒 Unlock This Week's Lessons
+        </button>
+
+        <div id="accessCountdown"></div>
+
+        <div style="
+            margin-top:15px;
+            padding:15px;
+            background:#fff8e1;
+            border-left:4px solid #ff9800;
+            border-radius:8px;
+            text-align:left;
+            font-size:14px;
+            line-height:1.7;
+        ">
+
+        <strong>📢 How to Join</strong>
+
+<ol style="margin-top:10px;padding-left:20px;line-height:1.8;">
+
+    <li>📅 Book your lessons at least <strong>1 day before</strong> the learning week begins.</li>
+
+    <li>💰 Pay the <strong>weekly lesson fee</strong>.</li>
+
+    <li>✅ Once payment is confirmed, <strong>all lessons for that week will be unlocked automatically.</strong></li>
+
+    <li>📲 A <strong>Notify Teacher on WhatsApp</strong> button will appear after payment.</li>
+
+    <li>📩 Tap the WhatsApp button to confirm your booking with the teacher.</li>
+
+    <li>🎥 Join your live Google Meet lessons at the scheduled times throughout the week.</li>
+
+</ol>
+
+<p style="margin:15px 0 0;padding:10px;background:#e8f5e9;border-left:4px solid #4caf50;border-radius:6px;">
+    <strong>📱 For easier access to future lessons:</strong><br>
+    Download the <strong>Elimu Connect</strong> app from the Google Play Store and join upcoming lessons with just one tap.
+    <br><br>
+    <a href="https://play.google.com/store/apps/details?id=elimuconnect.tuitioncentre" target="_blank">
+        📥 Download Elimu Connect
+    </a>
+</p>
+
+<p style="margin:12px 0 0;color:#d32f2f;font-weight:bold;">
+    ⏰ Booking closes <strong>1 day before</strong> the learning week starts.
+</p>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- PAYMENT / ACCESS MODAL -->
+<div id="accessModal" class="modal">
+    <div class="modal-content">
+        <div id="accessMessage"></div>
+        <button id="accessBtn">OK</button>
+    </div>
+</div>
+<script>
+const PAYMENT_LINK = "https://paystack.shop/pay/xqvo89sfbv";
+const LESSON_KEY = "7_2026";
+
+// ================= FORM 3 =================
+const form3Topics = [
+"Quadratic Expressions and Equations",
+"Approximation and Errors",
+"Trigonometry 2",
+"Surds",
+"Further Logarithms",
+"Commercial Arithmetic II",
+"Circle Geometry",
+"Matrices",
+"Formulae and Variation",
+"Sequences and Series",
+"Vectors 2",
+"Binomial Expansion",
+"Probability",
+"Compound Proportions & Rates of Work",
+"Graphical Methods"
+];
+
+// ================= FORM 4 =================
+const form4Topics = [
+"Matrices and Transformations",
+"Statistics 2",
+"Trigonometry 3",
+"Three-Dimensional Geometry",
+"Longitude and Latitude",
+"Loci",
+"Linear Programming",
+"Differentiation",
+"Area Approximation",
+"Integration"
+];
+
+// ================= CORE / ESSENTIAL =================
+const coreTopics = [
+"Numbers and Algebra",
+"Measurements and Geometry",
+"Statistics and Probability"
+];
+
+const essentialTopics = [
+"Numbers and Algebra",
+"Measurements and Geometry",
+"Statistics and Probability"
+];
+
+// ================= PROGRESS LOAD =================
+let form3Index = parseInt(localStorage.getItem("form3_index") || "0");
+let form4Index = parseInt(localStorage.getItem("form4_index") || "0");
+let coreIndex = parseInt(localStorage.getItem("core_index") || "0");
+let essentialIndex = parseInt(localStorage.getItem("essential_index") || "0");
+
+// ================= UI =================
+const mainBtn = document.getElementById("studentBtn");
+const countdownEl = document.getElementById("accessCountdown");
+const modal = document.getElementById("accessModal");
+const modalMsg = document.getElementById("accessMessage");
+const modalBtn = document.getElementById("accessBtn");
+
+
+
+
+    window.addEventListener("DOMContentLoaded", ()=>{
+    const whatsappBtn = document.createElement("button");
+    whatsappBtn.innerText = "📲 Notify Teacher on WhatsApp";
+    whatsappBtn.style.display = "none";
+    whatsappBtn.style.marginTop = "10px";
+    whatsappBtn.style.background = "#25D366";
+    whatsappBtn.style.color = "white";
+    whatsappBtn.style.border = "none";
+    whatsappBtn.style.padding = "12px 20px";
+    whatsappBtn.style.borderRadius = "8px";
+    whatsappBtn.style.cursor = "pointer";
+
+    document.querySelector(".card").appendChild(whatsappBtn);
+
+    whatsappBtn.onclick = ()=>{
+        notifyWhatsApp(localStorage.getItem(LESSON_KEY + "_ref"));
+    };
+
+    window.whatsappBtn = whatsappBtn;
+
+    // 🔥 IMPORTANT: if already paid, show immediately
+    const paid = localStorage.getItem(LESSON_KEY + "_paid");
+    if(paid === "true"){
+        whatsappBtn.style.display = "block";
+    }
+});
+    
+
+function showModal(msg, btn="OK", cb=null){
+    modalMsg.innerHTML = msg;
+    modalBtn.textContent = btn;
+    modal.style.display = "flex";
+
+    modalBtn.onclick = ()=>{
+        modal.style.display = "none";
+        if(cb) cb();
+    };
+}
+
+function showWhatsAppButton(){
+    if(window.whatsappBtn){
+        window.whatsappBtn.style.display = "block";
+    }
+}
+    
+function getTopicByDay(list, storageKey){
+
+    const today = new Date().toISOString().split("T")[0]; 
+    // e.g. "2026-06-19"
+
+    const saved = JSON.parse(localStorage.getItem(storageKey) || "{}");
+
+    // if already generated today → reuse SAME topic
+    if(saved.date === today){
+        return saved.topic;
+    }
+
+    // otherwise move to next topic
+    let index = saved.index || 0;
+
+    const topic = list[index];
+
+    index++;
+
+    if(index >= list.length){
+        index = 0;
+    }
+
+    // save new state
+    localStorage.setItem(storageKey, JSON.stringify({
+        date: today,
+        index: index,
+        topic: topic
+    }));
+
+    return topic;
+}
+
+// ================= DAILY LESSON ENGINE =================
+const day = new Date().getDay();
+
+let formClass = "";
+let formTopic = "";
+let seniorClass = "";
+let seniorTopic = "";
+
+if(day === 0){
+
+document.querySelector(".lesson-info").innerHTML = `
+<h3>📌 Sunday Revision Day</h3>
+<p>No live lessons today.</p>
+`;
+
+}else{
+
+// ALWAYS NEXT TOPIC IN SEQUENCE
+formClass = (day % 2 === 1) ? "Form 3" : "Form 4";
+
+formTopic = (day % 2 === 1)
+? getTopicByDay(form3Topics, "form3_progress_form3")
+: getTopicByDay(form4Topics, "form4_progress_form4");
+
+
+// CORE / ESSENTIAL
+seniorClass = (day % 2 === 1) ? "Grade 10 Core" : "Grade 10 Essential";
+
+seniorTopic = (day % 2 === 1)
+? getTopicByDay(coreTopics, "form3_progress_core")
+: getTopicByDay(essentialTopics, "form3_progress_essential");
+
+// DISPLAY
+document.querySelector(".lesson-info").innerHTML = `
+<h3>📅 Today's Live Lessons</h3>
+
+<div style="background:#eef5ff;padding:12px;margin:10px 0;border-radius:10px;">
+<h4>🕓 6:00 PM</h4>
+<p><b>${formClass} – KCSE Revision</b></p>
+<p>${formTopic}</p>
+<p><b>KCSE Mathematics Revision</b></p>
+</div>
+
+<div style="background:#f0fff0;padding:12px;margin:10px 0;border-radius:10px;">
+<h4>🕖 7:00 PM</h4>
+<p><b>${seniorClass}</b></p>
+<p>${seniorTopic}</p>
+<p><b>Grade 10 Mathematics (CBC)</b></p>
+</div>
+`;
+
+}
+
+
+function notifyWhatsApp(reference){
+    const phone = "254769255782";
+
+    const message =
+`🚀 NEW LIVE LESSON PAYMENT
+
+A student has just paid for live maths lesson.
+
+📌 Reference: ${reference}
+📅 Date: ${new Date().toLocaleString()}
+📚 Platform: Elimu Connect Live Lesson`;
+
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+    // SAFE navigation (no popup block)
+    window.location.href = url;
+}
+    
+// ================= PAYMENT SYSTEM =================
+let paid = localStorage.getItem(LESSON_KEY + "_paid") || "false";
+let paidRef = localStorage.getItem(LESSON_KEY + "_ref") || "";
+
+const reference = new URLSearchParams(location.search).get("reference");
+
+if(reference && reference !== paidRef){
+
+    paid = "true";
+    paidRef = reference;
+
+    localStorage.setItem(LESSON_KEY + "_paid", "true");
+    localStorage.setItem(LESSON_KEY + "_ref", reference);
+    
+const url = new URL(window.location.href);
+url.searchParams.delete("reference");
+window.history.replaceState({}, document.title, url.toString());
+
+    showModal(
+        "✅ Payment successful.<br><br>You can now join today's live lesson.",
+        "Continue"
+    );
+  // 🔥 SHOW BUTTON SAFELY
+    showWhatsAppButton();
+ 
+}
+
+// ================= ACCESS =================
+if(paid === "true"){
+    countdownEl.innerHTML = "✅ Access Granted";
+}else{
+    countdownEl.innerHTML = "🔒 Payment Required";
+}
+
+// ================= BUTTON =================
+mainBtn.onclick = ()=>{
+
+if(paid === "true"){
+
+    location.href = "https://meet.google.com/cny-ctij-duf";
+    return;
+
+}
+
+showModal(
+`
+<h3>📚 Live Mathematics Lesson</h3>
+<p><b>${formClass}</b> → ${formTopic}</p>
+<p><b>${seniorClass}</b> → ${seniorTopic}</p>
+<p><strong>Fee: KSh 200</strong></p>
+`,
+"Pay KSh 200",
+()=> location.href = PAYMENT_LINK
+);
+
+};
+
+</script>
+
+</body>
+</html>
+

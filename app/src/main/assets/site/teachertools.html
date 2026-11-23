@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Elimu Connect - Access</title>
+<style>
+body{
+  margin:0;
+  font-family: Segoe UI, Arial;
+  background: linear-gradient(135deg,#6DD5FA,#2980B9);
+}
+
+/* Countdown top bar */
+#accessCountdown{
+  position:fixed;
+  top:15px;
+  left:50%;
+  transform:translateX(-50%);
+  background:linear-gradient(135deg,#ffb347,#ffcc33);
+  padding:10px 20px;
+  border-radius:12px;
+  box-shadow:0 6px 15px rgba(0,0,0,.25);
+  font-weight:bold;
+  display:none;
+}
+/* Lock Overlay */
+#lockOverlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.85);
+  color:white;
+  display:none;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:25px;
+  backdrop-filter:blur(4px);
+  z-index:9999;
+}
+
+#lockOverlay div{
+  background:rgba(255,255,255,0.05);
+  padding:30px 25px;
+  border-radius:20px;
+  max-width:500px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.4);
+}
+
+#lockOverlay h2{
+  font-size:2.2em; /* larger heading */
+  font-weight:900;
+  margin-bottom:15px;
+  color:#ffdd57;
+}
+
+#lockOverlay p{
+  font-size:1.4em; /* larger text */
+  font-weight:bold;
+  line-height:1.5;
+  margin-bottom:25px;
+  color:#ffffffcc;
+}
+
+#unlockBtn{
+  padding:18px 28px;
+  font-size:1.3em;
+  font-weight:bold;
+  border:none;
+  border-radius:15px;
+  background:linear-gradient(135deg,#ff6a00,#ffb347);
+  color:white;
+  cursor:pointer;
+  transition:transform 0.2s, box-shadow 0.2s;
+}
+
+#unlockBtn:hover{
+  transform:scale(1.05);
+  box-shadow:0 8px 20px rgba(0,0,0,0.35);
+}
+
+/* Content blurred until unlocked */
+#content{
+  filter:blur(5px);
+  pointer-events:none;
+  padding:18px;
+}
+
+/* ----- CARD LAYOUT ----- */
+
+.categories{
+  margin-bottom:25px;
+}
+
+.category-header{
+  background:#ffffffdd;
+  padding:12px 15px;
+  border-radius:14px;
+  font-weight:bold;
+  box-shadow:0 8px 18px rgba(0,0,0,.15);
+  margin-bottom:12px;
+}
+
+.tools{
+  display:grid;
+  grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
+  gap:12px;
+  list-style:none;
+  padding:0;
+}
+
+/* tool card */
+.tools li{
+  background:white;
+  border-radius:14px;
+  box-shadow:0 8px 18px rgba(0,0,0,.12);
+  padding:12px;
+  transition:.2s;
+}
+
+.tools li:hover{
+  transform:translateY(-3px) scale(1.01);
+}
+
+/* links inside cards */
+.tools a{
+  display:block;
+  text-decoration:none;
+  color:#2c3e50;
+  font-weight:600;
+  line-height:1.3;
+}
+
+/* ---- TEXT COLORS FOR CARDS ---- */
+.tools li:nth-child(1) a { color:#1e3a8a; }
+.tools li:nth-child(2) a { color:#065f46; }
+.tools li:nth-child(3) a { color:#7c2d12; }
+.tools li:nth-child(4) a { color:#6d28d9; }
+.tools li:nth-child(5) a { color:#b91c1c; }
+.tools li:nth-child(6) a { color:#0f766e; }
+.tools li:nth-child(7) a { color:#92400e; }
+.tools li:nth-child(8) a { color:#1e40af; }
+.tools li:nth-child(9) a { color:#9a3412; }
+.tools li:nth-child(10) a { color:#166534; }
+
+.tools a:hover{
+  text-decoration: underline;
+}
+</style>
+</head>
+<body>
+
+<div id="accessCountdown">Loading…</div>
+
+<div id="lockOverlay">
+  <div>
+   
+    <p id="lockMsg"></p>
+    <button id="unlockBtn">Unlock Daily Pass —  $0.2/KSh 25</button>
+  </div>
+</div>
+
+
+
+
+  
+<!-- YOUR ACTUAL WEBSITE CONTENT -->
+<div id="content">
+  
+  
+   <!-- ELIMU CONNECT -->
+  <div class="categories">
+
+
+ <div class="category">
+  <div class="category-header">GENERAL TOOLS</div>
+      <div class="tools">
+
+   
+ <li><a href="https://drive.google.com/drive/folders/1GA_mWAMJjmWRUaleRZyGYqMHPYMDv_ki" target="_blank" title="schemes of work and lesson plans">All schemes of work and lesson plans 1</a></li>
+    <li><a href="https://educationnewshub.co.ke/primary-schools-free-cbc-schemes-of-work-for-all-grades/" target="_blank" title="schemes of work and lesson plans">All schemes of work and lesson plans 2</a></li>
+ <li><a href="https://cbcteacher.co.ke/cbc-schemes-of-work/" target="_blank" title="schemes of work and lesson plans">All schemes of work and lesson plans 3</a></li>
+	 <li><a href="https://teacherske.co.ke/" title="schemes of work and lesson plans">All schemes of work and lesson plans 4</a></li>	  
+		
+		  
+		  <li><a href="https://www.socialcreator.com/pastpapersandquizes" target="_blank" title="Access past papers, quizzes, and practice resources for students.">Past Papers/Ebooks/Notes</a></li>
+		  <li><a href="https://wisdomappweb.site/mappingteachers" target="_blank" title="Map teacher-student physical locations for classroom planning and management.">Teacher-student Physical Mapping</a></li>
+		  <li><a href="./register4.html" target="_blank" title="Manage and track student attendance easily with a smart digital register.">Smart Register</a></li>
+  <li><a href="./acbl.html" target="_blank" title="Record, track, and showcase student projects and competency-based learning portfolios.">Projects & CBL Portfolio</a></li>
+  <li><a href="./projects.html" target="_blank" title="Generate activities and projects automatically for classroom use.">Activities/Projects Generator</a></li>
+  <li><a href="./homeworkbest.html" target="_blank" title="Create, assign, and track homework efficiently for your students.">Homework Smart System</a></li>
+
+  <li><a href="./competencytracker.html" target="_blank" title="Monitor student competencies and performance across subjects.">Competencies Tracker</a></li>
+  <li><a href="./fortutor4.html" target="_blank" title="AI-powered assistant to help teachers plan lessons and answer queries.">AI Teaching Assistant</a></li>
+ 
+  <li><a href="./club.html" target="_blank" title="Manage STEM clubs, track activities, and engage students in science, tech, and innovation.">STEMLa Club</a></li>
+  
+  <li><a href="https://elimuconnect.github.io/smartelimuconnect/coding" target="_blank" title="Learn coding and programming skills through interactive lessons and projects.">Learn to Code</a></li>
+ <li><a href="./quizes.html" target="_blank" title="Quizes">Quizes</a></li>
+ <li><a href="./avideolessonsbest.html" target="_blank" title="Video lessons ">Video Lessons,J.S.S</a></li>
+	 </div>
+      </div>
+    
+
+
+
+
+
+
+
+	  
+    <div class="category">
+    
+      <div class="category-header">MATHX TOOLS</div>
+       <div class="tools">
+ 
+ 
+
+ <li>
+  <a href="https://elimuconnect.github.io/smartelimuconnect/scientific-calculator" target="_blank" title="Online scientific calculator for complex calculations, including trigonometry, logarithms, and more.">
+    Scientific Calculator
+  </a>
+</li>
+<li><a href="./mathformulars.html" target="_blank" title="Access common mathematics formulas for easy reference and calculations.">Math Formulas</a></li>
+<li><a href="./mathgraphs.html" target="_blank" title="Plot and analyze graphs of different mathematical functions.">Math Graphs</a></li>
+<li><a href="./transformation.html" target="_blank" title="Explore geometric transformations like translation, rotation, reflection, and scaling.">Transformation</a></li>
+<li><a href="./tables.html" target="_blank" title="View multiplication, division, and other mathematical tables.">Math Tables</a></li>
+<li><a href="./trigonometry.html" target="_blank" title="Understand trigonometry using the unit circle.">Trigonometry (Unit Circle)</a></li>
+<li><a href="./sohcahtoa.html" target="_blank" title="Use SOHCAHTOA to solve right-angle triangle problems.">Trigonometry (SOHCAHTOA)</a></li>
+<li><a href="./areas.html" target="_blank" title="Calculate areas of various geometric shapes.">Area</a></li>
+<li><a href="./volumes.html" target="_blank" title="Calculate volumes of 3D objects and solids.">Volume</a></li>
+<li><a href="./quadraticsolver.html" target="_blank" title="Solve quadratic equations quickly using the solver tool.">Quadratic Solver</a></li>
+<li><a href="./statistics.html" target="_blank" title="Perform statistical calculations and understand data sets.">Statistics</a></li>
+<li><a href="./vectors.html" target="_blank" title="Learn and solve vector-related problems in physics and mathematics.">Vectors</a></li>
+<li><a href="./matrix1.html" target="_blank" title="Perform basic matrix operations like addition and multiplication.">Matrix 1</a></li>
+<li><a href="./matrix2.html" target="_blank" title="Work with advanced matrix operations including inverses and determinants.">Matrix 2</a></li>
+<li><a href="./long&lat.html" target="_blank" title="Calculate longitude and latitude values and understand coordinates.">Longitude & Latitude</a></li>
+<li><a href="./differentiate&integrate.html" target="_blank" title="Perform differentiation and integration for calculus problems.">Differentiation & Integration</a></li>
+<li><a href="./area approximation.html" target="_blank" title="Use mid-ordinate and trapezium methods to approximate areas.">Mid-ordinate & Trapezium</a></li>
+<li><a href="./integrationarea.html" target="_blank" title="Calculate approximate area under curves using integration.">Integration Area Approx.</a></li>
+<li><a href="./error.html" target="_blank" title="Understand and calculate errors in measurements and calculations.">Error</a></li>
+<li><a href="./logs.html" target="_blank" title="Work with logarithms for calculations and problem solving.">Logarithms</a></li>
+<li><a href="./commercial1.html" target="_blank" title="Calculate simple and compound interest for financial mathematics.">Interest (Simple & Compound)</a></li>
+<li><a href="./incometax.html" target="_blank" title="Understand and calculate income tax problems.">Income Tax</a></li>
+<li><a href="./variations.html" target="_blank" title="Learn direct and inverse variations in algebra.">Variations</a></li>
+<li><a href="./binomial.html" target="_blank" title="Use binomial expansion to simplify algebraic expressions.">Binomial Expansion</a></li>
+
+
+  <li><a href="./game.html" target="_blank" title="Interactive and competitive games.">SmartLearn</a></li>	  
+ 
+</div>
+
+      </div>
+   
+ 
+    <div class="category">
+      <div class="category-header">CHEMX TOOLS</div>
+       <div class="tools">
+
+ <li><a href="./chemreactions.html" target="_blank" title="Explore different chemical reactions, balancing equations and reaction types.">Chem Reactions</a></li>
+<li><a href="./moleconcept.html" target="_blank" title="Understand the mole concept and calculations involving Avogadro's number.">Mole Concept</a></li>
+<li><a href="./organicchem.html" target="_blank" title="Study organic chemistry topics including hydrocarbons and functional groups.">Organic Chemistry</a></li>
+<li><a href="./periodictable.html" target="_blank" title="View the periodic table and understand element properties and groups.">Periodic Table</a></li>
+<li><a href="./commongases.html" target="_blank" title="Learn about common gases, their properties, and chemical behavior.">Common Gases</a></li>
+<li><a href="./chemgraphs.html" target="_blank" title="Analyze chemical graphs, concentration curves, and reaction rates.">Chem Graphs</a></li>
+<li><a href="./chemformulars.html" target="_blank" title="Access essential chemistry formulas for calculations and experiments.">Chem Formulas</a></li>
+<li><a href="./chemicalformula&quations.html" target="_blank" title="Learn to write and balance chemical formulas and equations.">Chemical Formulas & Equations</a></li>
+<li><a href="./gaslaws.html" target="_blank" title="Study the different gas laws like Boyle's, Charles', and Avogadro's laws.">Gas Laws</a></li>
+<li><a href="./diffusionlaw.html" target="_blank" title="Understand diffusion laws and principles in gases and liquids.">Diffusion Law</a></li>
+<li><a href="./ram.html" target="_blank" title="Learn about relative atomic mass (R.A.M) and molecular mass calculations.">R.A.M</a></li>
+
+<li><a href="./empiricalmolecular.html" target="_blank" title="Determine empirical and molecular formulas from experimental data.">Empirical & Molecular</a></li>
+<li><a href="./titrations.html" target="_blank" title="Perform and understand titration experiments and calculations.">Titrations</a></li>
+<li><a href="./radioactivity.html" target="_blank" title="Study radioactivity, decay, and nuclear reactions.">Radioactivity</a></li>
+<li><a href="./solubility.html" target="_blank" title="Understand solubility, saturation, and solubility product principles.">Solubility</a></li>
+<li><a href="./bondenergies.html" target="_blank" title="Learn about bond energies and calculations involving chemical bonds.">Bond Energies</a></li>
+<li><a href="./thermochemistry.html" target="_blank" title="Explore thermochemistry, enthalpy changes, and energy calculations.">Thermochemistry</a></li>
+<li><a href="./hesslaw.html" target="_blank" title="Hess Laws">HESS LAW</a></li>
+<li><a href="https://elimuconnect.github.io/smartelimuconnect/adirecttitrationssimulator" target="_blank" title="Direct Titrations Simulator">Direct Titrations Simulator</a></li>
+<li><a href="./backtitsimulator.html" target="_blank" title="Back Titrations Simulator">Back Titrations Simulator</a></li>
+<li><a href="./redoxtitration.html" target="_blank" title="Redox Titrations Simulator">Redox Titration Simulator</a></li>
+
+      </div>
+    </div>
+ 
+  
+    <!-- Wisdom App -->
+    <div class="category">
+      <div class="category-header">BIOX, PHYSICSX, LANGX TOOLS</div>
+      <div class="tools">
+        <!-- Biology Tools -->
+ <div class="bio">BIOLOGY
+ 
+ <li><a href="./bones.html" target="_blank" title="Learn about human and animal bones, structure, and functions.">Bones</a></li>
+<li><a href="./humanandfishanatomy.html" target="_blank" title="Explore human and fish anatomy with illustrations and detailed explanations.">Human and Fish Anatomy</a></li>
+<li><a href="./plantantomy.html" target="_blank" title="Study plant anatomy, including structure of leaves, stems, roots, and flowers.">Plant Anatomy</a></li>
+
+ 
+ 
+</div>
+
+<div class="phy">PHYSICS
+  
+  <li><a href="./physicsformulars.html" target="_blank" title="Access essential physics formulas for mechanics, electricity, and more.">Physics Formulas</a></li>
+<li><a href="./physicsprinciplesexplorer.html" target="_blank" title="Interactive exploration of physics principles and experiments.">Principles Explorer</a></li>
+<li><a href="./unitconverter.html" target="_blank" title="Convert units across physics measurements for easy calculations.">Unit Converter</a></li>
+
+  
+</div>
+
+<div class="kisw">KISWAHILI
+ 
+ <li><a href="./kamusi.html" target="_blank" title="Swahili dictionary to understand meanings of words and phrases.">Kamusi</a></li>
+<li><a href="./methali.html" target="_blank" title="Learn Swahili proverbs and their meanings for effective communication.">Methali</a></li>
+<li><a href="./nahaunamisema.html" target="_blank" title="Common Swahili sayings and idioms with explanations.">Nahau na Misemo</a></li>
+ <li><a href="./hadithistoriesvid.html" target="_blank" title="Hadith Na Stories.">Stories & Hadithi</a></li>
+ 
+</div>
+
+<div class="eng">ENGLISH
+ 
+ <li><a href="./dictionary.html" target="_blank" title="English dictionary for word meanings and pronunciation.">Dictionary</a></li>
+<li><a href="./ideoms.html" target="_blank" title="Collection of English idioms with explanations and examples.">Idioms</a></li>
+<li><a href="./proverbs.html" target="_blank" title="Popular English proverbs and their interpretations.">Proverbs</a></li>
+<li><a href="./similiesandmetaphors.html" target="_blank" title="Examples of similes and metaphors used in English writing.">Similes and Metaphors</a></li>
+
+ <li><a href="./hadithistoriesvid.html" target="_blank" title="Hadith Na Stories.">Stories & Hadithi</a></li>
+
+	
+</div>
+
+ </div>
+    
+
+	  
+   
+    <div class="category">
+      <div class="category-header"><strong>EXTERNAL TOOLS</strong><br> – These are trusted external websites and tools designed to help teachers, students<br>
+ , 
+ and educators improve learning, teaching, and exam preparation.<br> Feel free to use them as needed!</div>
+      <div class="tools">
+  
+
+
+<li>
+  <a href="https://www.calculator.net/scientific-calculator.html" target="_blank" title="Online scientific calculator for complex calculations, including trigonometry, logarithms, and more.">
+    Scientific Calculator
+  </a>
+</li>
+
+  <li><a href="https://worksheetzone.org" target="_blank" title="Provides downloadable worksheets for various subjects and grades.">Worksheet Zone</a></li>
+  <li><a href="https://webflow-dev.quizizz.com/homepage-au?lng=en" target="_blank" title="Interactive quizzes and assessments for students with real-time feedback.">Quizizz</a></li>
+  <li><a href="https://www.labxchange.org/" target="_blank" title="Virtual lab simulations and science resources for hands-on learning.">LabXchange</a></li>
+  <li><a href="https://phet.colorado.edu/" target="_blank" title="Physics, chemistry, and math interactive simulations for classrooms.">PhET Simulations</a></li>
+  <li><a href="https://www.mentimeter.com/" target="_blank" title="Create interactive presentations and polls to engage students.">Mentimeter</a></li>
+  <li><a href="https://kahoot.it/" target="_blank" title="Game-based quizzes and learning competitions to make lessons fun.">Kahoot!</a></li>
+  <li><a href="https://gemini.google.com/app" target="_blank" title="Google AI assistant for generating ideas, summaries, and content.">Google Gemini</a></li>
+ 
+	<li><a href="https://www.elimukenya.com/" target="_blank" title="CBC & KCSE notes, exams, and revision materials.">Elimu Kenya</a></li>
+
+<li><a href="https://www.schoolnet.co.ke/" target="_blank" title="KCSE past papers, marking schemes, and revision notes.">SchoolNet Kenya</a></li>
+
+<li><a href="https://www.kcseonline.com/" target="_blank" title="KCSE past papers and marking schemes.">KCSE Online</a></li>
+
+<li><a href="https://www.revisioncentre.co.ke/" target="_blank" title="CBC, KCSE, and revision exam materials.">Revision Centre Kenya</a></li>
+	  
+		  
+		  
+		  
+		  
+		  <li><a href="https://chatgpt.com/" target="_blank" title="AI chatbot for explanations, tutoring, lesson ideas, and more.">ChatGPT</a></li>
+  <li><a href="https://classroom.google.com/" target="_blank" title="Organize classes, assignments, and communicate with students online.">Google Classroom</a></li>
+  <li><a href="https://www.instructure.com/" target="_blank" title="Canvas LMS: Manage courses, assignments, grading, and collaboration.">Canvas</a></li>
+  <li><a href="https://nearpod.com/" target="_blank" title="Interactive lessons, quizzes, and virtual classroom engagement tools.">Nearpod</a></li>
+  <li><a href="https://www.peardeck.com/" target="_blank" title="Integrates with slides to make interactive presentations for students.">Pear Deck</a></li>
+  <li><a href="https://www.socrative.com/" target="_blank" title="Real-time quizzes, polls, and assessment tools for classroom feedback.">Socrative</a></li>
+  <li><a href="https://get.plickers.com/" target="_blank" title="Instant student assessments using a camera and printed cards.">Plickers</a></li>
+  <li><a href="https://www.canva.com/education/" target="_blank" title="Create educational graphics, presentations, and collaborative designs.">Canva for Education</a></li>
+  <li><a href="https://docs.google.com/forms/u/0/" target="_blank" title="Build surveys, quizzes, and collect student responses easily.">Google Forms</a></li>
+  <li><a href="https://copilot.microsoft.com/" target="_blank" title="AI assistant integrated with Microsoft 365 to enhance productivity.">Microsoft Copilot</a></li>
+  <li><a href="https://www.microsoft.com/en-us/microsoft-365/powerpoint?msockid=0b39fb68677a6b4a3a2aed3d66f86a3a" target="_blank" title="Create interactive slides, presentations, and learning materials.">Microsoft PowerPoint</a></li>
+  <li><a href="https://edpuzzle.com/" target="_blank" title="Turn videos into interactive lessons with embedded questions.">Edpuzzle</a></li>
+  <li><a href="https://quizlet.com/" target="_blank" title="Flashcards, games, and study sets to reinforce learning.">Quizlet</a></li>
+  <li><a href="https://onenote.cloud.microsoft/" target="_blank" title="Digital notebook for organizing lesson plans and notes.">OneNote</a></li>
+  <li><a href="https://trello.com/" target="_blank" title="Project management tool to organize tasks, lessons, and teamwork.">Trello</a></li>
+  <li><a href="https://ed.ted.com/" target="_blank" title="Curated educational videos with interactive questions for learning.">TED-Ed</a></li>
+  <li><a href="https://www.polleverywhere.com/" target="_blank" title="Live polling and audience interaction during lessons.">Poll Everywhere</a></li>
+  <li><a href="https://answergarden.ch/" target="_blank" title="Create simple online polls or brainstorming word clouds.">AnswerGarden</a></li>
+  <li><a href="https://www.microsoft.com/en/education" target="_blank" title="Microsoft Education portal with resources, lesson plans, and tools.">Microsoft Education</a></li>
+  <li><a href="https://www.socialcreator.com/pastpapersandquizes" target="_blank" title="Access past papers, quizzes, and practice resources for students.">All Resources</a></li>
+  <li><a href="https://kcserevision.com/" target="_blank" title="Past papers, revision notes, and exam preparation for KCSE.">KCSE Revision</a></li>
+<li><a href="https://www.oercommons.org/" target="_blank" title="Open Educational Resources: lesson plans, worksheets, and teaching materials.">OER Commons</a></li>
+
+<li><a href="https://www.teacherspayteachers.com/" target="_blank" title="Free and paid teacher-created lesson resources and worksheets.">Teachers Pay Teachers (Free Section)</a></li>
+
+<li><a href="https://www.commonlit.org/" target="_blank" title="Free reading passages, comprehension questions, and literacy tools.">CommonLit</a></li>
+
+<li><a href="https://www.readworks.org/" target="_blank" title="Free reading comprehension passages and lesson tools.">ReadWorks</a></li>
+
+<li><a href="https://www.bookwidgets.com/" target="_blank" title="Create interactive worksheets and assessments for students.">BookWidgets</a></li>
+
+<li><a href="https://www.liveworksheets.com/" target="_blank" title="Convert worksheets into interactive online activities.">Liveworksheets</a></li>
+
+<li><a href="https://www.lessonplanet.com/" target="_blank" title="Teacher lesson plans and classroom resources (free section available).">Lesson Planet</a></li>
+
+<li><a href="https://www.education.com/" target="_blank" title="Printable worksheets, lesson plans, and activities for teachers.">Education.com</a></li>
+
+<li><a href="https://www.planboardapp.com/" target="_blank" title="Free digital lesson planning tool for teachers.">Chalk Planboard</a></li>
+
+<li><a href="https://www.sheets.google.com/" target="_blank" title="Create marksheets, grading tools, and student trackers.">Google Sheets (Teacher Use)</a></li>
+<li><a href="https://www.physicsandmathstutor.com/" target="_blank" title="GCSE, IGCSE, A-Level past papers and revision notes.">Physics & Maths Tutor</a></li>
+
+<li><a href="https://www.exam-mate.com/" target="_blank" title="Cambridge IGCSE, AS & A Level past papers.">Exam Mate</a></li>
+
+<li><a href="https://papers.xtremepapers.xyz/" target="_blank" title="Free past papers for IGCSE, AS, A Level, IB, and O Level.">XtremePapers</a></li>
+
+<li><a href="https://www.ibdocuments.com/" target="_blank" title="IB past papers, question banks, and mark schemes.">IB Documents</a></li>
+
+
+
+		  
+</div>
+    </div>
+  
+
+
+
+    <!-- Wisdom App -->
+    <div class="category">
+      <div class="category-header">TPAD,TPAY,ZERAKI,TSC WEBSITE</div>
+      <div class="tools">
+  <!-- External Education Resources -->
+ 
+ 
+  <li><a href="https://teachersonline.tsc.go.ke/" target="_blank" title="Official portal for teachers to access personal records,and professional updates.">Teachers Online TSC</a></li>
+  <li><a href="https://tpay.tsc.go.ke/fa392bf9a4692aa0cc/zln" target="_blank" title="Online platform for TSC teachers to access payslips and P9">TPay TSC</a></li>
+  <li><a href="https://tpad2.tsc.go.ke/" target="_blank" title="Teacher Performance Appraisal and Development system to monitor and record teacher performance.">TPAD2 TSC</a></li>
+  <li><a href="https://www.zeraki.app/zeraki-analytics" target="_blank" title="Analytics platform to monitor student performance and school metrics using data dashboards.">Zeraki Analytics</a></li>
+
+
+
+</div>
+    </div>
+ 
+</div>
+
+
+<footer>
+  &copy; 2025 <strong>Smart Elimu Connect</strong>. All rights reserved.  
+  
+</footer>
+  
+<script>
+/* ---------------- CONFIG ---------------- */
+const PAYMENT_LINK = "https://paystack.shop/pay/uakeb-48iv"
+// --- Timing Controls (all at top)
+const FIRST_TRIAL_MS   = 24 * 60 * 60 * 1000;          // 24 hours free trial
+const PAID_DURATION_MS =  24 * 60 * 60 * 1000;     // 24 days paid access
+
+const KEY = "elimu_studentss_simple2_";
+
+/* --------------- STORAGE ---------------- */
+let paidUntil = parseInt(localStorage.getItem(KEY+"paidUntil")) || 0;
+let paidRef = localStorage.getItem(KEY+"paidReference") || "";
+let firstTrialEnd = parseInt(localStorage.getItem(KEY+"firstTrialEnd")) || 0;
+let trialUsed = localStorage.getItem(KEY+"trialUsed") === "true";
+
+/* --------------- ELEMENTS --------------- */
+const countdownEl = document.getElementById("accessCountdown");
+const overlay = document.getElementById("lockOverlay");
+const lockMsg = document.getElementById("lockMsg");
+const unlockBtn = document.getElementById("unlockBtn");
+const content = document.getElementById("content");
+
+/* ------------- HELPERS ------------------ */
+function now(){ return Date.now(); }
+
+function format(ms){
+  if(ms <= 0) return "00:00:00";
+  let s = Math.floor(ms/1000);
+  let h = Math.floor(s/3600);
+  s %= 3600;
+  let m = Math.floor(s/60);
+  s %= 60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+/* --------- HANDLE RETURN FROM PAYMENT --------- */
+const ref = new URLSearchParams(location.search).get("reference");
+if(ref && ref !== paidRef){
+  paidRef = ref;
+  paidUntil = now() + PAID_DURATION_MS;
+
+  localStorage.setItem(KEY+"paidReference", paidRef);
+  localStorage.setItem(KEY+"paidUntil", paidUntil);
+
+  // mark trial as used after payment
+  trialUsed = true;
+  localStorage.setItem(KEY+"trialUsed", "true");
+
+  // remove trial timer
+  localStorage.removeItem(KEY+"firstTrialEnd");
+  firstTrialEnd = 0;
+}
+
+/* --------- START TRIAL ONLY IF NEVER USED -------- */
+if(!trialUsed && !firstTrialEnd){
+  firstTrialEnd = now() + FIRST_TRIAL_MS;
+  localStorage.setItem(KEY+"firstTrialEnd", firstTrialEnd);
+}
+
+/* ---------------- ENGINE ---------------- */
+function updateAccess(){
+  const t = now();
+  countdownEl.style.display = "block";
+
+  // PAID
+  if(t < paidUntil){
+    countdownEl.textContent = "Paid access remaining: " + format(paidUntil - t);
+    content.style.filter="none";
+    content.style.pointerEvents="auto";
+    overlay.style.display="none";
+    return;
+  }
+
+  // TRIAL
+  if(t < firstTrialEnd){
+    countdownEl.textContent = "Free trial remaining: " + format(firstTrialEnd - t);
+    content.style.filter="none";
+    content.style.pointerEvents="auto";
+    overlay.style.display="none";
+    return;
+  }
+
+  // LOCKED
+  countdownEl.style.display = "none";
+  overlay.style.display = "flex";
+  content.style.filter = "blur(6px)";
+  content.style.pointerEvents = "none";
+
+  lockMsg.innerHTML =
+    "Empower your teaching — unlock 24 hours of Smart ICT tools, AI tools, lessons support,STEM labs/Simulations,schemes of work, lesson plans, notes, activities generator etc for only  $0.2/KSh 25.";
+
+  unlockBtn.onclick = () => location.href = PAYMENT_LINK;
+}
+
+setInterval(updateAccess, 700);
+updateAccess();
+</script>
+
+
+</body>
+</html>

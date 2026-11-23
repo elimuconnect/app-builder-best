@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paid Chatbot</title>
+    <style>
+        /* Basic styling for the chatbot */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .chatbox {
+            width: 300px;
+            height: 400px;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chatbox-header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            text-align: center;
+        }
+
+        .chatbox-body {
+            padding: 10px;
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+
+        .chatbox-input {
+            display: flex;
+            padding: 10px;
+            background-color: #f4f4f9;
+        }
+
+        .chatbox-input input, .chatbox-input button {
+            padding: 10px;
+            margin-right: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .chatbox-input button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        .chatbox-input button:hover {
+            background-color: #45a049;
+        }
+
+        .chat-message {
+            margin: 5px 0;
+        }
+
+        .user-message {
+            text-align: right;
+        }
+
+        .bot-message {
+            text-align: left;
+            background-color: #f0f0f0;
+            padding: 8px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chatbox" id="chatbox">
+        <div class="chatbox-header">
+            <h2>Welcome to Our Paid Chatbot</h2>
+        </div>
+        <div class="chatbox-body" id="chatbox-body">
+            <!-- Messages will be displayed here -->
+        </div>
+    </div>
+
+    <script>
+        let chatboxBody = document.getElementById("chatbox-body");
+
+        // Array of valid passwords
+        const validPasswords = [
+            "Xy7$2fGbZ8tQz5Lr", "pS9hJk!hPmD0bF7T", "Qw4$KiH6dFg8L2Zn", "M5a#Hq9oLpD1g0Fj", "R!3hP8LsE6kZyTf7",
+            "Xj2zU!hYqW8mK9Rn", "ZnD5oFq#XlT1hHs7", "P@0xWq2yLoS3tGb8", "Ym9bZqJk!5R2fX7Tc", "7Vq#9tE0yPjKn3Gs",
+            "B2FpZ#6dSk8CwLJ9", "WmR1!Yd9q8TzJ7p5", "N2xL5rPv@z6oK7iF", "QeJ8iP1#FzR2tCw0", "YpW5L7sT2h3Xo9kG",
+            "O4b6jQsN@r9V3YwT", "R#7yX9sTz0J4wKvG", "i2Xy6D$LqY7CmFvR", "P8yK0sZf9w6N3H2iL", "S3QzT9x5aX7pW!2v",
+            "zT3X1y4Mv#Ls7q0P", "iD7T6H2rX3kVbW9G", "fYz9p0B4ZxK8@W6t", "K5PqX9cL2V3#hYt7", "P9Lm#vF0Q8gR2tJ3",
+            "uZ6fM9jY8t0p5W2S", "F3vPz9hJ7B0Yx2R1", "wG7D5kX2lZ8F1rQj", "q5J7kL0xS3yFz1pY", "A8wQ9P7fK2R1!zTx",
+            "v9H0G7Uq2Z#5nL3F", "Kp2J4tQyR8wV5mF1", "Z3vN6kF2T9Xr4sB0", "wL2vY1X9Z7fTpG3M", "j6sQ8W5P1Fz0iR2C",
+            "bF9Y3kL1Rz5vH2oT", "Q3K7T9vN1g6pFz0m", "s8Yq3oR1V9pLz7gD", "F2mV6iW9zX1P0rT7", "N4g9X3L2sQk7vWzJ",
+            "vR5pY1G2mZ7s9B0W", "Q9X1tK0L2y5mF7Pz", "k8WzN2V7yF3jL0X1", "Y2tM9P1gL6X0vF7R", "f4T3JbK7h9Z2N0pV",
+            "V1m5zP9L8rY3Kj0X", "G6V9oQ2Z1p8XyR3T", "w9Y1gF4Tz2P7H0mL", "L9P7tX2Bq6vY1Wz3", "V1X2L5Tz9rF0b3Y7",
+            "Q7X6t1zP9f3yV2J5", "rP5zK2W8Q1F7yL0t", "v9X2F4T3k7J1Y0Qm", "sR1P7zF6L2X0y9jT", "B2t8kF6X5Zq1V0m7",
+            "Q9W6tL5y1G2s0X3J", "F3z0R7m5B2X8t9Y1", "K6Q4zP7f5R1Xy9T0", "F1T9W7p2Y6kXrL0m", "D9g7B6v1J2F0tX3P",
+            "m8L9F3V1X2pY4W0t", "j0T6X3K9L1B5vP2Y", "Y3R2tP7F1X6L9v0W", "sT5X9yP0F2K1L7Qm", "J2F7vT8P1X5L9Y0k",
+            "B4X2F7W1t9mL3R6p", "L9Y0vX5t2P3J1F6k", "R7B9zF2L1X6P3t0Y", "F5X2mR9Y1pL7V3tK", "K9Y6pR7L3z2F1X0t",
+            "Z4F7T1P9X3Y8L5m0", "V2kX5T1L3F9pY0R7", "qB8R9Y1mX2L5P3F0", "B9F2X1Y5L7T3v0mP", "V1L7X9p2R0Y6B3tF",
+            "L5X2F1T9Y0R6pK3m", "F1R7T6X0P3Y9L2B5", "Y7B2X5L9T1F6m3P0", "Q3X1F7Y5R2L0T9K8", "K9P1X2Y5F3L6R7t0",
+            "T7X9F1L3Y0R2B5k6", "Q1X9T2Y7F3P6L0R5", "Z3T9L2F5Y0X6P1B7", "X5Y9F7L0T2K3R1P6", "B9T1X0Y7L3F5K2R6",
+            "P7Y9X3L2T0F5R6K1", "L2X9Y0P5T6R1F7K3", "Y1L9F7X2T0R5P3K6", "K3X7P1Y0T2F9L6R5", 
+        ];
+
+        let isPasswordPrompted = false; // Flag to check if password prompt is already shown
+
+        // Function to display messages in the chatbox
+        function displayMessage(message, sender) {
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("chat-message", `${sender}-message`);
+            messageDiv.innerHTML = message;
+            chatboxBody.appendChild(messageDiv);
+            chatboxBody.scrollTop = chatboxBody.scrollHeight;  // Scroll to the bottom
+        }
+
+        // Function to format the countdown time
+        function formatCountdown(time) {
+            const days = Math.floor(time / (24 * 60 * 60 * 1000));
+            const hours = Math.floor((time % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+            const minutes = Math.floor((time % (60 * 60 * 1000)) / (60 * 1000));
+            const seconds = Math.floor((time % (60 * 1000)) / 1000);
+            return `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
+        }
+
+        // Function to check if the password is valid
+        function validatePassword(password) {
+            return validPasswords.includes(password);
+        }
+
+        // Function to start the chat and check paid subscription status
+        function startChat() {
+            const paidKey = "paid-start-time";
+            const paidLockKey = "paid-locked";  // Key to lock the paid bot after 30 days
+            const paidDuration = 31 * 24 * 60 * 60 * 1000;  // 30 days in milliseconds
+            const paidStart = localStorage.getItem(paidKey);
+
+            // First-time user, start paid bot and display message
+            if (!paidStart) {
+                const paidStartTime = Date.now();
+                localStorage.setItem(paidKey, paidStartTime);
+                displayMessage("You are starting a 30-day paid subscription! We will let you know when it's about to expire.", "bot");
+                return; // Stop further execution until the paid subscription is started
+            }
+
+            // Paid subscription has started, calculate expiration time
+            const paidEnd = parseInt(paidStart) + paidDuration;
+            const now = Date.now();
+
+            if (now < paidEnd) {
+                // Paid subscription is still valid, show countdown and premium link
+                const remainingTime = paidEnd - now;
+                const countdownMessage = `Your subscription ends in: ${formatCountdown(remainingTime)}`;
+                displayMessage(countdownMessage, "bot");
+
+                const premiumLinkMessage = "Click here to access premium content: <a href='./tools.html' target='_blank'>Student Paid Features</a>";
+                displayMessage(premiumLinkMessage, "bot");
+
+                // Update countdown every second
+                const countdownInterval = setInterval(() => {
+                    const remainingTime = paidEnd - Date.now();
+                    if (remainingTime <= 0) {
+                        clearInterval(countdownInterval);
+                        displayMessage("Your subscription has expired. Please renew to continue using the chatbot.", "bot");
+                        // Lock the bot for this browser
+                        localStorage.setItem(paidLockKey, "true");
+                    } else {
+                        const updatedCountdownMessage = `Your subscription ends in: ${formatCountdown(remainingTime)}`;
+                        chatboxBody.lastChild.innerHTML = updatedCountdownMessage;
+                    }
+                }, 1000);
+
+                // Keep the chat going
+                displayMessage("How can I assist you today?", "bot");
+            } else {
+                // Subscription expired for this browser, check if locked
+                if (localStorage.getItem(paidLockKey) === "true") {
+                    displayMessage("Your subscription has expired. Please renew to continue using the chatbot.", "bot");
+                } else {
+                    // Subscription expired but not locked, prompt user to renew or subscribe
+                    promptForPassword(); // Prompt for password to unlock paid features
+                }
+            }
+        }
+
+        // Function to prompt for password after 31 days
+        function promptForPassword() {
+            // Ensure only one password prompt is active at a time
+            if (!isPasswordPrompted) {
+                isPasswordPrompted = true;
+
+                const password = prompt("Please enter your password to continue using the chatbot:");
+
+                if (validatePassword(password)) {
+                    // Valid password entered, reset subscription and unlock chatbot
+                    displayMessage("Password accepted! You can now access premium content.", "bot");
+
+                    // Provide link to premium content
+                    displayMessage("Click here to access premium content: <a href='./tools.html' target='_blank'>Student Paid-TRIAL Features</a>", "bot");
+
+                    // Reset the subscription expiration timer
+                    localStorage.setItem("paid-start-time", Date.now());
+                    localStorage.removeItem("paid-locked");  // Unlock the bot for this session
+
+                    // Restart chat and show paid features
+                    startChat();
+                } else {
+                    displayMessage("Invalid password. Please try again.", "bot");
+                    // Reset flag to allow the user to enter the password again
+                    isPasswordPrompted = false;
+                }
+            }
+        }
+
+        // Automatically start the chatbot on page load
+        window.onload = startChat;
+    </script>
+
+</body>
+</html>

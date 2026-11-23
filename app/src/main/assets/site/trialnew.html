@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>7-Day Trial App with Countdown</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f7fa; color: #333; }
+    h1 { font-size: 28px; color: #0077cc; }
+    input, select, button { padding: 10px; font-size: 16px; margin: 8px 0; width: 320px; max-width: 100%; }
+    button { background:#0077cc; color:#fff; border:none; cursor:pointer; }
+    button[disabled] { opacity:.6; cursor:not-allowed; }
+    #status { margin-top: 12px; color: #444; min-height: 20px; }
+  </style>
+</head>
+<body>
+  <h1>🚀 Welcome to the App Free Trial</h1>
+
+  <div id="auth">
+    <input id="email" type="email" placeholder="Email" autocomplete="username"><br>
+    <input id="password" type="password" placeholder="Password" autocomplete="current-password"><br>
+    <select id="role">
+      <option value="">-- Select Role --</option>
+      <option value="student">Student</option>
+      <option value="tutorschool">Tutors / Schools</option>
+    </select><br>
+    <button id="signupBtn">Sign Up (7-Day Trial)</button>
+    <button id="signinBtn">Sign In</button>
+     <button id="googleBtn">Sign in with Google</button>
+
+    <div id="status"></div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAc8JIey-v5R3v6QG73JOH8LBOMixg0VRQ",
+      authDomain: "schooltransports-34fd7.firebaseapp.com",
+      databaseURL: "https://schooltransports-34fd7-default-rtdb.firebaseio.com",
+      projectId: "schooltransports-34fd7",
+      storageBucket: "schooltransports-34fd7.firebasestorage.app",
+      messagingSenderId: "125561731802",
+      appId: "1:125561731802:web:745a6ce91863118a4f03e3"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    const emailEl = document.getElementById('email');
+    const passwordEl = document.getElementById('password');
+    const roleEl = document.getElementById('role');
+    const signupBtn = document.getElementById('signupBtn');
+    const signinBtn = document.getElementById('signinBtn');
+    const statusEl = document.getElementById('status');
+
+
+const googleBtn = document.getElementById('googleBtn');
+const provider = new firebase.auth.GoogleAuthProvider();
+
+
+
+
+    const deviceId = btoa(navigator.userAgent + "_" + new Date().getTimezoneOffset());
+    let isRedirecting = false;
+
+    function setStatus(msg, isError=false) {
+      statusEl.textContent = msg;
+      statusEl.style.color = isError ? "#b00" : "#444";
+      console.log(msg);
+    }
+
+    function setBusy(on) {
+      signupBtn.disabled = on;
+      signinBtn.disabled = on;
+    }
+
+    function formatRemaining(ms) {
+      const days = Math.floor(ms / (1000*60*60*24));
+      const hours = Math.floor((ms / (1000*60*60)) % 24);
+      const mins = Math.floor((ms / (1000*60)) % 60);
+      return `${days}d ${hours}h ${mins}m`;
+    }
+
+    function showCountdownAndRedirect(role, trialStarted) {
+      if(isRedirecting) return;
+      isRedirecting = true;
+
+      const trialMs = 7*24*60*60*1000;
+      const endTime = trialStarted + trialMs;
+      const now = Date.now();
+      const remainingMs = Math.max(0, endTime - now);
+
+      let secondsLeft = 3;
+      function updateMessage() {
+        const remainText = formatRemaining(remainingMs);
+        setStatus(`✅ Access granted. Trial left: ${remainText}. Redirecting in ${secondsLeft}...`);
+      }
+      updateMessage();
+      const interval = setInterval(() => {
+        secondsLeft--;
+        if(secondsLeft > 0) {
+          updateMessage();
+        } else {
+          clearInterval(interval);
+          redirectToRole(role);
+        }
+      }, 1000);
+    }
+
+    function redirectToRole(role) {
+      if(role==='student') window.location.href = "go:bot1";
+      else if(role==='tutorschool') window.location.href = "go:school";
+      else { setStatus('No role assigned for this account.', true); auth.signOut(); isRedirecting=false; }
+    }
+
+    // ---------- Signup ----------
+    signupBtn.addEventListener('click', async () => {
+      const email = emailEl.value.trim();
+      const password = passwordEl.value;
+      const role = roleEl.value;
+      if(!email||!password) { setStatus('Enter email and password.', true); return; }
+      if(!role) { setStatus('Select a role.', true); return; }
+
+      try {
+        setBusy(true);
+        setStatus('Checking device and creating account...');
+        const deviceSnap = await db.ref('devices/'+deviceId).get();
+        if(deviceSnap.exists()) { setStatus('This device has already used the free trial.', true); setBusy(false); return; }
+
+        const userCred = await auth.createUserWithEmailAndPassword(email,password);
+        const uid = userCred.user.uid;
+        const now = Date.now();
+
+        await db.ref('users/'+uid).set({ trialStarted: now, deviceId: deviceId, role: role });
+        await db.ref('devices/'+deviceId).set({ used:true, linkedTo:uid });
+
+        showCountdownAndRedirect(role, now);
+      } catch(err) {
+        console.error(err);
+        setStatus(err.message || 'Signup failed', true);
+        setBusy(false);
+      }
+    });
+
+    // ---------- Signin ----------
+    signinBtn.addEventListener('click', async () => {
+      const email = emailEl.value.trim();
+      const password = passwordEl.value;
+      if(!email||!password) { setStatus('Enter email and password.', true); return; }
+
+      try {
+        setBusy(true);
+        setStatus('Signing in...');
+        const userCred = await auth.signInWithEmailAndPassword(email,password);
+        const uid = userCred.user.uid;
+
+        const snap = await db.ref('users/'+uid).get();
+        if(!snap.exists()) { setStatus('No user info found in DB.', true); await auth.signOut(); setBusy(false); return; }
+
+        const data = snap.val();
+        const now = Date.now();
+        const expired = (now - data.trialStarted) > 7*24*60*60*1000;
+        if(expired) { setStatus('Trial expired — redirecting to subscribe...', true); window.location.href="go:subscribe"; return; }
+
+        showCountdownAndRedirect(data.role, data.trialStarted);
+      } catch(err) {
+        console.error(err);
+        setStatus(err.message || 'Sign in failed', true);
+        setBusy(false);
+      }
+    });
+
+    // ---------- Check if user already signed in ----------
+    auth.onAuthStateChanged(async user => {
+      if(!user || isRedirecting) return;
+      try {
+        const uid = user.uid;
+        const snap = await db.ref('users/'+uid).get();
+        if(!snap.exists()) { setStatus('Signed in but no DB record found.', true); return; }
+
+        const data = snap.val();
+        const now = Date.now();
+        const expired = (now - data.trialStarted) > 7*24*60*60*1000;
+        if(expired) { setStatus('Trial expired — redirecting to subscribe...', true); window.location.href="go:subscribe"; return; }
+
+        showCountdownAndRedirect(data.role, data.trialStarted);
+      } catch(err) {
+        console.error(err);
+        setStatus('Error checking session', true);
+      }
+    });
+
+
+
+googleBtn.addEventListener('click', async () => {
+  try {
+    setBusy(true);
+    setStatus('Signing in with Google...');
+    const result = await auth.signInWithPopup(provider);
+    const user = result.user;
+    const uid = user.uid;
+
+    // Check if user exists in DB
+    const snap = await db.ref('users/' + uid).get();
+    let trialStarted = Date.now();
+
+    if (!snap.exists()) {
+      // First time Google login → select role first
+      const role = prompt("Enter your role: student or tutorschool").toLowerCase();
+      if (!role || (role !== 'student' && role !== 'tutorschool')) {
+        setStatus('Invalid role. Sign out and try again.', true);
+        await auth.signOut();
+        setBusy(false);
+        return;
+      }
+      await db.ref('users/' + uid).set({ trialStarted, deviceId, role });
+      await db.ref('devices/' + deviceId).set({ used:true, linkedTo:uid });
+      showCountdownAndRedirect(role, trialStarted);
+    } else {
+      const data = snap.val();
+      const now = Date.now();
+      const expired = (now - data.trialStarted) > 7*24*60*60*1000;
+      if(expired) { 
+        setStatus('Trial expired — redirecting to subscribe...', true); 
+        window.location.href = "go:subscribe"; 
+        return; 
+      }
+      showCountdownAndRedirect(data.role, data.trialStarted);
+    }
+
+  } catch(err) {
+    console.error(err);
+    setStatus(err.message || 'Google sign in failed', true);
+    setBusy(false);
+  }
+});
+
+
+  </script>
+</body>
+</html>

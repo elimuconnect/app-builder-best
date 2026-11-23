@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Parent Engagement Hub</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f4f8ff; }
+  .card { background: #fff; padding: 15px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 3px 8px rgba(0,0,0,0.1);}
+  h2 { color: #2c3e50; }
+  label { font-weight: bold; display: block; margin-top: 10px; }
+  input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; border-radius: 6px; border: 1px solid #ccc;}
+  button { padding: 10px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px;}
+  button:hover { background: #2980b9;}
+  table { width: 100%; border-collapse: collapse; margin-top: 20px;}
+  th, td { border: 1px solid #ddd; padding: 8px; text-align: center;}
+  th { background: #3498db; color: white; }
+  .small { font-size: 12px; color: #666; margin-top:6px;}
+  #roleSelect { text-align: center; margin-top: 40px; }
+  #teacherSection, #parentSection { display: none; }
+</style>
+</head>
+<body>
+<h2>📒 Parent Engagement Hub</h2>
+
+<!-- Role Selection -->
+<div id="roleSelect" class="card">
+  <h3>Select Role</h3>
+  <button onclick="chooseRole('teacher')">👨‍🏫 Teacher</button>
+  <button onclick="chooseRole('parent')">👨‍👩‍👦 Parent</button>
+</div>
+
+<!-- Teacher Section -->
+<div id="teacherSection" class="card">
+  <h3>Teacher Phase</h3>
+
+  <label>School Name:</label>
+  <input id="schoolName" placeholder="Enter school name">
+
+  <label>Grade:</label>
+  <input id="gradeName" placeholder="Enter grade (e.g., Grade 6)">
+
+  <label>Student Name:</label>
+  <input id="studentName" placeholder="Enter student name">
+
+  <button onclick="registerStudent()">Register Student</button>
+  <button onclick="clearSchoolGrade()">Change School/Grade</button>
+  <div class="small">School and grade are saved locally until you press "Change School/Grade".</div>
+  <hr>
+
+  <h3>Students</h3>
+  <div id="studentList"></div>
+
+  <hr>
+  <h3>Daily Engagement</h3>
+  <label>Date:</label>
+  <input type="date" id="highlightDate" value="">
+  <table id="attendanceTable">
+    <thead>
+      <tr>
+        <th>Student</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  
+  <label>Daily Highlights (one per line):</label>
+<textarea id="dailyHighlights" placeholder="Enter highlights, one per line" rows="5"></textarea>
+
+<h4>Attendance</h4>
+<div id="attendanceList"></div>
+
+<button onclick="sendDailyHighlights()">Send Highlights</button>
+ 
+</div>
+
+<!-- Parent Section -->
+<div id="parentSection" class="card">
+  <h3>Parent Phase</h3>
+
+  <label>Select School:</label>
+  <select id="parentSchool" onchange="saveParentSchool(); loadParentGrades()">
+    <option value="">-- Choose School --</option>
+  </select>
+  <button onclick="resetParentSchool()">Change School</button>
+
+  <label>Select Grade:</label>
+  <select id="parentGrade" onchange="loadHighlights()">
+    <option value="">-- Choose Grade --</option>
+  </select>
+
+  <h3>Daily Highlights</h3>
+  <div id="highlightsContainer"></div>
+</div>
+
+<script>
+// ---------- Firebase Setup ----------
+const firebaseConfig = {
+  apiKey: "AIzaSyCAiOSHmURDyAAYm5EmoomLkZ_Aud7iXIQ",
+  authDomain: "cbc-general.firebaseapp.com",
+  databaseURL: "https://cbc-general-default-rtdb.firebaseio.com",
+  projectId: "cbc-general",
+  storageBucket: "cbc-general.appspot.com",
+  messagingSenderId: "764732839741",
+  appId: "1:764732839741:web:ab829af54839de91359754"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ---------- Helpers ----------
+function sanitizeKey(s) {
+  if (!s) return "";
+  return s.toString().trim().replace(/[.#$\[\]\/]/g, "_");
+}
+function schoolPath() {
+  const schoolRaw = document.getElementById("schoolName").value || localStorage.getItem("schoolName");
+  const gradeRaw  = document.getElementById("gradeName").value  || localStorage.getItem("gradeName");
+  return { schoolRaw, gradeRaw, schoolKey: sanitizeKey(schoolRaw), gradeKey: sanitizeKey(gradeRaw) };
+}
+
+// ---------- Teacher Functions ----------
+let teacherStudentsRef = null;
+
+function registerStudent() {
+  const { schoolKey, gradeKey, schoolRaw, gradeRaw } = schoolPath();
+  const studentName = document.getElementById("studentName").value.trim();
+  if (!schoolRaw || !gradeRaw || !studentName) return alert("Fill school, grade and student name.");
+
+  localStorage.setItem("schoolName", schoolRaw);
+  localStorage.setItem("gradeName", gradeRaw);
+
+  const newRef = db.ref(`parent_engagement/schools/${schoolKey}/${gradeKey}/students`).push();
+  newRef.set({ name: studentName })
+    .then(() => { document.getElementById("studentName").value=""; startStudentListeners(); })
+    .catch(console.error);
+}
+
+function deleteStudent(studentKey) {
+  const { schoolKey, gradeKey } = schoolPath();
+  if (!confirm("Delete this student?")) return;
+  db.ref(`parent_engagement/schools/${schoolKey}/${gradeKey}/students/${studentKey}`).remove()
+    .then(() => startStudentListeners())
+    .catch(console.error);
+}
+
+function startStudentListeners() {
+  loadStudentsRealtime();
+}
+
+
+
+
+
+
+
+
+
+// Load attendance for the day, default all present
+function loadAttendance() {
+  const { schoolKey, gradeKey } = schoolPath();
+  const attendanceDiv = document.getElementById("attendanceList");
+  const studentSelect = document.getElementById("studentSelect");
+  if (!schoolKey || !gradeKey) return;
+
+  db.ref(`parent_engagement/schools/${schoolKey}/${gradeKey}/students`).once("value", snapshot => {
+    attendanceDiv.innerHTML = "";
+    snapshot.forEach(child => {
+      const name = child.val().name || child.key;
+      const div = document.createElement("div");
+      div.innerHTML = `<label>
+                         <input type="checkbox" class="attCheckbox" data-key="${child.key}" checked>
+                         ${name} (Present)
+                       </label>`;
+      attendanceDiv.appendChild(div);
+    });
+  });
+}
+
+// Send highlights to all parents
+function sendDailyHighlights() {
+  const { schoolKey, gradeKey } = schoolPath();
+  const notes = document.getElementById("dailyHighlights").value.trim();
+  if (!schoolKey || !gradeKey) return alert("Add school and grade first.");
+
+  // Gather attendance
+  const attendanceCheckboxes = document.querySelectorAll(".attCheckbox");
+  const attendance = {};
+  attendanceCheckboxes.forEach(cb => {
+    attendance[cb.dataset.key] = cb.checked ? "Present" : "Absent";
+  });
+
+  // Save to Firebase under today's date
+  const todayKey = new Date().toISOString().split("T")[0];
+  db.ref(`parent_engagement/schools/${schoolKey}/${gradeKey}/dailyHighlights/${todayKey}`).set({
+    notes: notes,
+    attendance: attendance
+  }).then(() => {
+    alert("Highlights sent to parents!");
+    document.getElementById("dailyHighlights").value = "";
+    loadAttendance();
+  }).catch(err => console.error(err));
+}
+
+// Call this when teacher loads page
+window.onload = () => {
+  // existing code...
+  const role = localStorage.getItem("role");
+  if (role === "teacher") loadAttendance();
+};
+
+
+
+
+
+
+
+
+function loadStudentsRealtime() {
+  const { schoolKey, gradeKey } = schoolPath();
+  const studentListDiv = document.getElementById("studentList");
+  const tbody = document.querySelector("#attendanceTable tbody");
+  if (teacherStudentsRef) teacherStudentsRef.off();
+  if (!schoolKey || !gradeKey) return;
+
+  teacherStudentsRef = db.ref(`parent_engagement/schools/${schoolKey}/${gradeKey}/students`);
+  teacherStudentsRef.on("value", snapshot => {
+    studentListDiv.innerHTML = "";
+    tbody.innerHTML = "";
+    snapshot.forEach(child => {
+      const data = child.val();
+      const name = data.name || child.key;
+
+      // List
+      const div = document.createElement("div");
+      div.textContent = name + " ";
+      const btn = document.createElement("button");
+      btn.textContent="❌ Delete";
+      btn.onclick = ()=>deleteStudent(child.key);
+      div.appendChild(btn);
+      studentListDiv.appendChild(div);
+
+      // Attendance table row
+      const tr = document.createElement("tr");
+      const tdName = document.createElement("td"); tdName.textContent=name;
+      const tdStatus = document.createElement("td");
+      const sel = document.createElement("select");
+      sel.id="att_"+child.key;
+      sel.innerHTML="<option>Present</option><option>Absent</option>";
+      tdStatus.appendChild(sel);
+      tr.appendChild(tdName); tr.appendChild(tdStatus);
+      tbody.appendChild(tr);
+    });
+  });
+}
+
+function clearSchoolGrade() {
+  localStorage.removeItem("schoolName"); localStorage.removeItem("gradeName");
+  document.getElementById("schoolName").value=""; document.getElementById("gradeName").value="";
+  if(teacherStudentsRef){teacherStudentsRef.off(); teacherStudentsRef=null;}
+  alert("School & grade reset.");
+}
+
+function sendHighlights() {
+  const { schoolKey, gradeKey } = schoolPath();
+  const date = document.getElementById("highlightDate").value || new Date().toISOString().split("T")[0];
+  const notes = document.getElementById("dailyNotes").value.trim();
+  if(!schoolKey||!gradeKey) return alert("Fill school & grade");
+
+  // Attendance collection
+  const attendance = {};
+  document.querySelectorAll("#attendanceTable select").forEach(sel=>{
+    const studentKey = sel.id.replace("att_","");
+    attendance[studentKey] = sel.value;
+  });
+
+  // Save to Firebase
+  db.ref(`parent_engagement/schools/${schoolKey}/${gradeKey}/dailyHighlights/${date}`)
+    .set({ attendance, notes })
+    .then(()=>alert("Highlights sent to parents!"));
+}
+
+// ---------- Parent Functions ----------
+function loadParentSchools() {
+  const sel = document.getElementById("parentSchool"); sel.innerHTML="<option value=''>-- Choose School --</option>";
+  db.ref("parent_engagement/schools").once("value", snapshot=>{
+    snapshot.forEach(child=>{
+      const opt=document.createElement("option");
+      opt.value=child.key; opt.textContent=child.key;
+      sel.appendChild(opt);
+    });
+    lockParentSchool();
+  });
+}
+function lockParentSchool() {
+  const saved = localStorage.getItem("parentSchool");
+  if(saved){ document.getElementById("parentSchool").value=saved; document.getElementById("parentSchool").disabled=true; loadParentGrades(); }
+}
+function resetParentSchool() { localStorage.removeItem("parentSchool"); const sel=document.getElementById("parentSchool"); sel.disabled=false; sel.value=""; loadParentSchools(); }
+function saveParentSchool() { const val=document.getElementById("parentSchool").value; if(val) localStorage.setItem("parentSchool",val); loadParentGrades(); }
+
+function loadParentGrades() {
+  const schoolKey=document.getElementById("parentSchool").value;
+  const gradeSel=document.getElementById("parentGrade");
+  gradeSel.innerHTML="<option value=''>-- Choose Grade --</option>";
+  if(!schoolKey) return;
+  db.ref(`parent_engagement/schools/${schoolKey}`).once("value", snapshot=>{
+    snapshot.forEach(child=>{ if(child.key!=="meta"){ const opt=document.createElement("option"); opt.value=child.key; opt.textContent=child.key; gradeSel.appendChild(opt); }});
+  });
+}
+function loadHighlights() {
+  const schoolKey = document.getElementById("parentSchool").value;
+  const gradeKey = document.getElementById("parentGrade").value;
+  const container = document.getElementById("highlightsContainer");
+  container.innerHTML = "<p>Loading...</p>";
+  if (!schoolKey || !gradeKey) return;
+
+  db.ref(`parent_engagement/schools/${schoolKey}/${gradeKey}/dailyHighlights`).once("value", snapshot => {
+    container.innerHTML = "";
+    snapshot.forEach(day => {
+      const div = document.createElement("div");
+      div.style.border = "1px solid #ccc";
+      div.style.padding = "10px";
+      div.style.marginBottom = "10px";
+      div.style.borderRadius = "6px";
+
+      const dateStr = new Date(day.key).toDateString();
+      const attendance = day.val().attendance || {};
+      const notes = day.val().notes || "";
+
+      // Attendance display with student names
+      let attText = "<ul>";
+      for (const studentKey in attendance) {
+        db.ref(`parent_engagement/schools/${schoolKey}/${gradeKey}/students/${studentKey}/name`)
+          .once("value")
+          .then(snap => {
+            const studentName = snap.exists() ? snap.val() : studentKey;
+            const li = document.createElement("li");
+            li.innerHTML = `<strong>${studentName}</strong>: ${attendance[studentKey]}`;
+            div.querySelector("ul.attendanceList").appendChild(li);
+          });
+      }
+      attText = '<ul class="attendanceList"></ul>';
+
+      // Convert notes to bullet points
+      let notesList = "";
+      if (notes) {
+        const bullets = notes.split("\n").filter(n => n.trim() !== "");
+        notesList = "<ul>";
+        bullets.forEach(b => notesList += `<li>${b}</li>`);
+        notesList += "</ul>";
+      }
+
+      div.innerHTML = `<h4>${dateStr}</h4>
+                       <strong>Attendance:</strong>${attText}
+                       <strong>Highlights:</strong>${notesList}`;
+      container.appendChild(div);
+    });
+  });
+}
+
+// ---------- Role Toggle ----------
+function chooseRole(role){
+  localStorage.setItem("role",role);
+  document.getElementById("roleSelect").style.display="none";
+  if(role==="teacher"){ document.getElementById("teacherSection").style.display="block"; startStudentListeners(); }
+  if(role==="parent"){ document.getElementById("parentSection").style.display="block"; loadParentSchools(); }
+}
+
+// ---------- On Load ----------
+window.onload=()=>{
+  const role=localStorage.getItem("role");
+  if(role) chooseRole(role);
+  const savedSchool=localStorage.getItem("schoolName");
+  const savedGrade=localStorage.getItem("gradeName");
+  if(savedSchool) document.getElementById("schoolName").value=savedSchool;
+  if(savedGrade) document.getElementById("gradeName").value=savedGrade;
+  const today=new Date().toISOString().split("T")[0];
+  document.getElementById("highlightDate").value=today;
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Tutor: Save + Repeat + Download</title>
+  <script src="https://unpkg.com/mathlive"></script>
+  <link rel="stylesheet" href="https://unpkg.com/mathlive/dist/mathlive.core.css" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif;
+      background: #eef1f5;
+    }
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    #toolbar {
+      padding: 15px;
+      background: #1976d2;
+      color: white;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    #toolbar button, #gradeSelector {
+      background: white;
+      color: #1976d2;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #editor {
+      flex: 1;
+      padding: 30px;
+      font-size: 1.6em;
+      background: #fff;
+      overflow-y: auto;
+      outline: none;
+      white-space: pre-wrap;
+      cursor: text;
+    }
+    .question { color: #333; margin-bottom: 20px; font-weight: bold; }
+    .solution { color: #2e7d32; font-weight: normal; }
+    .hand-writing {
+      cursor: url('https://cur.cursors-4u.net/people/peo-2/peo129.cur'), auto !important;
+    }
+    #status {
+      padding: 10px;
+      background: #388e3c;
+      color: white;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <div id="toolbar">
+    <select id="gradeSelector">
+      <option value="">Select Grade</option>
+      <option value="grade9">Grade 9</option>
+      <option value="grade10">Grade 10</option>
+      <option value="grade11">Grade 11</option>
+    </select>
+    <button onclick="startTutor()">▶️ Start Tutor</button>
+    <button onclick="pauseLesson()">⏸️ Pause</button>
+    <button onclick="resumeLesson()">▶️ Resume</button>
+    <button onclick="repeatLesson()">🔁 Repeat Lesson</button>
+    <button onclick="repeatQuestion()">🔁 Repeat Question</button>
+    <button onclick="skipLesson()">⏭️ Skip</button>
+    <button onclick="downloadAll()">⬇️ Download All</button>
+  </div>
+
+  <div id="editor" contenteditable="true">
+    <p>Select a grade and click "Start Tutor" to begin.</p>
+  </div>
+
+  <div id="status">⏳ Waiting for you to select a grade...</div>
+</div>
+
+<script>
+  let tutorStarted = false;
+  let paused = false;
+  let typingTimer = null;
+  let waitTimer = null;
+  let inLessonMode = true;
+  let currentLesson = 0;
+  let currentQuestion = 0;
+  let lessonsArray = [];
+  let questionsArray = [];
+  const fullTranscript = [];
+
+  const allLessons = {
+    grade9: [
+      [`Lesson 1: TITRATIONS (VOLUMETRIC ANALYSIS)
+
+In titration experiments and calculations:
+
+- Moles should be given in four decimal places.
+- When reading the solution in a volumetric flask or burette, the lower meniscus must align with the mark.
+- Molarity should be expressed to three decimal places.
+- Average volume should be recorded to two decimal places, unless it's exact.
+- Relative formula mass (RFM) and relative atomic mass (RAM) have no units.
+- The correct unit for grams per litre is g per L, not capital G per L.
+- Burette readings must not exceed 50 cubic centimeters.
+- When completing a titration table, use either one or two decimal places.
+  If using two, the second decimal should be zero or five.
+- Decimal place formatting must be consistent.
+- Stop adding solution when the endpoint is reached — usually shown by a color change from the indicator.`,
+ "Lesson 2: Solving simple equations."],
+      ["Lesson 1: Algebraic Expressions", "Lesson 2: Linear Equations"],
+      ["Lesson 1: Pythagorean Theorem", "Lesson 2: Triangle Problems"],
+      [`Lesson 1: TITRATIONS (VOLUMETRIC ANALYSIS)
+
+In titration experiments and calculations:
+
+- Moles should be given in four decimal places.
+- When reading the solution in a volumetric flask or burette, the lower meniscus must align with the mark.
+- Molarity should be expressed to three decimal places.
+- Average volume should be recorded to two decimal places, unless it's exact.
+- Relative formula mass (RFM) and relative atomic mass (RAM) have no units.
+- The correct unit for grams per litre is g per L, not capital G per L.
+- Burette readings must not exceed 50 cubic centimeters.
+- When completing a titration table, use either one or two decimal places.
+  If using two, the second decimal should be zero or five.
+- Decimal place formatting must be consistent.
+- Stop adding solution when the endpoint is reached — usually shown by a color change from the indicator.`,
+ "Lesson 2: Plotting Functions"],
+      ["Lesson 1: Probability Intro", "Lesson 2: Basic Calculations"],
+      ["Lesson 1: Weekly Review", "Lesson 2: Practice"],
+      ["📌 No lesson scheduled for today."]
+    ],
+    grade10: [
+      ["Lesson 1: Quadratic Equations", "Lesson 2: Factorization"],
+      ["Lesson 1: Completing the Square", "Lesson 2: Graphing Quadratics"],
+      ["Lesson 1: Simultaneous Equations", "Lesson 2: Substitution Method"],
+      ["Lesson 1: Trigonometry Intro", "Lesson 2: Ratios"],
+      ["Lesson 1: Statistics Intro", "Lesson 2: Central Tendency"],
+      ["Lesson 1: Quadratic Review", "Lesson 2: Practice"],
+      ["📌 No lesson scheduled for today."]
+    ],
+    grade11: [
+      ["Lesson 1: Differentiation", "Lesson 2: Calculus in Motion"],
+      ["Lesson 1: Integration", "Lesson 2: Substitution"],
+      ["Lesson 1: Logarithms", "Lesson 2: Properties"],
+      ["Lesson 1: Vectors", "Lesson 2: Vector Operations"],
+      ["Lesson 1: Exponentials", "Lesson 2: Logarithmic Equations"],
+      ["Lesson 1: Calculus Review", "Lesson 2: Practice"],
+      ["📌 No lesson scheduled for today."]
+    ]
+  };
+
+  const allQuestions = {
+    grade9: [
+      { question: "What is the Pythagorean theorem?", solution: "a² + b² = c²" },
+      { question: "Solve: 3x = 12", solution: "Divide both sides by 3 → x = 4" }
+    ],
+    grade10: [
+      { question: "Factor x² + 5x + 6", solution: "(x + 2)(x + 3)" },
+      { question: "Simplify sin²θ + cos²θ", solution: "It equals 1." }
+    ],
+    grade11: [
+      { question: "Differentiate y = x²", solution: "dy/dx = 2x" },
+      { question: "Integrate ∫x dx", solution: "(1/2)x² + C" }
+    ]
+  };
+
+  const editor = document.getElementById("editor");
+  const status = document.getElementById("status");
+
+  function getTodayLessons(gradeLessons) {
+    const dayIndex = new Date().getDay(); // Sunday = 0 ... Saturday = 6
+    return gradeLessons[dayIndex] || ["📌 No lesson scheduled for today."];
+  }
+
+  function getVoice() {
+    const voices = speechSynthesis.getVoices();
+    const preferred = ["Google UK English Male", "en-GB", "en-IN", "en-KE"];
+    return voices.find(v => preferred.includes(v.name) || preferred.includes(v.lang)) || voices[0];
+  }
+
+  function speak(text, onEnd) {
+    speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.voice = getVoice();
+    utter.rate = 0.88;
+    utter.onend = () => onEnd && onEnd();
+    speechSynthesis.speak(utter);
+  }
+
+  function typeSolution(text, callback) {
+    const solutionDiv = document.createElement("div");
+    solutionDiv.className = "solution";
+    editor.appendChild(solutionDiv);
+    editor.classList.add("hand-writing");
+
+    let i = 0;
+    typingTimer = setInterval(() => {
+      if (paused) return;
+      if (i >= text.length) {
+        clearInterval(typingTimer);
+        editor.classList.remove("hand-writing");
+        callback && callback();
+        return;
+      }
+      solutionDiv.textContent += text[i++];
+    }, 80);
+  }
+
+  function showLesson(index) {
+    if (index >= lessonsArray.length) {
+      inLessonMode = false;
+      showQuestion(currentQuestion);
+      return;
+    }
+
+    const text = lessonsArray[index];
+    editor.innerHTML = `<div class="question">${text}</div>`;
+    status.textContent = `📖 Lesson ${index + 1}: Reading...`;
+    fullTranscript.push(`Lesson ${index + 1}:\n${text}\n`);
+
+    speak(text, () => {
+      currentLesson++;
+      setTimeout(() => showLesson(currentLesson), 4000);
+    });
+  }
+
+  function showQuestion(index) {
+    if (index >= questionsArray.length) {
+      editor.innerHTML = "✅ All lessons and questions completed.";
+      status.textContent = "✅ Done.";
+      return;
+    }
+
+    const q = questionsArray[index];
+    editor.innerHTML = `<div class="question">${q.question}</div>`;
+    status.textContent = `🔊 Reading Question ${index + 1}...`;
+    fullTranscript.push(`\n${q.question}\n`);
+
+    speak(q.question, () => {
+      status.textContent = "⌛ Writing solution in 10 seconds...";
+      waitTimer = setTimeout(() => {
+        if (!paused) {
+          status.textContent = "✍️ Writing Solution...";
+          typeSolution(q.solution, () => {
+            status.textContent = `🔊 Reading Solution...`;
+            fullTranscript.push(`${q.solution}\n`);
+            speak(q.solution, () => {
+              status.textContent = `✅ Done with Question ${index + 1}.`;
+              currentQuestion++;
+              setTimeout(() => showQuestion(currentQuestion), 5000);
+            });
+          });
+        }
+      }, 10000);
+    });
+  }
+
+  function startTutor() {
+    if (tutorStarted) return;
+
+    const grade = document.getElementById("gradeSelector").value;
+    if (!grade) {
+      alert("Please select a grade first.");
+      return;
+    }
+
+    const todayLessons = getTodayLessons(allLessons[grade]);
+    lessonsArray = todayLessons;
+    questionsArray = allQuestions[grade];
+    tutorStarted = true;
+    status.textContent = "🟢 Tutor is starting...";
+    showLesson(currentLesson);
+  }
+
+  function pauseLesson() {
+    paused = true;
+    clearTimeout(waitTimer);
+    clearInterval(typingTimer);
+    speechSynthesis.cancel();
+    editor.classList.remove("hand-writing");
+    status.textContent = "⏸️ Paused.";
+  }
+
+  function resumeLesson() {
+    paused = false;
+    status.textContent = '⏯️ Resumed.';
+  }
+
+  function repeatLesson() {
+    speechSynthesis.cancel();
+    showLesson(currentLesson - 1);
+  }
+
+  function repeatQuestion() {
+    speechSynthesis.cancel();
+    showQuestion(currentQuestion - 1);
+  }
+
+  function skipLesson() {
+    clearTimeout(waitTimer);
+    clearInterval(typingTimer);
+    speechSynthesis.cancel();
+    if (inLessonMode) {
+      currentLesson++;
+      showLesson(currentLesson);
+    } else {
+      currentQuestion++;
+      showQuestion(currentQuestion);
+    }
+  }
+
+  function downloadAll() {
+    const blob = new Blob([fullTranscript.join('\n')], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Smart_Tutor_Summary.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // Fix for Chrome speechSynthesis voices not loaded initially
+  if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = () => {};
+  }
+</script>
+
+</body>
+</html>

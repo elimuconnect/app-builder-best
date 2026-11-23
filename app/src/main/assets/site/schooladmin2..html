@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>School Tools Hub</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f8;
+    margin: 0; padding: 0;
+  }
+  header {
+    background-color: #0d47a1;
+    color: #fff;
+    padding: 25px 20px;
+    text-align: center;
+  }
+ header img.logo {
+    display: block;
+    margin: 80px auto 15px; /* ⬅ moved down */
+    width: 110px;
+    max-width: 40%;
+}
+
+  }
+  header h1 { margin: 0; font-size: 2.5em; }
+  header p { font-size: 1.1em; max-width: 800px; margin: 10px auto; color: #e0e0e0; line-height: 1.6; }
+
+  .container { max-width: 1400px; margin: auto; padding: 20px; }
+  .categories { display: flex; flex-wrap: wrap; gap: 4%; margin-bottom: 30px; }
+  .category {
+    flex: 0 0 48%;
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: 0.3s;
+  }
+  .category:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+  .category-header {
+    background-color: #1976d2;
+    color: #fff;
+    padding: 20px;
+    font-weight: bold;
+    font-size: 1.5em;
+    text-align: center;
+  }
+  .tools {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+    padding: 20px;
+  }
+  .tools a {
+    display: block;
+    padding: 15px;
+    background-color: #e3f2fd;
+    text-decoration: none;
+    color: #0d47a1;
+    text-align: center;
+    border-radius: 10px;
+    transition: 0.3s;
+    font-size: 1.1em;
+    font-weight: 600;
+  }
+  .tools a:hover { background-color: #bbdefb; transform: scale(1.05); }
+  @media (max-width: 768px) { .category { flex: 0 0 100%; } }
+
+  footer {
+    text-align: center;
+    padding: 20px 0;
+    background-color: #0d47a1;
+    color: #fff;
+    font-size: 0.9em;
+  }
+  footer a { color: #ffeb3b; text-decoration: none; }
+
+  /* LOGIN OVERLAY */
+  #loginOverlay {
+    position:fixed; inset:0; z-index:10000;
+    background:rgba(255,255,255,0.3);
+    display:flex; align-items:center; justify-content:center;
+    pointer-events:all;
+    font-family:Segoe UI,sans-serif;
+  }
+  #loginOverlay button {
+    background:#4285F4; color:#fff; border:none;
+    padding:14px 22px; border-radius:8px;
+    font-size:16px; font-weight:600; cursor:pointer;
+  }
+
+  /* PAGE LOCK */
+  #pageLock {
+    position:fixed; inset:0; z-index:9998;
+    display:flex; align-items:center; justify-content:center;
+    pointer-events:all;
+  }
+  #pageLock div {
+    background:#fff; padding:12px 18px; border-radius:10px; font-weight:600;
+    box-shadow:0 4px 15px rgba(0,0,0,.2);
+  }
+
+  /* ACCESS MODAL */
+  #accessModal {
+    position:fixed; inset:0; z-index:9999;
+    background:rgba(0,0,0,.6); display:none;
+    align-items:center; justify-content:center;
+  }
+  #accessModal div {
+    background:#fff; padding:25px 30px; border-radius:12px; max-width:400px;
+    text-align:center; color:#033a63; box-shadow:0 6px 20px rgba(0,0,0,0.3);
+  }
+  #accessModal button {
+    background:#0078D7; color:#fff; border:none; padding:12px 20px;
+    border-radius:8px; font-weight:600; cursor:pointer; font-size:1em;
+  }
+
+  /* COUNTDOWN */
+  #accessCountdown {
+    position:fixed; top:100px; left:10px;
+    background:#0078D7; color:#fff; padding:12px 16px; border-radius:8px;
+    display:none; font-weight:600;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="https://static.wixstatic.com/media/9ba186_61b351de3531446995b426f1c49950ed~mv2.png" alt="Elimu Connect Logo" class="logo"/>
+  <h1>Smart Elimu Connect</h1>
+  <p>Your centralized education hub. From attendance, competency tracking, and STEM learning, to lesson planning and communication — everything in one place.</p>
+  <p>Access teaching resources, math & science tools, language aids, educational games, and external learning platforms — all organized for easy use.</p>
+</header>
+
+<div class="container">
+
+  <!-- ELIMU CONNECT -->
+  <div class="categories">
+    <div class="category">
+      <div class="category-header">General Tools</div>
+      <div class="tools">
+	   
+  <li><a href="./appaccessdaily.html" target="_blank" title="Get affordable websites for schools and educational institutions.">Affordable Schools Websites</a></li>
+   <li><a href="https://drive.google.com/drive/folders/1GA_mWAMJjmWRUaleRZyGYqMHPYMDv_ki" target="_blank" title="schemes of work and lesson plans">All schemes of work and lesson plans 1</a></li>
+    <li><a href="https://educationnewshub.co.ke/primary-schools-free-cbc-schemes-of-work-for-all-grades/" target="_blank" title="schemes of work and lesson plans">All schemes of work and lesson plans 2</a></li>
+ <li><a href="https://cbcteacher.co.ke/cbc-schemes-of-work/" target="_blank" title="schemes of work and lesson plans">All schemes of work and lesson plans 3</a></li>
+	 <li><a href="https://teacherske.co.ke/" title="schemes of work and lesson plans">All schemes of work and lesson plans 4</a></li>	  
+		
+		  
+		  <li><a href="./register4.html" target="_blank" title="Manage and track student attendance easily with a smart digital register.">Smart Register</a></li>
+  <li><a href="./acbl.html" target="_blank" title="Record, track, and showcase student projects and competency-based learning portfolios.">Projects & CBL Portfolio</a></li>
+  <li><a href="./projects.html" target="_blank" title="Generate activities and projects automatically for classroom use.">Activities/Projects Generator</a></li>
+  <li><a href="./homeworkbest.html" target="_blank" title="Create, assign, and track homework efficiently for your students.">Homework Smart System</a></li>
+  <li><a href="./driver.html" target="_blank" title="Track school bus routes and driver information in real-time.">School Bus Tracking - Driver Phase</a></li>
+  <li><a href="./parents.html" target="_blank" title="Parents can track the school bus and student activities for safety and updates.">School Bus Tracking - Parents Phase</a></li>
+  <li><a href="./competencytracker.html" target="_blank" title="Monitor student competencies and performance across subjects.">Competencies Tracker</a></li>
+  <li><a href="./fortutor4.html" target="_blank" title="AI-powered assistant to help teachers plan lessons and answer queries.">AI Teaching Assistant</a></li>
+  <li><a href="https://wisdomappweb.site/mappingteachers" target="_blank" title="Map teacher-student physical locations for classroom planning and management.">Teacher-student Physical Mapping(Teacher Phase)</a></li>
+  <li><a href="./mappingstudents.html" target="_blank" title="Map teacher-student physical locations for classroom planning and management.">Teacher-student Physical Mapping(Student)</a></li>
+
+  <li><a href="./quizes.html" target="_blank" title="Quizes grade7-9">QUIZES</a></li>
+ <li><a href="./avideolessonsbest2.html" target="_blank" title="VIDEO LESSONS FOR JUNIOUR SCHOOLS">Video lessons,J.S.Sr</a></li>
+ <li><a href="./remedialtracker3.html" target="_blank" title="Remedial Tracker">Remedial lessons Tracker</a></li>
+ 
+		  
+		  <li><a href="./club.html" target="_blank" title="Manage STEM clubs, track activities, and engage students in science, tech, and innovation.">STEMLa Club</a></li>
+  <li><a href="./parentengagement.html" target="_blank" title="Connect with parents for updates, notifications, and student progress tracking.">Parent Connect</a></li>
+ 
+  <li><a href="./game.html" target="_blank" title="Engage students with competitive quizzes and interactive games.">Compete & Win</a></li>
+  <li><a href="./aG6V9oQ2Z1p8XyR3T.html" target="_blank" title="Learn coding and programming skills through interactive lessons and projects.">Learn to Code</a></li>
+
+
+	 </div>
+      </div>
+    
+
+    
+    <div class="category">
+      <div class="category-header">MathX Tools</div>
+       <div class="tools">
+ 
+  
+    <li><a href="./mathformulars.html" target="_blank" title="Access common mathematics formulas for easy reference and calculations.">Math Formulas</a></li>
+    <li><a href="./mathgraphs.html" target="_blank" title="Plot and analyze graphs of different mathematical functions.">Math Graphs</a></li>
+    <li><a href="./transformation.html" target="_blank" title="Explore geometric transformations like translation, rotation, reflection, and scaling.">Transformation</a></li>
+    <li><a href="./tables.html" target="_blank" title="View multiplication, division, and other mathematical tables.">Math Tables</a></li>
+    <li><a href="./trigonometry.html" target="_blank" title="Understand trigonometry using the unit circle.">Trigonometry (Unit Circle)</a></li>
+    <li><a href="./sohcahtoa.html" target="_blank" title="Use SOHCAHTOA to solve right-angle triangle problems.">Trigonometry (SOHCAHTOA)</a></li>
+    <li><a href="./areas.html" target="_blank" title="Calculate areas of various geometric shapes.">Area</a></li>
+    <li><a href="./volumes.html" target="_blank" title="Calculate volumes of 3D objects and solids.">Volume</a></li>
+   <li><a href="./unitconverter.html" target="_blank" title="Convert units across physics measurements for easy calculations.">Unit Converter</a></li>
+ 
+	 <li><a href="./quadraticsolver.html" target="_blank" title="Solve quadratic equations quickly using the solver tool.">Quadratic Solver</a></li>
+    <li><a href="./statistics.html" target="_blank" title="Perform statistical calculations and understand data sets.">Statistics</a></li>
+    <li><a href="./vectors.html" target="_blank" title="Learn and solve vector-related problems in physics and mathematics.">Vectors</a></li>
+    <li><a href="./matrix1.html" target="_blank" title="Perform basic matrix operations like addition and multiplication.">Matrix 1</a></li>
+    <li><a href="./matrix2.html" target="_blank" title="Work with advanced matrix operations including inverses and determinants.">Matrix 2</a></li>
+    <li><a href="./long&lat.html" target="_blank" title="Calculate longitude and latitude values and understand coordinates.">Longitude & Latitude</a></li>
+    <li><a href="./differentiate&integrate.html" target="_blank" title="Perform differentiation and integration for calculus problems.">Differentiation & Integration</a></li>
+    <li><a href="./area approximation.html" target="_blank" title="Use mid-ordinate and trapezium methods to approximate areas.">Mid-ordinate & Trapezium</a></li>
+    <li><a href="./integrationarea.html" target="_blank" title="Calculate approximate area under curves using integration.">Integration Area Approx.</a></li>
+    <li><a href="./error.html" target="_blank" title="Understand and calculate errors in measurements and calculations.">Error</a></li>
+    <li><a href="./logs.html" target="_blank" title="Work with logarithms for calculations and problem solving.">Logarithms</a></li>
+    <li><a href="./commercial1.html" target="_blank" title="Calculate simple and compound interest for financial mathematics.">Interest (Simple & Compound)</a></li>
+    <li><a href="./incometax.html" target="_blank" title="Understand and calculate income tax problems.">Income Tax</a></li>
+    <li><a href="./variations.html" target="_blank" title="Learn direct and inverse variations in algebra.">Variations</a></li>
+    <li><a href="./binomial.html" target="_blank" title="Use binomial expansion to simplify algebraic expressions.">Binomial Expansion</a></li>
+ 
+</div>
+
+      </div>
+   
+ 
+  
+  
+  
+    <div class="category">
+      <div class="category-header">ChemX Tools</div>
+       <div class="tools">
+
+ 
+    <li><a href="./chemreactions.html" target="_blank" title="Explore different chemical reactions, balancing equations and reaction types.">Chem Reactions</a></li>
+    <li><a href="./moleconcept.html" target="_blank" title="Understand the mole concept and calculations involving Avogadro's number.">Mole Concept</a></li>
+    <li><a href="./organicchem.html" target="_blank" title="Study organic chemistry topics including hydrocarbons and functional groups.">Organic Chemistry</a></li>
+    <li><a href="./periodictable.html" target="_blank" title="View the periodic table and understand element properties and groups.">Periodic Table</a></li>
+    <li><a href="./commongases.html" target="_blank" title="Learn about common gases, their properties, and chemical behavior.">Common Gases</a></li>
+    <li><a href="./chemgraphs.html" target="_blank" title="Analyze chemical graphs, concentration curves, and reaction rates.">Chem Graphs</a></li>
+    <li><a href="./chemformulars.html" target="_blank" title="Access essential chemistry formulas for calculations and experiments.">Chem Formulas</a></li>
+    <li><a href="./chemicalformula&quations.html" target="_blank" title="Learn to write and balance chemical formulas and equations.">Chemical Formulas & Equations</a></li>
+    <li><a href="./gaslaws.html" target="_blank" title="Study the different gas laws like Boyle's, Charles', and Avogadro's laws.">Gas Laws</a></li>
+    <li><a href="./diffusionlaw.html" target="_blank" title="Understand diffusion laws and principles in gases and liquids.">Diffusion Law</a></li>
+    <li><a href="./ram.html" target="_blank" title="Learn about relative atomic mass (R.A.M) and molecular mass calculations.">R.A.M</a></li>
+  <li><a href="./unitconverter.html" target="_blank" title="Convert units across physics measurements for easy calculations.">Unit Converter</a></li>
+ 
+    <li><a href="./empiricalmolecular.html" target="_blank" title="Determine empirical and molecular formulas from experimental data.">Empirical & Molecular</a></li>
+    <li><a href="./titrations.html" target="_blank" title="Perform titrations calculations.">Titrations Calculator</a></li>
+    <li><a href="./radioactivity.html" target="_blank" title="Study radioactivity, decay, and nuclear reactions.">Radioactivity</a></li>
+    <li><a href="./solubility.html" target="_blank" title="Understand solubility, saturation, and solubility product principles.">Solubility</a></li>
+    <li><a href="./bondenergies.html" target="_blank" title="Learn about bond energies and calculations involving chemical bonds.">Bond Energies</a></li>
+    <li><a href="./thermochemistry.html" target="_blank" title="Explore thermochemistry, enthalpy changes, and energy calculations.">Thermochemistry</a></li>
+ 
+    <li><a href="./adirecttitrationsimulator2.html" target="_blank" title="Direct Titrations.">Back Titrations</a></li>
+    <li><a href="./backtitsimulator2.html" target="_blank" title="Back Titrations.">Back Titrations</a></li>
+    <li><a href="./redoxtitration2.html" target="_blank" title="Redox Titrations">Redox Titratons</a></li>
+ 
+<li><a href="./hesslaw.html" target="_blank" title="Hess Laws.">Hess Law</a></li>
+    
+		   
+      </div>
+    </div>
+ 
+  
+    <!-- Wisdom App -->
+    <div class="category">
+      <div class="category-header">BioX,PhyX,LangX</div>
+      <div class="tools">
+        <!-- Biology Tools -->
+ <div class="bio">Biology
+ 
+    <li><a href="./bones.html" target="_blank" title="Learn about human and animal bones, structure, and functions.">Bones</a></li>
+    <li><a href="./humanandfishanatomy.html" target="_blank" title="Explore human and fish anatomy with illustrations and detailed explanations.">Human and Fish Anatomy</a></li>
+    <li><a href="./plantantomy.html" target="_blank" title="Study plant anatomy, including structure of leaves, stems, roots, and flowers.">Plant Anatomy</a></li>
+
+</div>
+
+<div class="phy">Physics
+  
+    <li><a href="./physicsformulars.html" target="_blank" title="Access essential physics formulas for mechanics, electricity, and more.">Physics Formulas</a></li>
+    <li><a href="./physicsprinciplesexplorer.html" target="_blank" title="Interactive exploration of physics principles and experiments.">Principles Explorer</a></li>
+    <li><a href="./unitconverter.html" target="_blank" title="Convert units across physics measurements for easy calculations.">Unit Converter</a></li>
+ 
+</div>
+
+<div class="kisw">Kiswahili
+ 
+    <li><a href="./kamusi.html" target="_blank" title="Swahili dictionary to understand meanings of words and phrases.">Kamusi</a></li>
+    <li><a href="./methali.html" target="_blank" title="Learn Swahili proverbs and their meanings for effective communication.">Methali</a></li>
+    <li><a href="./nahaunamisema.html" target="_blank" title="Common Swahili sayings and idioms with explanations.">Nahau na Misemo</a></li>
+  <li><a href="./hadithistoriesvid.html" target="_blank" title="Hadith Na Stories.">Stories & Hadithi</a></li>
+</div>
+
+<div class="eng">English
+ 
+    <li><a href="./dictionary.html" target="_blank" title="English dictionary for word meanings and pronunciation.">Dictionary</a></li>
+    <li><a href="./ideoms.html" target="_blank" title="Collection of English idioms with explanations and examples.">Idioms</a></li>
+    <li><a href="./proverbs.html" target="_blank" title="Popular English proverbs and their interpretations.">Proverbs</a></li>
+    <li><a href="./similiesandmetaphors.html" target="_blank" title="Examples of similes and metaphors used in English writing.">Similes and Metaphors</a></li>
+   <li><a href="./hadithistoriesvid.html" target="_blank" title="Hadith Na Stories.">Stories & Hadithi</a></li>
+</div>
+
+ </div>
+      </div>
+  
+
+
+
+
+
+<section style="max-width:650px;margin:30px auto;padding:20px;border-radius:10px;background:#f7f7f7;font-family:Arial;">
+  <h2>Teacher Suggestions / Areas of Improvement</h2>
+  <p style="color:#555;">Kindly share feedback that can help us make the tools better.</p>
+
+  <label>School Name</label><br>
+  <input id="schoolName" style="width:100%;padding:10px;margin:6px 0;border-radius:6px;border:1px solid #ccc;"><br>
+
+  <label>Teacher Name</label><br>
+  <input id="teacherName" style="width:100%;padding:10px;margin:6px 0;border-radius:6px;border:1px solid #ccc;"><br>
+
+  <label>Tool Name</label><br>
+  <input id="toolName" style="width:100%;padding:10px;margin:6px 0;border-radius:6px;border:1px solid #ccc;"><br>
+
+  <label>Area of Improvement</label><br>
+  <textarea id="suggestionText" rows="5" style="width:100%;padding:10px;margin:6px 0;border-radius:6px;border:1px solid #ccc;"></textarea>
+
+  <button onclick="submitSuggestion()" style="margin-top:10px;padding:10px 18px;border:none;border-radius:6px;background:#0078D7;color:white;">
+    Send Suggestion
+  </button>
+
+  <p id="feedbackMsg" style="margin-top:10px;color:green;display:none;">
+    Suggestion sent — thank you!
+  </p>
+</section>
+
+	  
+
+
+
+   
+    <div class="category">
+      <div class="category-header"><strong>External Resources</strong><br> – These are trusted external websites and tools designed to help teachers, students<br>
+ , 
+ and educators improve learning, teaching, and exam preparation.<br> Feel free to use them as needed!</div>
+      <div class="tools">
+  <!-- External Education Resources -->
+ 
+ 
+	 <li><a href="https://drive.google.com/drive/folders/1GA_mWAMJjmWRUaleRZyGYqMHPYMDv_ki" target="_blank" title="schemes of work and lesson plans">All schemes of work and lesson plans 1</a></li>
+    <li><a href="https://educationnewshub.co.ke/primary-schools-free-cbc-schemes-of-work-for-all-grades/" target="_blank" title="schemes of work and lesson plans">All schemes of work and lesson plans 2</a></li>
+ <li><a href="https://cbcteacher.co.ke/cbc-schemes-of-work/" target="_blank" title="schemes of work and lesson plans">All schemes of work and lesson plans 3</a></li>
+	 <li><a href="https://teacherske.co.ke/" title="schemes of work and lesson plans">All schemes of work and lesson plans 4</a></li>	  
+			  	  
+		  <li>
+  <a href="https://www.calculator.net/scientific-calculator.html" target="_blank" title="Online scientific calculator for complex calculations, including trigonometry, logarithms, and more.">
+    Scientific Calculator
+  </a>
+</li>
+
+  <li><a href="https://worksheetzone.org" target="_blank" title="Provides downloadable worksheets for various subjects and grades.">Worksheet Zone</a></li>
+  <li><a href="https://webflow-dev.quizizz.com/homepage-au?lng=en" target="_blank" title="Interactive quizzes and assessments for students with real-time feedback.">Quizizz</a></li>
+  <li><a href="https://www.labxchange.org/" target="_blank" title="Virtual lab simulations and science resources for hands-on learning.">LabXchange</a></li>
+  <li><a href="https://phet.colorado.edu/" target="_blank" title="Physics, chemistry, and math interactive simulations for classrooms.">PhET Simulations</a></li>
+  <li><a href="https://www.mentimeter.com/" target="_blank" title="Create interactive presentations and polls to engage students.">Mentimeter</a></li>
+  <li><a href="https://kahoot.it/" target="_blank" title="Game-based quizzes and learning competitions to make lessons fun.">Kahoot!</a></li>
+  <li><a href="https://gemini.google.com/app" target="_blank" title="Google AI assistant for generating ideas, summaries, and content.">Google Gemini</a></li>
+ 
+	<li><a href="https://www.elimukenya.com/" target="_blank" title="CBC & KCSE notes, exams, and revision materials.">Elimu Kenya</a></li>
+
+<li><a href="https://www.schoolnet.co.ke/" target="_blank" title="KCSE past papers, marking schemes, and revision notes.">SchoolNet Kenya</a></li>
+
+<li><a href="https://www.kcseonline.com/" target="_blank" title="KCSE past papers and marking schemes.">KCSE Online</a></li>
+
+<li><a href="https://www.revisioncentre.co.ke/" target="_blank" title="CBC, KCSE, and revision exam materials.">Revision Centre Kenya</a></li>
+	  
+		  
+		  
+		  
+		  
+		  <li><a href="https://chatgpt.com/" target="_blank" title="AI chatbot for explanations, tutoring, lesson ideas, and more.">ChatGPT</a></li>
+  <li><a href="https://classroom.google.com/" target="_blank" title="Organize classes, assignments, and communicate with students online.">Google Classroom</a></li>
+  <li><a href="https://www.instructure.com/" target="_blank" title="Canvas LMS: Manage courses, assignments, grading, and collaboration.">Canvas</a></li>
+  <li><a href="https://nearpod.com/" target="_blank" title="Interactive lessons, quizzes, and virtual classroom engagement tools.">Nearpod</a></li>
+  <li><a href="https://www.peardeck.com/" target="_blank" title="Integrates with slides to make interactive presentations for students.">Pear Deck</a></li>
+  <li><a href="https://www.socrative.com/" target="_blank" title="Real-time quizzes, polls, and assessment tools for classroom feedback.">Socrative</a></li>
+  <li><a href="https://get.plickers.com/" target="_blank" title="Instant student assessments using a camera and printed cards.">Plickers</a></li>
+  <li><a href="https://www.canva.com/education/" target="_blank" title="Create educational graphics, presentations, and collaborative designs.">Canva for Education</a></li>
+  <li><a href="https://docs.google.com/forms/u/0/" target="_blank" title="Build surveys, quizzes, and collect student responses easily.">Google Forms</a></li>
+  <li><a href="https://copilot.microsoft.com/" target="_blank" title="AI assistant integrated with Microsoft 365 to enhance productivity.">Microsoft Copilot</a></li>
+  <li><a href="https://www.microsoft.com/en-us/microsoft-365/powerpoint?msockid=0b39fb68677a6b4a3a2aed3d66f86a3a" target="_blank" title="Create interactive slides, presentations, and learning materials.">Microsoft PowerPoint</a></li>
+  <li><a href="https://edpuzzle.com/" target="_blank" title="Turn videos into interactive lessons with embedded questions.">Edpuzzle</a></li>
+  <li><a href="https://quizlet.com/" target="_blank" title="Flashcards, games, and study sets to reinforce learning.">Quizlet</a></li>
+  <li><a href="https://onenote.cloud.microsoft/" target="_blank" title="Digital notebook for organizing lesson plans and notes.">OneNote</a></li>
+  <li><a href="https://trello.com/" target="_blank" title="Project management tool to organize tasks, lessons, and teamwork.">Trello</a></li>
+  <li><a href="https://ed.ted.com/" target="_blank" title="Curated educational videos with interactive questions for learning.">TED-Ed</a></li>
+  <li><a href="https://www.polleverywhere.com/" target="_blank" title="Live polling and audience interaction during lessons.">Poll Everywhere</a></li>
+  <li><a href="https://answergarden.ch/" target="_blank" title="Create simple online polls or brainstorming word clouds.">AnswerGarden</a></li>
+  <li><a href="https://www.microsoft.com/en/education" target="_blank" title="Microsoft Education portal with resources, lesson plans, and tools.">Microsoft Education</a></li>
+  <li><a href="https://www.socialcreator.com/pastpapersandquizes" target="_blank" title="Access past papers, quizzes, and practice resources for students.">All Resources</a></li>
+  <li><a href="https://kcserevision.com/" target="_blank" title="Past papers, revision notes, and exam preparation for KCSE.">KCSE Revision</a></li>
+<li><a href="https://www.oercommons.org/" target="_blank" title="Open Educational Resources: lesson plans, worksheets, and teaching materials.">OER Commons</a></li>
+
+<li><a href="https://www.teacherspayteachers.com/" target="_blank" title="Free and paid teacher-created lesson resources and worksheets.">Teachers Pay Teachers (Free Section)</a></li>
+
+<li><a href="https://www.commonlit.org/" target="_blank" title="Free reading passages, comprehension questions, and literacy tools.">CommonLit</a></li>
+
+<li><a href="https://www.readworks.org/" target="_blank" title="Free reading comprehension passages and lesson tools.">ReadWorks</a></li>
+
+<li><a href="https://www.bookwidgets.com/" target="_blank" title="Create interactive worksheets and assessments for students.">BookWidgets</a></li>
+
+<li><a href="https://www.liveworksheets.com/" target="_blank" title="Convert worksheets into interactive online activities.">Liveworksheets</a></li>
+
+<li><a href="https://www.lessonplanet.com/" target="_blank" title="Teacher lesson plans and classroom resources (free section available).">Lesson Planet</a></li>
+
+<li><a href="https://www.education.com/" target="_blank" title="Printable worksheets, lesson plans, and activities for teachers.">Education.com</a></li>
+
+<li><a href="https://www.planboardapp.com/" target="_blank" title="Free digital lesson planning tool for teachers.">Chalk Planboard</a></li>
+
+<li><a href="https://www.sheets.google.com/" target="_blank" title="Create marksheets, grading tools, and student trackers.">Google Sheets (Teacher Use)</a></li>
+<li><a href="https://www.physicsandmathstutor.com/" target="_blank" title="GCSE, IGCSE, A-Level past papers and revision notes.">Physics & Maths Tutor</a></li>
+
+<li><a href="https://www.exam-mate.com/" target="_blank" title="Cambridge IGCSE, AS & A Level past papers.">Exam Mate</a></li>
+
+<li><a href="https://papers.xtremepapers.xyz/" target="_blank" title="Free past papers for IGCSE, AS, A Level, IB, and O Level.">XtremePapers</a></li>
+
+<li><a href="https://www.ibdocuments.com/" target="_blank" title="IB past papers, question banks, and mark schemes.">IB Documents</a></li>
+
+
+ 
+  
+</div>
+    </div>
+  
+
+
+
+   
+    <div class="category">
+      <div class="category-header">TPAD,TPAY,ZERAKI,TSC WEBSITE</div>
+      <div class="tools">
+  <!-- External Education Resources -->
+ 
+ 
+  <li><a href="https://teachersonline.tsc.go.ke/" target="_blank" title="Official portal for teachers to access personal records,and professional updates.">Teachers Online TSC</a></li>
+  <li><a href="https://tpay.tsc.go.ke/fa392bf9a4692aa0cc/zln" target="_blank" title="Online platform for TSC teachers to access payslips and P9">TPay TSC</a></li>
+  <li><a href="https://tpad2.tsc.go.ke/" target="_blank" title="Teacher Performance Appraisal and Development system to monitor and record teacher performance.">TPAD2 TSC</a></li>
+  <li><a href="https://www.zeraki.app/zeraki-analytics" target="_blank" title="Analytics platform to monitor student performance and school metrics using data dashboards.">Zeraki Analytics</a></li>
+
+
+</div>
+    </div>
+ 
+</div>
+
+
+<footer>
+  &copy; 2025 <strong>Smart Elimu Connect</strong>. All rights reserved.  
+  
+</footer>
+
+
+
+
+<div id="accessModal" style="
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:white;
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:99999;
+">
+
+<div style="
+background:#fff;
+padding:30px;
+border-radius:12px;
+max-width:420px;
+width:90%;
+box-shadow:0 6px 20px rgba(0,0,0,.3);
+">
+
+<p id="accessMessage"></p>
+
+<button
+id="accessBtn"
+style="
+display:none;
+width:100%;
+padding:12px;
+margin-top:15px;
+background:#0078D7;
+color:#fff;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+">
+Pay Now
+</button>
+
+
+
+
+
+<h2>School Tools Login</h2>
+
+<input
+id="loginEmail"
+type="email"
+placeholder="Enter Email"
+style="
+width:100%;
+padding:12px;
+margin-bottom:15px;
+border:1px solid #ccc;
+border-radius:8px;
+">
+
+<button
+id="adminLoginBtn"
+onclick="adminLogin()"
+style="
+width:100%;
+padding:12px;
+margin-bottom:10px;
+background:#0078D7;
+color:#fff;
+border:none;
+border-radius:8px;
+cursor:pointer;
+">
+Administrator Login
+</button>
+
+<button
+id="teacherLoginBtn"
+onclick="teacherLogin()"
+style="
+width:100%;
+padding:12px;
+background:#2a9d8f;
+color:#fff;
+border:none;
+border-radius:8px;
+cursor:pointer;
+">
+Teacher Login
+</button>
+<hr style="margin:20px 0;">
+
+<p style="text-align:center;font-weight:bold;">
+New School?
+</p>
+
+<button
+onclick="showRegistrationForm()"
+style="
+width:100%;
+padding:12px;
+background:#f39c12;
+color:#fff;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;">
+Register School
+</button>
+
+
+
+<div id="registerModal" style="display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.6);
+justify-content:center;
+align-items:center;
+z-index:100000;">
+
+<div style="
+background:white;
+padding:25px;
+border-radius:12px;
+width:420px;
+max-width:95%;">
+
+<h2>Register School</h2>
+
+<input id="regSchool"
+placeholder="School Name"
+style="width:100%;padding:10px;margin:6px 0;">
+
+<input id="regAdmin"
+placeholder="Administrator Name"
+style="width:100%;padding:10px;margin:6px 0;">
+
+<input id="regEmail"
+type="email"
+placeholder="Administrator Email"
+style="width:100%;padding:10px;margin:6px 0;">
+
+<input id="regPhone"
+placeholder="Phone"
+style="width:100%;padding:10px;margin:6px 0;">
+
+<input id="regCounty"
+placeholder="County"
+style="width:100%;padding:10px;margin:6px 0;">
+
+<button
+onclick="registerSchool()"
+style="
+width:100%;
+padding:12px;
+background:#2a9d8f;
+color:white;
+border:none;
+margin-top:10px;">
+Create Account
+</button>
+
+	<button
+onclick="document.getElementById('registerModal').style.display='none'"
+style="
+width:100%;
+padding:12px;
+margin-top:10px;
+background:#777;
+color:white;
+border:none;
+cursor:pointer;">
+Cancel
+</button>
+
+</div>
+
+</div>
+
+
+
+	
+	
+</div>
+</div>
+
+
+
+
+<!-- Status Bar -->
+<div id="statusBar" style="
+display:none;
+position:fixed;
+top:10px;
+right:10px;
+display:flex;
+gap:8px;
+align-items:center;
+flex-wrap:wrap;
+justify-content:flex-end;
+z-index:100002;
+max-width:95%;
+">
+
+<div id="adminAccess" style="
+display:none;
+background:#2a9d8f;
+color:#fff;
+padding:6px 10px;
+border-radius:20px;
+font:600 13px Segoe UI,sans-serif;
+white-space:nowrap;
+">
+🟢 Admin
+</div>
+
+<div id="accessType" style="
+display:none;
+background:#555;
+color:#fff;
+padding:6px 10px;
+border-radius:20px;
+font:600 13px Segoe UI,sans-serif;
+white-space:nowrap;
+">
+Paid
+</div>
+
+<div id="accessCountdown" style="
+display:none;
+background:#0078D7;
+color:#fff;
+padding:6px 10px;
+border-radius:20px;
+font:600 13px Segoe UI,sans-serif;
+white-space:nowrap;
+">
+120d
+</div>
+
+</div>
+
+	
+
+<div id="adminTools" style="
+display:none;
+position:fixed;
+top:55px;
+left:50%;
+transform:translateX(-50%);
+background:#fff;
+padding:15px;
+border-radius:12px;
+box-shadow:0 5px 16px rgba(0,0,0,.2);
+width:95%;
+max-width:500px;
+box-sizing:border-box;
+z-index:100001;
+">
+	
+    <input
+        id="newTeacherEmail"
+        type="email"
+        placeholder="Teacher Email"
+        style="
+        width:100%;
+        padding:11px;
+        margin-bottom:12px;
+        border:1px solid #ccc;
+        border-radius:8px;
+        box-sizing:border-box;
+        ">
+
+    <div style="
+        display:flex;
+        gap:10px;
+    ">
+
+        <button
+            onclick="adminAddTeacher()"
+            style="
+            flex:1;
+            padding:11px;
+            background:#0078D7;
+            color:white;
+            border:none;
+            border-radius:8px;
+            cursor:pointer;
+            font-weight:600;
+            ">
+            Add Teacher
+        </button>
+
+        <button
+            onclick="adminDeleteTeacher()"
+            style="
+            flex:1;
+            padding:11px;
+            background:#e63946;
+            color:white;
+            border:none;
+            border-radius:8px;
+            cursor:pointer;
+            font-weight:600;
+            ">
+            Delete Teacher
+        </button>
+
+    </div>
+
+</div>
+
+	
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const SUPABASE_URL = "https://hhtplinfcdwgahlhurhx.supabase.co"; 
+	
+	const SUPABASE_KEY = "sb_publishable_cOXipkG4wSKIkIHwkP04JA_KunvG7T5";
+
+const client =
+supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+
+const PAYMENT_LINK =
+"https://paystack.shop/pay/b-fmc6kyut";
+
+const ACCESS_DURATION =
+120*24*60*60*1000;
+
+
+	// Save Paystack reference immediately
+
+// ===== HELPERS =====
+function getQueryParam(name){
+    return new URLSearchParams(window.location.search).get(name);
+}
+
+// Save Paystack reference immediately
+const paystackReference = getQueryParam("reference");
+
+if(paystackReference){
+    sessionStorage.setItem(
+        "paystack_reference",
+        paystackReference
+    );
+}
+
+
+
+
+
+
+
+function showAccessModal(msg, showPayButton = false){
+
+    document.getElementById("accessMessage").textContent = msg;
+
+    document.getElementById("accessModal").style.display = "flex";
+
+    const btn = document.getElementById("accessBtn");
+
+    if(showPayButton){
+
+        btn.style.display = "block";
+        btn.textContent = "Pay Now";
+
+        btn.onclick = () => {
+
+            location.href = PAYMENT_LINK;
+
+        };
+
+    }else{
+
+        btn.style.display = "none";
+
+    }
+
+}
+
+
+
+
+	
+function hideAccessModal(){ document.getElementById('accessModal').style.display="none"; }
+
+
+
+
+
+	let countdownInterval = null;
+
+function startCountdown(expiresAt){
+
+    const countdownEl = document.getElementById("accessCountdown");
+    countdownEl.style.display = "block";
+
+    if(countdownInterval){
+        clearInterval(countdownInterval);
+    }
+
+    countdownInterval = setInterval(()=>{
+
+        const remaining = expiresAt - Date.now();
+
+        if(remaining <= 0){
+
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+
+            countdownEl.style.display = "none";
+
+            showAccessModal(
+                "Access expired. Please pay to continue.",
+                true,
+                "Pay Now"
+            );
+
+            return;
+        }
+
+        const days = Math.floor(remaining / 86400000);
+        const hours = Math.floor((remaining % 86400000) / 3600000);
+        const minutes = Math.floor((remaining % 3600000) / 60000);
+        const seconds = Math.floor((remaining % 60000) / 1000);
+
+        countdownEl.textContent =
+            `Paid access: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+    },1000);
+}
+
+
+
+async function adminLogin(){
+
+    const email = document.getElementById("loginEmail")
+        .value.trim().toLowerCase();
+
+    if(!email) return alert("Enter administrator email.");
+
+    const deviceId = getDeviceId();
+
+    const { data: admin, error } = await client
+        .from("school_tools_users")
+        .select("*")
+        .eq("email", email)
+        .eq("role", "admin")
+        .single();
+
+    if(error || !admin){
+        alert("Administrator not found.");
+        return;
+    }
+
+    if(!admin.device_id){
+
+        await client
+            .from("school_tools_users")
+            .update({ device_id: deviceId })
+            .eq("id", admin.id);
+
+    } else if(admin.device_id !== deviceId){
+
+        alert("This account is already used on another device.");
+        return;
+    }
+
+   		localStorage.setItem("admin_email", email);
+localStorage.removeItem("teacher_email");		
+
+    await handleAdminAccess(admin.email);
+	
+}
+
+
+async function teacherLogin(){
+
+    const email = document.getElementById("loginEmail")
+        .value.trim().toLowerCase();
+
+    if(!email) return alert("Enter teacher email.");
+
+    const deviceId = getDeviceId();
+
+    const { data: teacher, error } = await client
+        .from("school_tools_teachers")
+        .select("*")
+        .eq("email", email)
+        .single();
+
+    if(error || !teacher){
+        alert("Teacher not registered.");
+        return;
+    }
+
+    if(!teacher.device_id){
+
+        await client
+            .from("school_tools_teachers")
+            .update({ device_id: deviceId })
+            .eq("id", teacher.id);
+
+    } else if(teacher.device_id !== deviceId){
+
+        alert("This account is already used on another device.");
+        return;
+    }
+localStorage.setItem("teacher_email", email);
+localStorage.removeItem("admin_email");
+   
+    await handleTeacherAccess(teacher.email);
+	
+}
+
+
+
+document.getElementById("registerModal").addEventListener("click", function(e){
+
+    if(e.target === this){
+        this.style.display = "none";
+    }
+
+});
+
+
+
+	
+	
+function getDeviceId(){
+    let id = localStorage.getItem("device_id");
+
+    if(!id){
+        id = crypto.randomUUID();
+        localStorage.setItem("device_id", id);
+    }
+
+    return id;
+}
+
+
+
+
+async function registerSchool(){
+
+    const school = document.getElementById("regSchool").value.trim();
+
+    const admin = document.getElementById("regAdmin").value.trim();
+
+    const email = document.getElementById("regEmail").value.trim().toLowerCase();
+
+    const phone = document.getElementById("regPhone").value.trim();
+
+    const county = document.getElementById("regCounty").value.trim();
+
+    if(!school || !admin || !email){
+
+        alert("Please fill all required fields.");
+
+        return;
+
+    }
+
+    // Check if admin already exists
+    const { data: existing, error: existingError } = await client
+        .from("school_tools_users")
+        .select("id")
+        .eq("email", email)
+        .maybeSingle();
+
+    if(existingError){
+
+        alert(existingError.message);
+
+        return;
+
+    }
+
+    if(existing){
+
+        alert("Administrator email already registered.");
+
+        return;
+
+    }
+
+    // Create school account
+    const { error: accountError } = await client
+        .from("school_tool_accounts")
+        .insert({
+            school_name: school,
+            admin_name: admin,
+            email: email,
+            phone: phone,
+            county: county
+        });
+
+    if(accountError){
+
+        alert(accountError.message);
+
+        return;
+
+    }
+
+    // Create admin user
+    const { error: userError } = await client
+        .from("school_tools_users")
+        .insert({
+            email: email,
+            role: "admin"
+        });
+
+    if(userError){
+
+        alert(userError.message);
+
+        return;
+
+    }
+
+   // Registration successful
+alert("School registered successfully.");
+
+localStorage.setItem("admin_email", email);
+localStorage.removeItem("teacher_email");
+
+// Close registration form
+document.getElementById("registerModal").style.display = "none";
+
+// Clear the form
+document.getElementById("regSchool").value = "";
+document.getElementById("regAdmin").value = "";
+document.getElementById("regEmail").value = "";
+document.getElementById("regPhone").value = "";
+document.getElementById("regCounty").value = "";
+
+// Show payment screen
+showAccessModal(
+    "School registered successfully.\n\nPlease pay to activate your administrator account.",
+    true
+);
+}
+
+
+function showRegistrationForm(){
+
+    document.getElementById("registerModal").style.display="flex";
+
+}
+
+	
+
+async function saveAccess(user, reference){
+
+    if(!reference) return false;
+
+    const email = user.email.toLowerCase().trim();
+
+    // Has this reference already been used?
+    const { data: existing, error: existingError } = await client
+        .from("school_tools_payments")
+        .select("id,email,reference,expires_at")
+        .eq("reference", reference)
+        .maybeSingle();
+
+    if(existingError){
+        console.error(existingError);
+        return false;
+    }
+
+    // Reference already exists
+    if(existing){
+
+        if(existing.email.toLowerCase() !== email){
+
+            alert("This payment reference has already been used.");
+
+            return false;
+
+        }
+
+        // Existing active payment
+        if(existing.expires_at > Date.now()){
+
+            hideAccessModal();
+
+            startCountdown(existing.expires_at);
+
+            const label = document.getElementById("accessType");
+            label.style.display = "block";
+            label.style.background = "#0078D7";
+            label.textContent = "Access type: Paid (Admin)";
+
+            sessionStorage.removeItem("paystack_reference");
+
+            history.replaceState({}, "", window.location.pathname);
+
+            return true;
+
+        }
+
+    }
+
+    // Save new payment
+    const expiresAt = Date.now() + ACCESS_DURATION;
+
+    const { error: insertError } = await client
+        .from("school_tools_payments")
+        .insert({
+            email: email,
+            reference: reference,
+            expires_at: expiresAt
+        });
+
+    if(insertError){
+
+        console.error(insertError);
+
+        alert(insertError.message);
+
+        return false;
+
+    }
+
+    hideAccessModal();
+
+    startCountdown(expiresAt);
+
+    const label = document.getElementById("accessType");
+    label.style.display = "block";
+    label.style.background = "#0078D7";
+    label.textContent = "Access type: Paid (Admin)";
+
+    sessionStorage.removeItem("paystack_reference");
+
+    history.replaceState({}, "", window.location.pathname);
+
+    return true;
+}
+
+
+
+
+
+// ===== ADMINS & TEACHERS =====
+
+const MAX_TEACHERS = 50;
+
+function showAdminAccess(){
+
+    document.getElementById("statusBar").style.display = "flex";
+
+    document.getElementById("adminAccess").style.display = "block";
+
+    document.getElementById("adminTools").style.display = "block";
+
+}
+
+
+
+function hideAdminAccess(){
+
+   
+    document.getElementById("adminTools").style.display = "none";
+
+}
+
+
+	
+
+async function adminDeleteTeacher(){
+
+    const email = document
+        .getElementById("newTeacherEmail")
+        .value
+        .trim()
+        .toLowerCase();
+
+    if(!email){
+        return alert("Enter teacher email");
+    }
+
+    // ✅ Get admin from localStorage (NO Supabase Auth)
+    const adminEmail = localStorage.getItem("admin_email");
+
+    if(!adminEmail){
+        return alert("Admin not logged in");
+    }
+
+    const { data: admin, error: adminError } = await client
+        .from("school_tools_users")
+        .select("id")
+        .eq("email", adminEmail)
+        .single();
+
+    if(adminError || !admin){
+        alert("Admin account not found.");
+        return;
+    }
+
+    const confirmDelete = confirm(`Delete teacher ${email}?`);
+
+    if(!confirmDelete) return;
+
+    const { error } = await client
+        .from("school_tools_teachers")
+        .delete()
+        .eq("email", email)
+        .eq("added_by", admin.id);
+
+    if(error){
+        alert(error.message);
+        return;
+    }
+
+   document.getElementById("newTeacherEmail").value = "";
+alert("Teacher deleted successfully.");
+}
+
+	
+
+async function checkAdminAccess(adminId){
+
+    // Get admin email
+    const { data: admin, error: adminError } = await client
+        .from("school_tools_users")
+        .select("email")
+        .eq("id", adminId)
+        .single();
+
+    if(adminError || !admin){
+        console.log("Admin not found", adminError);
+        return false;
+    }
+
+    const email = admin.email.toLowerCase().trim();
+
+    // Find latest active payment
+    const { data: payment, error: paymentError } = await client
+        .from("school_tools_payments")
+        .select("*")
+        .eq("email", email)
+        .gt("expires_at", Date.now())
+        .order("expires_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+    if(paymentError){
+        console.log(paymentError);
+        return false;
+    }
+
+    // No valid payment
+    if(!payment){
+
+        document.getElementById("accessCountdown").style.display = "none";
+        document.getElementById("accessType").style.display = "none";
+
+        return false;
+    }
+
+    // Active payment found
+    startCountdown(payment.expires_at);
+
+    const label = document.getElementById("accessType");
+    label.style.display = "block";
+    label.style.background = "#0078D7";
+    label.textContent = "Access type: Paid (Admin)";
+
+    return true;
+}
+
+
+
+
+async function checkAdmin(email){
+
+    email = email.toLowerCase().trim();
+
+    const { data, error } = await client
+        .from("school_tools_users")
+        .select("id, role")
+        .eq("email", email)
+        .single();
+
+    if(error || !data) return false;
+
+    if(data.role !== "admin") return false;
+
+    return data;
+
+}
+
+
+
+
+async function checkTeacherAccess(email){
+
+    const {data:teacher}=await client
+    .from("school_tools_teachers")
+    .select("added_by")
+    .eq("email",email)
+    .maybeSingle();
+
+    if(!teacher) return false;
+
+    return await checkAdminAccess(teacher.added_by);
+
+}
+
+
+
+
+async function adminAddTeacher(){
+
+    const email = document
+        .getElementById("newTeacherEmail")
+        .value
+        .trim()
+        .toLowerCase();
+
+    if(!email){
+        alert("Enter teacher email.");
+        return false;
+    }
+
+    // ✅ Get admin email from localStorage (NO AUTH)
+    const adminEmail = localStorage.getItem("admin_email");
+
+    if(!adminEmail){
+        alert("Admin not signed in.");
+        return false;
+    }
+
+    // Get admin ID
+    const { data: admin, error: adminError } = await client
+        .from("school_tools_users")
+        .select("id")
+        .eq("email", adminEmail)
+        .single();
+
+    if(adminError || !admin){
+        alert("Admin account not found.");
+        return false;
+    }
+
+   // Count teachers added by this admin
+const { count, error: countError } = await client
+    .from("school_tools_teachers")
+    .select("*", { count: "exact", head: true })
+    .eq("added_by", admin.id);
+
+if (countError) {
+    alert(countError.message);
+    return false;
+}
+
+// Check if teacher already exists
+const { data: existingTeacher, error: existingError } = await client
+    .from("school_tools_teachers")
+    .select("id")
+    .eq("email", email)
+    .eq("added_by", admin.id)
+    .maybeSingle();
+
+if (existingError) {
+    alert(existingError.message);
+    return false;
+}
+
+if (existingTeacher) {
+    alert("This teacher has already been added.");
+    return false;
+}
+
+// Maximum teachers reached
+if (count >= MAX_TEACHERS) {
+    alert(`Maximum of ${MAX_TEACHERS} teachers reached!`);
+    return false;
+}
+
+// Insert teacher
+const { error } = await client
+    .from("school_tools_teachers")
+    .insert({
+        email,
+        added_by: admin.id
+    });
+	
+
+if (error) {
+    alert(error.message);
+    return false;
+}
+
+document.getElementById("newTeacherEmail").value = "";
+
+alert("Teacher added successfully.");
+
+return true;
+
+}
+
+
+async function handleAdminAccess(email){
+
+    const admin = await checkAdmin(email);
+
+    if(!admin){
+        alert("Administrator not found.");
+        return;
+    }
+
+    // Check if user has just returned from Paystack
+    const reference = sessionStorage.getItem("paystack_reference");
+
+    
+	
+	
+	if(reference){
+
+    const paid = await saveAccess(
+        { email },
+        reference
+    );
+
+    if(!paid){
+        return;
+    }
+
+}
+	
+	
+	
+
+    const allowed = await checkAdminAccess(admin.id);
+
+    if(!allowed){
+
+        showAccessModal(
+            "Admin subscription required.",
+            true
+        );
+
+        return;
+    }
+
+    hideAccessModal();
+
+    showAdminAccess();
+
+}
+
+
+
+async function handleTeacherAccess(email){
+
+    hideAdminAccess();
+
+    const allowed = await checkTeacherAccess(email);
+
+    if(!allowed){
+        alert("Access denied. Ask admin.");
+        return;
+    }
+
+    hideAccessModal();
+
+}
+
+
+
+(async()=>{
+
+    const adminEmail = localStorage.getItem("admin_email");
+    const teacherEmail = localStorage.getItem("teacher_email");
+
+    if(adminEmail){
+
+        await handleAdminAccess(adminEmail);
+        return;
+
+    }
+
+    if(teacherEmail){
+
+        await handleTeacherAccess(teacherEmail);
+        return;
+
+    }
+
+    showAccessModal("Please login to continue.");
+
+})();
+
+
+	
+
+async function submitSuggestion(){
+
+    const school=document.getElementById("schoolName").value.trim();
+
+    const teacher=document.getElementById("teacherName").value.trim();
+
+    const tool=document.getElementById("toolName").value.trim();
+
+    const improvement=document.getElementById("suggestionText").value.trim();
+
+    const msg=document.getElementById("feedbackMsg");
+
+    if(!school||!teacher||!tool||!improvement){
+
+        alert("Please fill in all fields.");
+
+        return;
+
+    }
+
+    const {error}=await client
+
+    .from("school_tools_suggestions")
+
+    .insert({
+
+        school,
+
+        teacher,
+
+        tool,
+
+        improvement
+
+    });
+
+    if(error){
+
+        console.error(error);
+
+        alert("Could not send — try again.");
+
+        return;
+
+    }
+
+    msg.style.display="block";
+
+    document.getElementById("schoolName").value="";
+
+    document.getElementById("teacherName").value="";
+
+    document.getElementById("toolName").value="";
+
+    document.getElementById("suggestionText").value="";
+
+}
+</script>
+</body>
+</html>

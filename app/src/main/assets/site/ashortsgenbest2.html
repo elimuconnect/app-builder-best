@@ -1,0 +1,4288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Elimu Connect • ShortsGen v4 (9:16 Canvas) — Edited (Music Only)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #1976d2;
+    --math: #ef6c00;
+    --sci: #2e7d32;
+    --eng: #0d47a1;
+    --bubble-bg: #fff9e6;
+    --subtitle-bg: rgba(10, 25, 90, 0.85);
+  }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    font-family: 'Patrick Hand', ComicSans, Arial;
+    background: linear-gradient(#e6f7ff, #ffffff);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  .app {
+    width: 420px;
+    max-width: 100%;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  h1 {
+    font-size: 1rem;
+    margin: 0;
+    text-align: center;
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0;
+    justify-content: center;
+  }
+
+  select,
+  input[type="file"],
+  button {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-weight: bold;
+  }
+
+  button {
+    background: var(--accent);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+
+  button:hover {
+    transform: scale(1.04);
+  }
+
+  .small {
+    font-size: 0.8rem;
+    color: #444;
+    text-align: center;
+  }
+
+  #stageWrap {
+    width: 360px;
+    height: 640px;
+    margin: 12px auto;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.2);
+    position: relative;
+    background: #222;
+  }
+
+  /* Canvas fits inside stageWrap but actual pixels are 720x1280 (portrait) */
+  #canvasPreview {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: #000;
+  }
+
+  .controls .row {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+  }
+
+  .status {
+    font-size: 0.9rem;
+    margin-top: 8px;
+    text-align: center;
+  }
+
+  a.hidden {
+    display: none;
+  }
+
+  .hint {
+    font-size: 0.8rem;
+    color: #555;
+    margin-top: 6px;
+    text-align: center;
+  }
+
+  @keyframes flash {
+    0% { opacity: 0; filter: brightness(3); }
+    100% { opacity: 1; filter: brightness(1); }
+  }
+
+  header h1 {
+    background: linear-gradient(90deg, #ff9800, #2196f3);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  /* 📱 MOBILE RESPONSIVE ADJUSTMENTS */
+  @media (max-width: 480px) {
+    .app {
+      width: 100%;
+    }
+
+    #stageWrap {
+      width: 100%;
+      height: 80vh;
+      border-radius: 12px;
+    }
+
+    h1 {
+      font-size: 0.9rem;
+    }
+
+    button,
+    select,
+    input[type="file"] {
+      font-size: 0.85rem;
+      padding: 6px 8px;
+    }
+
+    .status,
+    .hint {
+      font-size: 0.8rem;
+    }
+  }
+  
+  
+  
+  .comment-bubble {
+  position: absolute; /* inside container */
+  bottom: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #fffa65, #ff6b6b);
+  color: #000;
+  font-size: 22px;
+  font-weight: bold;
+  padding: 18px 28px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  z-index: 999;
+  pointer-events: none;
+  white-space: pre-wrap;
+}
+
+/* Pulse animation */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.05); }
+}
+  
+</style>
+
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Elimu Connect • ShortsGen v4</h1>
+      <div class="small">9:16 Canvas • Cartoon bubble subtitles • Auto WebM</div>
+    </header>
+
+    <div class="controls">
+      <label>Duration:
+
+      <div id="short-container">
+  <select id="duration">
+    <option value="10">10s</option>
+    <option value="15">15s</option>
+    <option value="20">20s</option>
+    <option value="30">30s</option>
+    <option value="45">45s</option>
+    <option value="60" selected>60s</option>
+  </select>
+</div>
+
+
+
+      </label>
+
+      <label>Voice method:
+        <select id="voiceMethod">
+          <option value="mic">Mic live (embed)</option>
+          <option value="upload">Upload voice file (embed)</option>
+          <option value="tts">SpeechSynthesis preview (not embedded)</option>
+        </select>
+      </label>
+
+      <label>Voice gender:
+        <select id="voiceGender"><option value="auto">Auto</option><option value="male">Male</option><option value="female">Female</option></select>
+      </label>
+    </div>
+
+    <div class="controls row">
+      <input type="file" id="voiceUpload" accept="audio/*" />
+      <button id="useUploadBtn">Use Upload</button>
+      <button id="genBtn">🎲 Generate Preview</button>
+      <button id="recordBtn">🔴 Start & Record (auto-stop)</button>
+    </div>
+
+    <div id="stageWrap" title="This box is the recorded 9:16 area">
+      <canvas id="canvasPreview" width="720" height="1280"></canvas>
+    </div>
+
+    <div class="controls">
+      <a id="downloadLink" class="hidden"></a>
+    </div>
+
+    <div class="status" id="status">Click Generate Preview to unlock audio, then press Start & Record.</div>
+    <div class="hint">Tip: if browser prompts to allow mic, allow it. For embedded narration use Upload or Mic. TTS is disabled (no narration).</div>
+  </div>
+
+<div id="short-container">
+  <div class="short-item" id="item1"></div>
+  <div class="short-item" id="item2"></div>
+  <div class="short-item" id="item3"></div>
+  <div class="short-item" id="item4"></div>
+</div>
+
+<script>
+/* ---------- Configuration & assets ---------- */
+const CANVAS_W = 720, CANVAS_H = 1280; // portrait 9:16
+
+
+let animRunning = false;
+let lastItemTime = 0;
+const ITEM_INTERVAL = 5000; // show new knowledge item every 5 seconds
+let currentItem = null;
+
+
+const RETENTION_WORDS = [
+  "WAIT",
+  "STOP",
+  "DON’T SCROLL",
+  "LOOK",
+  "THINK FAST",
+  "HURRY",
+  "FOCUS",
+  "READY?",
+  "WATCH THIS",
+  "CHALLENGE",
+  "EASY?",
+  "TRICKY",
+  "NO CHEATING",
+  "SMART ONLY",
+  "BE HONEST",
+  "LAST CHANCE",
+  "ARE YOU SURE?",
+  "TRY THIS",
+  "QUICK TEST",
+  "BRAIN CHECK",
+  "CAN YOU SEE?",
+  "DON’T MISS",
+  "SECRET",
+  "OMG!",
+  "WAIT FOR IT",
+  "INSANE",
+  "UNBELIEVABLE",
+  "YOU WON’T BELIEVE",
+  "FAST!",
+  "STOP RIGHT THERE",
+  "HOLD UP",
+  "ONLY FOR GENIUS",
+  "WARNING",
+  "GUESS WHAT?",
+  "MUST SEE",
+  "PROVE IT",
+  "DID YOU KNOW?",
+  "QUICK THINK",
+  "WATCH CLOSELY",
+  "HOW FAST?",
+  "SLOW DOWN",
+  "PAY ATTENTION",
+  "CHALLENGE ALERT",
+  "TEST YOUR BRAIN",
+  "CAN YOU HANDLE THIS?",
+  "EYE OPENING",
+  "YOU THINK YOU KNOW?",
+  "DON’T LOOK AWAY",
+  "TRUST ME",
+  "FAST MINDS ONLY",
+  "READ THIS",
+  "MIND BLOWING",
+  "CHECK THIS OUT",
+  "LAST SECOND",
+  "ARE YOU READY?",
+  "CAN YOU SEE IT?",
+  "TRY HARDER",
+  "THIS OR THAT?",
+  "ALMOST THERE",
+  "TIME’S UP",
+  "FOCUS NOW",
+  "HOLD ON",
+  "WHAT’S NEXT?",
+  "GUESS QUICK",
+  "WATCH AND LEARN",
+  "DON’T BLINK",
+  "SEE IF YOU CAN",
+  "TRY AGAIN",
+  "FAST EYE",
+  "SPEED TEST",
+  "MIND GAME",
+  "CAN YOU SPOT IT?",
+  "THINK QUICK",
+  "DON’T MISS OUT",
+  "SECRET INSIDE",
+  "EYE TEST",
+  "HINT",
+  "WHAT HAPPENS NEXT?",
+  "QUICK EYES",
+  "ARE YOU ALERT?",
+  "NOTICE THIS",
+  "MUST TRY",
+  "KEEP LOOKING",
+  "ALERT!",
+  "LAST TRY",
+  "CHECK YOURSELF"
+];
+const RETENTION_PHRASES = [
+  "7 seconds ⏱️",
+  "99% fail 😳",
+  "Don’t blink 👀",
+  "Comment fast 👇",
+  "Smart people only 🧠",
+ 
+ "Harder than it looks 🤯", 
+  "Brain tricks you 🌀",      
+ 
+ 
+  "Wait till the end 😮",
+  "No skipping 🚫",
+  "Answer fast 💨",
+  "Kids vs adults 😅",
+  "Be honest 🤔",
+  "No guessing 🙅",
+  "Focus 🎯",
+  "Watch closely 👁️",
+  "Think fast ⚡",
+  "Beat the timer? ⏳",
+  "Geniuses only ✅",
+  "Spot the difference 👓",
+  "Eyes can lie 👀",
+  "Quick! Gone soon ⌛",
+  "Pay attention 👂",
+  "Notice details 🔍",
+  "Brain challenge 🧩",
+  "Can you solve it? 🤔",
+  "Don’t scroll 🚷",
+  "Tricky 😏",
+  "Time’s short ⏲️",
+  "Focus or fail ❌",
+  "Look closely 👁️‍🗨️",
+  "Guess carefully 🤨",
+  "Most miss this 🙈",
+  "Solve it? 🕵️",
+  "Eyes wide 👁️",
+  "Think outside 📦",
+  "Your turn ✋",
+  "Brain test 🧠",
+  "Spot it 👀",
+  "No cheating 🚫",
+  "Ready? 🎬",
+  "Check answer 📝",
+  "Brave continue 🦁",
+  "Catch it? 🎯",
+  "Timer won’t wait ⏳",
+  "Memory matters 🧠",
+  "Watch till end ⏱️",
+  "Disappears fast ⚡",
+  "Spot before gone 👀",
+  "Try luck 🍀",
+  "Tricky one 😵",
+  "Keep up? 🏃",
+  "Eyes on prize 🏆",
+  "Brain vs clock ⏰"
+];
+
+
+
+const RETENTION_EMOJIS = [
+  "😳","🤯","⏱️","🔥","⚡","👀","🧠","🎯","🚀",
+  "❗","❓","🛑","👇","💥","✨","😅","😮","😬",
+  "🙀","😱","💨","⚠️","🎉","💡","👆","🌀","🤔",
+  "🤪","😏","🤩","👓","🕵️","🫣","🫢","🥵","🥶",
+  "😎","🎬","🏆","🫡","💫","📢","🥳","📌","🔍",
+  "🧩","🚨","🖐️","🖤","🤝","💭","💪","🏃","👑"
+];
+
+
+
+// updated to free catchy backgrounds (Pixabay/Unsplash style)
+const BACKGROUNDS = [
+  {name:'Sunny Schoolyard', url:'https://cdn.pixabay.com/video/2020/11/23/57105-484330937_tiny.mp4'},
+   { name: 'Background 1', url: 'https://cdn.pixabay.com/video/2020/11/23/57105-484330937_tiny.mp4' },
+  { name: 'Background 2', url: 'https://cdn.pixabay.com/video/2021/09/21/89245-613200528_tiny.mp4' },
+  { name: 'Background 3', url: 'https://cdn.pixabay.com/video/2023/09/25/182283-868067131_tiny.mp4' },
+  { name: 'Background 4', url: 'https://cdn.pixabay.com/video/2020/11/07/55762-503981022_tiny.mp4' },
+  { name: 'Background 5', url: 'https://cdn.pixabay.com/video/2022/11/17/139433-772291290_tiny.mp4' },
+  { name: 'Background 6', url: 'https://cdn.pixabay.com/video/2017/12/09/13289-246909903_tiny.mp4' },
+  { name: 'Background 7', url: 'https://cdn.pixabay.com/video/2023/06/01/165379-832460315_tiny.mp4' },
+  { name: 'Background 8', url: 'https://cdn.pixabay.com/video/2022/06/10/119849-719283263_large.mp4' },
+  { name: 'Background 9', url: 'https://cdn.pixabay.com/video/2015/11/30/1462-147310229_tiny.mp4' },
+  { name: 'Background 10', url: 'https://cdn.pixabay.com/video/2022/02/02/106382-673007973_tiny.mp4' },
+  { name: 'Background 11', url: 'https://cdn.pixabay.com/video/2022/06/30/122684-726192372_tiny.mp4' },
+  { name: 'Background 12', url: 'https://cdn.pixabay.com/video/2021/06/05/76526-559511539_tiny.mp4' },
+  { name: 'Background 13', url: 'https://cdn.pixabay.com/video/2024/04/17/208306_tiny.mp4' },
+  { name: 'Background 14', url: 'https://cdn.pixabay.com/video/2023/12/04/191956-891301549_tiny.mp4' },
+  { name: 'Background 15', url: 'https://cdn.pixabay.com/video/2020/11/07/54846-479358521_tiny.mp4' },
+  { name: 'Background 16', url: 'https://cdn.pixabay.com/video/2022/06/24/121985-724732208_tiny.mp4' },
+  { name: 'Background 17', url: 'https://cdn.pixabay.com/video/2021/01/21/62556-504654653_large.mp4' },
+  { name: 'Background 18', url: 'https://cdn.pixabay.com/video/2023/12/04/191957-891301551_tiny.mp4' },
+  { name: 'Background 19', url: 'https://cdn.pixabay.com/video/2019/06/14/24405-342401498_tiny.mp4' },
+  { name: 'Background 20', url: 'https://cdn.pixabay.com/video/2022/03/02/109306-684501149_tiny.mp4' },
+  { name: 'Background 21', url: 'https://cdn.pixabay.com/video/2022/11/07/138088-769119564_tiny.mp4' },
+  { name: 'Background 22', url: 'https://cdn.pixabay.com/video/2020/11/21/56969-482090088_tiny.mp4' },
+  { name: 'Background 23', url: 'https://cdn.pixabay.com/video/2021/12/04/99691-656497305_tiny.mp4' },
+  { name: 'Background 24', url: 'https://cdn.pixabay.com/video/2022/03/09/110219-688187364_tiny.mp4' },
+  { name: 'Background 25', url: 'https://cdn.pixabay.com/video/2024/01/30/198620-907940175_tiny.mp4' },
+  { name: 'Background 26', url: 'https://cdn.pixabay.com/video/2021/06/15/77773-564423223_tiny.mp4' },
+  { name: 'Background 27', url: 'https://cdn.pixabay.com/video/2020/04/22/36902-412873827_large.mp4' },
+  { name: 'Background 28', url: 'https://cdn.pixabay.com/video/2021/08/08/84334-585553485_tiny.mp4' },
+  { name: 'Background 29', url: 'https://cdn.pixabay.com/video/2023/01/13/146408-789177007_tiny.mp4' },
+  { name: 'Background 30', url: 'https://cdn.pixabay.com/video/2018/04/26/15826-266811435_tiny.mp4' },
+  { name: 'Background 31', url: 'https://cdn.pixabay.com/video/2020/11/07/54929-483011932_tiny.mp4' },
+  { name: 'Background 32', url: 'https://cdn.pixabay.com/video/2020/05/16/39234-421020414_tiny.mp4' },
+  { name: 'Background 33', url: 'https://cdn.pixabay.com/video/2020/05/24/39969-423362341_tiny.mp4' },
+  { name: 'Background 34', url: 'https://cdn.pixabay.com/video/2020/11/07/55249-499594009_tiny.mp4' },
+  { name: 'Background 35', url: 'https://cdn.pixabay.com/video/2022/03/10/110339-688648503_tiny.mp4' },
+  { name: 'Background 36', url: 'https://cdn.pixabay.com/video/2024/02/21/201334-915360170_large.mp4' },
+  { name: 'Background 37', url: 'https://cdn.pixabay.com/video/2016/04/20/2864-163910609_tiny.mp4' },
+  { name: 'Background 38', url: 'https://cdn.pixabay.com/video/2023/10/19/185630-876210582_tiny.mp4' },
+  { name: 'Background 39', url: 'https://cdn.pixabay.com/video/2020/04/13/35905-408654239_tiny.mp4' },
+  { name: 'Background 40', url: 'https://cdn.pixabay.com/video/2020/09/15/50016-459915440_large.mp4' },
+  { name: 'Background 41', url: 'https://cdn.pixabay.com/video/2020/04/22/36884-412873792_tiny.mp4' },
+  { name: 'Background 42', url: 'https://cdn.pixabay.com/video/2022/11/18/139572-773417751_tiny.mp4' },
+  { name: 'Background 43', url: 'https://cdn.pixabay.com/video/2022/04/01/112553-695117361_tiny.mp4' },
+  { name: 'Background 44', url: 'https://cdn.pixabay.com/video/2021/01/13/61904-500763043_tiny.mp4' },
+  { name: 'Background 45', url: 'https://cdn.pixabay.com/video/2016/09/21/5411-183788474_tiny.mp4' },
+  { name: 'Background 46', url: 'https://cdn.pixabay.com/video/2022/03/12/110491-689510259_tiny.mp4' },
+  { name: 'Background 47', url: 'https://cdn.pixabay.com/video/2022/01/14/104386-666197775_tiny.mp4' },
+  { name: 'Background 48', url: 'https://cdn.pixabay.com/video/2021/09/13/88420-607824363_tiny.mp4' },
+  { name: 'Background 49', url: 'https://cdn.pixabay.com/video/2020/07/01/43522-436237366_tiny.mp4' },
+  { name: 'Background 50', url: 'https://cdn.pixabay.com/video/2020/11/19/56858-481625623_tiny.mp4' },
+  { name: 'Background 51', url: 'https://cdn.pixabay.com/video/2023/02/06/149538-796360005_tiny.mp4' },
+  { name: 'Background 52', url: 'https://cdn.pixabay.com/video/2023/04/03/157231-814315545_tiny.mp4' },
+  { name: 'Background 53', url: 'https://cdn.pixabay.com/video/2023/11/11/188720-883612354_tiny.mp4' },
+  { name: 'Background 54', url: 'https://cdn.pixabay.com/video/2023/03/31/156893-813654701_tiny.mp4' },
+  { name: 'Background 55', url: 'https://cdn.pixabay.com/video/2022/12/07/141981-778907209_tiny.mp4' },
+  { name: 'Background 56', url: 'https://cdn.pixabay.com/video/2022/06/01/118905-716230915_tiny.mp4' },
+  { name: 'Background 57', url: 'https://cdn.pixabay.com/video/2022/06/15/120475-720880598_tiny.mp4' },
+  { name: 'Background 58', url: 'https://cdn.pixabay.com/video/2022/12/21/143758-784138204_tiny.mp4' },
+  { name: 'Background 59', url: 'https://cdn.pixabay.com/video/2024/04/30/210082_tiny.mp4' },
+  { name: 'Background 60', url: 'https://cdn.pixabay.com/video/2023/01/10/145976-788094597_tiny.mp4' },
+  { name: 'Background 61', url: 'https://cdn.pixabay.com/video/2022/04/25/115067-703067890_tiny.mp4' },
+  { name: 'Background 62', url: 'https://cdn.pixabay.com/video/2024/09/25/233204_tiny.mp4' },
+  { name: 'Background 63', url: 'https://cdn.pixabay.com/video/2023/05/30/165119-832090797_tiny.mp4' },
+  { name: 'Background 64', url: 'https://cdn.pixabay.com/video/2023/04/03/157232-814315549_tiny.mp4' },
+  { name: 'Background 65', url: 'https://cdn.pixabay.com/video/2024/09/25/233202_tiny.mp4' },
+  { name: 'Background 66', url: 'https://cdn.pixabay.com/video/2024/07/08/220150_tiny.mp4' },
+  { name: 'Background 67', url: 'https://cdn.pixabay.com/video/2023/05/09/162382-825277028_tiny.mp4' },
+  { name: 'Background 68', url: 'https://cdn.pixabay.com/video/2022/05/09/116448-708008210_tiny.mp4' },
+  { name: 'Background 69', url: 'https://cdn.pixabay.com/video/2022/12/07/141985-778907234_tiny.mp4' },
+  { name: 'Background 70', url: 'https://cdn.pixabay.com/video/2024/02/04/199249-909835726_tiny.mp4' },
+  { name: 'Background 71', url: 'https://cdn.pixabay.com/video/2023/11/24/190549-888131757_tiny.mp4' },
+  { name: 'Background 72', url: 'https://cdn.pixabay.com/video/2022/04/25/115059-703067865_tiny.mp4' },
+  { name: 'Background 73', url: 'https://cdn.pixabay.com/video/2024/06/06/215534_tiny.mp4' },
+  { name: 'Background 74', url: 'https://cdn.pixabay.com/video/2023/11/24/190550-888131763_tiny.mp4' },
+  { name: 'Background 75', url: 'https://cdn.pixabay.com/video/2022/10/21/135875-764362174_tiny.mp4' },
+  { name: 'Background 76', url: 'https://cdn.pixabay.com/video/2023/06/20/168039-838076818_tiny.mp4' },
+  { name: 'Background 77', url: 'https://cdn.pixabay.com/video/2023/03/06/153480-805374145_tiny.mp4' },
+  { name: 'Background 78', url: 'https://cdn.pixabay.com/video/2023/10/20/185765-876514019_tiny.mp4' },
+  { name: 'Background 79', url: 'https://cdn.pixabay.com/video/2023/06/05/165867-833532201_tiny.mp4' },
+  { name: 'Background 80', url: 'https://cdn.pixabay.com/video/2024/02/04/199250-909835729_tiny.mp4' },
+  { name: 'Background 81', url: 'https://cdn.pixabay.com/video/2021/07/25/82670-580050749_tiny.mp4' },
+  { name: 'Background 82', url: 'https://cdn.pixabay.com/video/2022/09/23/132294-753175506_tiny.mp4' },
+  { name: 'Background 83', url: 'https://cdn.pixabay.com/video/2023/07/16/171850-846103451_tiny.mp4' },
+  { name: 'Background 84', url: 'https://cdn.pixabay.com/video/2024/04/17/208372_tiny.mp4' },
+  { name: 'Background 85', url: 'https://cdn.pixabay.com/video/2020/11/29/57753-486147545_tiny.mp4' },
+  { name: 'Background 86', url: 'https://cdn.pixabay.com/video/2021/07/25/82667-580050745_tiny.mp4' },
+  { name: 'Background 87', url: 'https://cdn.pixabay.com/video/2022/09/23/132295-753175509_tiny.mp4' },
+  { name: 'Background 88', url: 'https://cdn.pixabay.com/video/2024/02/04/199254-909835739_tiny.mp4' },
+  { name: 'Background 89', url: 'https://cdn.pixabay.com/video/2023/08/01/174146-850740062_tiny.mp4' },
+  { name: 'Background 90', url: 'https://cdn.pixabay.com/video/2022/09/16/131506-750569073_tiny.mp4' },
+  { name: 'Background 91', url: 'https://cdn.pixabay.com/video/2022/11/24/140315-774824218_tiny.mp4' },
+  { name: 'Background 92', url: 'https://cdn.pixabay.com/video/2024/03/12/203933-922571593_tiny.mp4' },
+  { name: 'Background 93', url: 'https://cdn.pixabay.com/video/2023/01/23/147644-791958963_tiny.mp4' },
+  { name: 'Background 94', url: 'https://cdn.pixabay.com/video/2022/09/22/132200-752646688_tiny.mp4' },
+  { name: 'Background 95', url: 'https://cdn.pixabay.com/video/2022/04/25/115017-703067690_tiny.mp4' },
+  { name: 'Background 96', url: 'https://cdn.pixabay.com/video/2020/11/14/56375-479358459_tiny.mp4' },
+  { name: 'Background 97', url: 'https://cdn.pixabay.com/video/2023/10/20/185803-876514093_tiny.mp4' },
+  { name: 'Background 98', url: 'https://cdn.pixabay.com/video/2024/04/17/208375_tiny.mp4' },
+  { name: 'Background 99', url: 'https://cdn.pixabay.com/video/2022/07/09/123589-728487663_tiny.mp4' },
+  { name: 'Background 100', url: 'https://cdn.pixabay.com/video/2022/12/01/141159-777088863_tiny.mp4' },
+  { name: 'Background 101', url: 'https://cdn.pixabay.com/video/2024/10/09/235497_tiny.mp4' },
+  { name: 'Background 102', url: 'https://cdn.pixabay.com/video/2023/10/02/183252-870457501_tiny.mp4' },
+  { name: 'Background 103', url: 'https://cdn.pixabay.com/video/2021/01/14/61945-501260349_tiny.mp4' },
+  { name: 'Background 104', url: 'https://cdn.pixabay.com/video/2015/11/28/1438-147170157_tiny.mp4' },
+  { name: 'Background 105', url: 'https://cdn.pixabay.com/video/2024/04/17/208376_tiny.mp4' },
+  { name: 'Background 106', url: 'https://cdn.pixabay.com/video/2023/01/04/145298-786403405_tiny.mp4' },
+  { name: 'Background 107', url: 'https://cdn.pixabay.com/video/2023/09/27/182536-868916394_tiny.mp4' },
+  { name: 'Background 108', url: 'https://cdn.pixabay.com/video/2019/06/14/24410-342401514_tiny.mp4' },
+  { name: 'Background 109', url: 'https://cdn.pixabay.com/video/2024/03/12/203934-922571602_tiny.mp4' },
+
+
+
+
+
+
+
+
+
+  { name: 'Background 110', url: 'https://cdn.pixabay.com/video/2023/12/04/191957-891301551_tiny.mp4' },
+  { name: 'Background 111', url: 'https://cdn.pixabay.com/video/2023/02/06/149538-796360005_tiny.mp4' },
+  { name: 'Background 112', url: 'https://cdn.pixabay.com/video/2023/04/03/157232-814315549_tiny.mp4' },
+  { name: 'Background 113', url: 'https://cdn.pixabay.com/video/2024/09/25/233204_tiny.mp4' },
+  { name: 'Background 114', url: 'https://cdn.pixabay.com/video/2024/09/25/233202_tiny.mp4' },
+  { name: 'Background 115', url: 'https://cdn.pixabay.com/video/2024/07/08/220150_tiny.mp4' },
+  { name: 'Background 116', url: 'https://cdn.pixabay.com/video/2024/02/04/199249-909835726_tiny.mp4' },
+  { name: 'Background 117', url: 'https://cdn.pixabay.com/video/2024/02/04/199250-909835729_tiny.mp4' },
+  { name: 'Background 118', url: 'https://cdn.pixabay.com/video/2024/02/04/199254-909835739_tiny.mp4' },
+  { name: 'Background 119', url: 'https://cdn.pixabay.com/video/2024/04/17/208372_tiny.mp4' },
+  { name: 'Background 120', url: 'https://cdn.pixabay.com/video/2024/04/17/208375_tiny.mp4' },
+  { name: 'Background 121', url: 'https://cdn.pixabay.com/video/2024/04/17/208376_tiny.mp4' },
+  { name: 'Background 122', url: 'https://cdn.pixabay.com/video/2024/04/30/210082_tiny.mp4' },
+  { name: 'Background 123', url: 'https://cdn.pixabay.com/video/2024/03/12/203933-922571593_tiny.mp4' },
+  { name: 'Background 124', url: 'https://cdn.pixabay.com/video/2024/03/12/203934-922571602_tiny.mp4' },
+  { name: 'Background 125', url: 'https://cdn.pixabay.com/video/2024/06/06/215534_tiny.mp4' },
+  { name: 'Background 126', url: 'https://cdn.pixabay.com/video/2024/10/09/235497_tiny.mp4' },
+
+
+
+{ name: 'Background 127', url: 'https://cdn.pixabay.com/video/2022/12/12/142683-780599470_tiny.mp4' },
+{ name: 'Background 128', url: 'https://cdn.pixabay.com/video/2022/09/23/132295-753175509_tiny.mp4' },
+{ name: 'Background 129', url: 'https://cdn.pixabay.com/video/2022/09/23/132294-753175506_tiny.mp4' },
+{ name: 'Background 130', url: 'https://cdn.pixabay.com/video/2023/01/03/145153-786384364_tiny.mp4' },
+{ name: 'Background 131', url: 'https://cdn.pixabay.com/video/2022/12/21/143761-784138211_tiny.mp4' },
+{ name: 'Background 132', url: 'https://cdn.pixabay.com/video/2022/05/02/115730-705415385_tiny.mp4' },
+{ name: 'Background 133', url: 'https://cdn.pixabay.com/video/2023/10/02/183254-870457513_tiny.mp4' },
+{ name: 'Background 134', url: 'https://cdn.pixabay.com/video/2022/10/31/137247-766338227_tiny.mp4' },
+{ name: 'Background 135', url: 'https://cdn.pixabay.com/video/2020/02/28/32989-394514023_tiny.mp4' },
+{ name: 'Background 136', url: 'https://cdn.pixabay.com/video/2022/09/13/131155-750216590_tiny.mp4' },
+{ name: 'Background 137', url: 'https://cdn.pixabay.com/video/2023/05/30/165120-832090799_tiny.mp4' },
+{ name: 'Background 138', url: 'https://cdn.pixabay.com/video/2022/05/04/115980-706323936_tiny.mp4' },
+{ name: 'Background 139', url: 'https://cdn.pixabay.com/video/2023/01/09/145864-787701151_tiny.mp4' },
+{ name: 'Background 140', url: 'https://cdn.pixabay.com/video/2022/10/01/133144-755982928_tiny.mp4' },
+{ name: 'Background 141', url: 'https://cdn.pixabay.com/video/2024/03/12/203934-922571602_tiny.mp4' },
+{ name: 'Background 142', url: 'https://cdn.pixabay.com/video/2022/10/31/137246-766338223_tiny.mp4' },
+{ name: 'Background 143', url: 'https://cdn.pixabay.com/video/2023/04/12/158527-816999750_tiny.mp4' },
+{ name: 'Background 144', url: 'https://cdn.pixabay.com/video/2021/03/05/66956-523721318_tiny.mp4' },
+{ name: 'Background 145', url: 'https://cdn.pixabay.com/video/2023/03/17/155016-809859637_tiny.mp4' },
+{ name: 'Background 146', url: 'https://cdn.pixabay.com/video/2022/09/21/132081-752283582_tiny.mp4' },
+{ name: 'Background 147', url: 'https://cdn.pixabay.com/video/2022/11/03/137579-766938298_tiny.mp4' },
+{ name: 'Background 148', url: 'https://cdn.pixabay.com/video/2022/09/16/131504-750569066_tiny.mp4' },
+{ name: 'Background 149', url: 'https://cdn.pixabay.com/video/2022/05/09/116451-708008221_tiny.mp4' },
+
+
+{ name: 'Background 150', url: 'https://cdn.pixabay.com/video/2020/11/13/56299-479205703_tiny.mp4' },
+{ name: 'Background 151', url: 'https://cdn.pixabay.com/video/2023/03/06/153479-805374143_tiny.mp4' },
+{ name: 'Background 152', url: 'https://cdn.pixabay.com/video/2023/10/17/185408-875362659_tiny.mp4' },
+{ name: 'Background 153', url: 'https://cdn.pixabay.com/video/2022/09/15/131403-750559764_tiny.mp4' },
+{ name: 'Background 154', url: 'https://cdn.pixabay.com/video/2023/10/06/183716-872027012_tiny.mp4' },
+{ name: 'Background 155', url: 'https://cdn.pixabay.com/video/2019/06/14/24406-342401501_tiny.mp4' },
+{ name: 'Background 156', url: 'https://cdn.pixabay.com/video/2023/11/07/188255-882242986_tiny.mp4' },
+{ name: 'Background 157', url: 'https://cdn.pixabay.com/video/2025/10/14/309804_tiny.mp4' },
+{ name: 'Background 158', url: 'https://cdn.pixabay.com/video/2023/04/11/158388-816637364_tiny.mp4' },
+{ name: 'Background 159', url: 'https://cdn.pixabay.com/video/2024/05/21/212961_tiny.mp4' },
+{ name: 'Background 160', url: 'https://cdn.pixabay.com/video/2025/10/06/308237_tiny.mp4' },
+{ name: 'Background 161', url: 'https://cdn.pixabay.com/video/2022/10/17/135212-761273636_tiny.mp4' },
+{ name: 'Background 162', url: 'https://cdn.pixabay.com/video/2022/10/17/135202-761273627_tiny.mp4' },
+{ name: 'Background 163', url: 'https://cdn.pixabay.com/video/2020/11/13/56311-479205713_tiny.mp4' },
+{ name: 'Background 164', url: 'https://cdn.pixabay.com/video/2023/06/27/169029-840229967_tiny.mp4' },
+{ name: 'Background 165', url: 'https://cdn.pixabay.com/video/2020/11/10/56075-478688146_tiny.mp4' },
+{ name: 'Background 166', url: 'https://cdn.pixabay.com/video/2020/01/31/31802-388997514_tiny.mp4' },
+{ name: 'Background 167', url: 'https://cdn.pixabay.com/video/2023/02/14/150644-798877201_tiny.mp4' },
+{ name: 'Background 168', url: 'https://cdn.pixabay.com/video/2024/03/12/203931-922571581_tiny.mp4' },
+{ name: 'Background 169', url: 'https://cdn.pixabay.com/video/2025/05/21/280481_tiny.mp4' },
+{ name: 'Background 170', url: 'https://cdn.pixabay.com/video/2023/05/05/161764-824152819_tiny.mp4' },
+{ name: 'Background 171', url: 'https://cdn.pixabay.com/video/2020/02/27/32950-394513969_tiny.mp4' },
+{ name: 'Background 172', url: 'https://cdn.pixabay.com/video/2023/01/23/147640-791958949_tiny.mp4' },
+{ name: 'Background 173', url: 'https://cdn.pixabay.com/video/2019/10/10/27729-365891002_tiny.mp4' },
+{ name: 'Background 174', url: 'https://cdn.pixabay.com/video/2023/10/20/185809-876514131_tiny.mp4' },
+{ name: 'Background 175', url: 'https://cdn.pixabay.com/video/2021/07/08/80697-572838398_tiny.mp4' },
+{ name: 'Background 176', url: 'https://cdn.pixabay.com/video/2017/05/10/9067-217261108_tiny.mp4' },
+{ name: 'Background 177', url: 'https://cdn.pixabay.com/video/2019/10/28/28388-369533658_tiny.mp4' },
+{ name: 'Background 178', url: 'https://cdn.pixabay.com/video/2025/05/26/281839_tiny.mp4' },
+{ name: 'Background 179', url: 'https://cdn.pixabay.com/video/2024/03/28/205930_tiny.mp4' },
+{ name: 'Background 180', url: 'https://cdn.pixabay.com/video/2025/04/22/273595_tiny.mp4' },
+{ name: 'Background 181', url: 'https://cdn.pixabay.com/video/2021/01/04/61116-497754343_tiny.mp4' },
+{ name: 'Background 182', url: 'https://cdn.pixabay.com/video/2022/11/09/138341-769520916_tiny.mp4' },
+{ name: 'Background 183', url: 'https://cdn.pixabay.com/video/2025/05/26/281840_tiny.mp4' },
+{ name: 'Background 184', url: 'https://cdn.pixabay.com/video/2023/10/02/183253-870457508_tiny.mp4' },
+{ name: 'Background 185', url: 'https://cdn.pixabay.com/video/2021/02/04/64093-509542772_tiny.mp4' },
+{ name: 'Background 186', url: 'https://cdn.pixabay.com/video/2020/05/13/38957-420224573_tiny.mp4' },
+{ name: 'Background 187', url: 'https://cdn.pixabay.com/video/2022/04/20/114540-701775812_tiny.mp4' },
+
+
+
+
+{ name: 'Background 188', url: 'https://cdn.pixabay.com/video/2022/09/08/130588-747868234_tiny.mp4' },
+{ name: 'Background 189', url: 'https://cdn.pixabay.com/video/2020/02/04/31921-389236388_tiny.mp4' },
+{ name: 'Background 190', url: 'https://cdn.pixabay.com/video/2023/10/20/185807-876514114_tiny.mp4' },
+{ name: 'Background 191', url: 'https://cdn.pixabay.com/video/2024/09/16/231704_tiny.mp4' },
+{ name: 'Background 192', url: 'https://cdn.pixabay.com/video/2024/04/17/208368_tiny.mp4' },
+{ name: 'Background 193', url: 'https://cdn.pixabay.com/video/2024/11/25/243214_tiny.mp4' },
+{ name: 'Background 194', url: 'https://cdn.pixabay.com/video/2022/12/12/142684-780599471_tiny.mp4' },
+{ name: 'Background 195', url: 'https://cdn.pixabay.com/video/2023/03/15/154794-808552003_tiny.mp4' },
+{ name: 'Background 196', url: 'https://cdn.pixabay.com/video/2020/11/19/56848-481625618_tiny.mp4' },
+{ name: 'Background 197', url: 'https://cdn.pixabay.com/video/2019/06/14/24413-342401518_tiny.mp4' },
+{ name: 'Background 198', url: 'https://cdn.pixabay.com/video/2024/09/25/233180_tiny.mp4' },
+{ name: 'Background 199', url: 'https://cdn.pixabay.com/video/2023/01/31/148754-794599361_tiny.mp4' },
+{ name: 'Background 200', url: 'https://cdn.pixabay.com/video/2019/06/14/24412-342401515_tiny.mp4' },
+{ name: 'Background 201', url: 'https://cdn.pixabay.com/video/2022/05/12/116737-709204411_tiny.mp4' },
+{ name: 'Background 202', url: 'https://cdn.pixabay.com/video/2023/01/16/146757-789873515_tiny.mp4' },
+{ name: 'Background 203', url: 'https://cdn.pixabay.com/video/2024/06/25/218195_tiny.mp4' },
+{ name: 'Background 204', url: 'https://cdn.pixabay.com/video/2023/10/20/185801-876514088_tiny.mp4' },
+{ name: 'Background 205', url: 'https://cdn.pixabay.com/video/2022/01/17/104758-667892001_tiny.mp4' },
+{ name: 'Background 206', url: 'https://cdn.pixabay.com/video/2023/02/12/150343-798230385_tiny.mp4' },
+{ name: 'Background 207', url: 'https://cdn.pixabay.com/video/2023/03/07/153655-805688970_tiny.mp4' },
+{ name: 'Background 208', url: 'https://cdn.pixabay.com/video/2025/10/14/309864_tiny.mp4' },
+{ name: 'Background 209', url: 'https://cdn.pixabay.com/video/2022/03/01/109213-684053597_tiny.mp4' },
+{ name: 'Background 210', url: 'https://cdn.pixabay.com/video/2021/03/22/68715-535892735_tiny.mp4' },
+{ name: 'Background 211', url: 'https://cdn.pixabay.com/video/2022/09/13/131149-750216576_tiny.mp4' },
+{ name: 'Background 212', url: 'https://cdn.pixabay.com/video/2020/11/07/55000-490755555_tiny.mp4' },
+{ name: 'Background 213', url: 'https://cdn.pixabay.com/video/2020/11/07/55003-490755576_tiny.mp4' },
+{ name: 'Background 214', url: 'https://cdn.pixabay.com/video/2022/04/11/113555-698386334_tiny.mp4' },
+{ name: 'Background 215', url: 'https://cdn.pixabay.com/video/2025/04/08/270864_tiny.mp4' },
+{ name: 'Background 216', url: 'https://cdn.pixabay.com/video/2020/03/07/33329-396402462_tiny.mp4' },
+{ name: 'Background 217', url: 'https://cdn.pixabay.com/video/2023/05/24/164237-830460848_tiny.mp4' },
+{ name: 'Background 218', url: 'https://cdn.pixabay.com/video/2025/04/14/272021_tiny.mp4' },
+{ name: 'Background 219', url: 'https://cdn.pixabay.com/video/2021/09/12/88359-608445677_tiny.mp4' },
+{ name: 'Background 220', url: 'https://cdn.pixabay.com/video/2022/11/19/139638-773417911_tiny.mp4' },
+{ name: 'Background 221', url: 'https://cdn.pixabay.com/video/2021/08/22/85985-590746516_tiny.mp4' },
+{ name: 'Background 222', url: 'https://cdn.pixabay.com/video/2020/03/21/34039-399415264_tiny.mp4' },
+{ name: 'Background 223', url: 'https://cdn.pixabay.com/video/2021/04/13/71018-537986680_tiny.mp4' },
+{ name: 'Background 224', url: 'https://cdn.pixabay.com/video/2023/03/21/155626-810650583_tiny.mp4' },
+{ name: 'Background 225', url: 'https://cdn.pixabay.com/video/2025/06/11/285224_tiny.mp4' },
+{ name: 'Background 226', url: 'https://cdn.pixabay.com/video/2023/10/25/186501-878145183_tiny.mp4' },
+{ name: 'Background 227', url: 'https://cdn.pixabay.com/video/2020/01/16/31296-385265706_tiny.mp4' },
+{ name: 'Background 228', url: 'https://cdn.pixabay.com/video/2022/04/02/112671-695204745_tiny.mp4' },
+{ name: 'Background 229', url: 'https://cdn.pixabay.com/video/2021/05/28/75617-556482746_tiny.mp4' },
+{ name: 'Background 230', url: 'https://cdn.pixabay.com/video/2021/06/21/78484-566253537_tiny.mp4' },
+{ name: 'Background 231', url: 'https://cdn.pixabay.com/video/2024/03/09/203522-921629678_tiny.mp4' },
+{ name: 'Background 232', url: 'https://cdn.pixabay.com/video/2020/11/11/56162-478755498_tiny.mp4' },
+{ name: 'Background 233', url: 'https://cdn.pixabay.com/video/2021/08/11/84685-590762068_tiny.mp4' },
+
+
+
+{ name: 'Background 234', url: 'https://cdn.pixabay.com/video/2025/10/25/312010_tiny.mp4' },
+{ name: 'Background 235', url: 'https://cdn.pixabay.com/video/2025/09/21/305593_tiny.mp4' },
+{ name: 'Background 236', url: 'https://cdn.pixabay.com/video/2025/10/31/313052_tiny.mp4' },
+{ name: 'Background 237', url: 'https://cdn.pixabay.com/video/2024/09/14/231325_tiny.mp4' },
+{ name: 'Background 238', url: 'https://cdn.pixabay.com/video/2025/07/03/289368_tiny.mp4' },
+{ name: 'Background 239', url: 'https://cdn.pixabay.com/video/2022/04/11/113562-698386354_tiny.mp4' },
+{ name: 'Background 240', url: 'https://cdn.pixabay.com/video/2025/06/26/287862_tiny.mp4' },
+{ name: 'Background 241', url: 'https://cdn.pixabay.com/video/2024/11/02/239567_tiny.mp4' },
+{ name: 'Background 242', url: 'https://cdn.pixabay.com/video/2025/10/09/308981_tiny.mp4' },
+{ name: 'Background 243', url: 'https://cdn.pixabay.com/video/2025/10/09/308968_tiny.mp4' },
+{ name: 'Background 244', url: 'https://cdn.pixabay.com/video/2025/10/28/312430_tiny.mp4' },
+{ name: 'Background 245', url: 'https://cdn.pixabay.com/video/2025/03/18/265647_tiny.mp4' },
+{ name: 'Background 246', url: 'https://cdn.pixabay.com/video/2024/09/20/232259_tiny.mp4' },
+{ name: 'Background 247', url: 'https://cdn.pixabay.com/video/2025/08/26/299902_tiny.mp4' },
+{ name: 'Background 248', url: 'https://cdn.pixabay.com/video/2025/07/31/294490_tiny.mp4' },
+{ name: 'Background 249', url: 'https://cdn.pixabay.com/video/2024/08/08/225398_tiny.mp4' },
+{ name: 'Background 250', url: 'https://cdn.pixabay.com/video/2025/08/24/299377_tiny.mp4' },
+{ name: 'Background 251', url: 'https://cdn.pixabay.com/video/2025/11/04/313813_tiny.mp4' },
+{ name: 'Background 252', url: 'https://cdn.pixabay.com/video/2025/04/14/272008_tiny.mp4' },
+{ name: 'Background 253', url: 'https://cdn.pixabay.com/video/2024/12/09/245778_tiny.mp4' },
+{ name: 'Background 254', url: 'https://cdn.pixabay.com/video/2025/08/28/300430_tiny.mp4' },
+{ name: 'Background 255', url: 'https://cdn.pixabay.com/video/2025/06/14/285867_tiny.mp4' },
+{ name: 'Background 256', url: 'https://cdn.pixabay.com/video/2025/08/12/296911_tiny.mp4' },
+{ name: 'Background 257', url: 'https://cdn.pixabay.com/video/2025/06/05/283771_tiny.mp4' },
+{ name: 'Background 258', url: 'https://cdn.pixabay.com/video/2025/09/29/307043_tiny.mp4' },
+{ name: 'Background 259', url: 'https://cdn.pixabay.com/video/2025/06/11/285219_tiny.mp4' },
+{ name: 'Background 260', url: 'https://cdn.pixabay.com/video/2024/10/27/238550_tiny.mp4' },
+{ name: 'Background 261', url: 'https://cdn.pixabay.com/video/2025/10/31/313062_tiny.mp4' },
+{ name: 'Background 262', url: 'https://cdn.pixabay.com/video/2025/06/10/284934_tiny.mp4' },
+{ name: 'Background 263', url: 'https://cdn.pixabay.com/video/2025/08/20/298638_tiny.mp4' },
+
+
+{ name: 'Background 264', url: 'https://cdn.pixabay.com/video/2025/05/14/278967_tiny.mp4' },
+{ name: 'Background 265', url: 'https://cdn.pixabay.com/video/2025/06/28/288323_tiny.mp4' },
+{ name: 'Background 266', url: 'https://cdn.pixabay.com/video/2025/03/23/266820_tiny.mp4' },
+{ name: 'Background 267', url: 'https://cdn.pixabay.com/video/2025/04/17/272591_tiny.mp4' },
+{ name: 'Background 268', url: 'https://cdn.pixabay.com/video/2025/06/03/283438_tiny.mp4' },
+{ name: 'Background 269', url: 'https://cdn.pixabay.com/video/2025/04/06/270194_tiny.mp4' },
+{ name: 'Background 270', url: 'https://cdn.pixabay.com/video/2025/06/22/287212_tiny.mp4' },
+{ name: 'Background 271', url: 'https://cdn.pixabay.com/video/2025/03/15/264934_tiny.mp4' },
+{ name: 'Background 272', url: 'https://cdn.pixabay.com/video/2025/02/16/258696_tiny.mp4' },
+{ name: 'Background 273', url: 'https://cdn.pixabay.com/video/2024/09/11/230932_tiny.mp4' },
+{ name: 'Background 274', url: 'https://cdn.pixabay.com/video/2024/11/02/239569_tiny.mp4' },
+{ name: 'Background 275', url: 'https://cdn.pixabay.com/video/2025/03/11/263862_tiny.mp4' },
+{ name: 'Background 276', url: 'https://cdn.pixabay.com/video/2024/07/17/221672_tiny.mp4' },
+{ name: 'Background 277', url: 'https://cdn.pixabay.com/video/2025/02/27/261352_tiny.mp4' },
+{ name: 'Background 278', url: 'https://cdn.pixabay.com/video/2025/09/03/301365_tiny.mp4' },
+{ name: 'Background 279', url: 'https://cdn.pixabay.com/video/2025/03/18/265554_tiny.mp4' },
+{ name: 'Background 280', url: 'https://cdn.pixabay.com/video/2025/02/23/260399_tiny.mp4' },
+{ name: 'Background 281', url: 'https://cdn.pixabay.com/video/2025/04/09/271155_tiny.mp4' },
+{ name: 'Background 282', url: 'https://cdn.pixabay.com/video/2025/09/15/304228_tiny.mp4' },
+{ name: 'Background 283', url: 'https://cdn.pixabay.com/video/2025/09/30/307230_tiny.mp4' },
+{ name: 'Background 284', url: 'https://cdn.pixabay.com/video/2025/01/23/254251_tiny.mp4' },
+{ name: 'Background 285', url: 'https://cdn.pixabay.com/video/2025/09/26/306481_tiny.mp4' },
+{ name: 'Background 286', url: 'https://cdn.pixabay.com/video/2025/09/25/306429_tiny.mp4' },
+{ name: 'Background 287', url: 'https://cdn.pixabay.com/video/2025/03/12/264248_tiny.mp4' },
+{ name: 'Background 288', url: 'https://cdn.pixabay.com/video/2025/03/27/268033_tiny.mp4' },
+{ name: 'Background 289', url: 'https://cdn.pixabay.com/video/2025/05/11/278281_tiny.mp4' },
+{ name: 'Background 290', url: 'https://cdn.pixabay.com/video/2025/09/29/307129_tiny.mp4' },
+{ name: 'Background 291', url: 'https://cdn.pixabay.com/video/2025/09/29/306998_tiny.mp4' },
+{ name: 'Background 292', url: 'https://cdn.pixabay.com/video/2025/08/25/299576_tiny.mp4' },
+{ name: 'Background 293', url: 'https://cdn.pixabay.com/video/2024/06/13/216613_tiny.mp4' },
+{ name: 'Background 294', url: 'https://cdn.pixabay.com/video/2025/04/24/274052_tiny.mp4' },
+{ name: 'Background 295', url: 'https://cdn.pixabay.com/video/2025/09/08/302713_tiny.mp4' },
+
+
+
+{ name: 'Background 296', url: 'https://cdn.pixabay.com/video/2024/08/01/224231_tiny.mp4' },
+{ name: 'Background 297', url: 'https://cdn.pixabay.com/video/2024/09/24/232950_tiny.mp4' },
+{ name: 'Background 298', url: 'https://cdn.pixabay.com/video/2025/03/04/262469_tiny.mp4' },
+{ name: 'Background 299', url: 'https://cdn.pixabay.com/video/2025/04/04/269667_tiny.mp4' },
+{ name: 'Background 300', url: 'https://cdn.pixabay.com/video/2025/09/08/302588_tiny.mp4' },
+{ name: 'Background 301', url: 'https://cdn.pixabay.com/video/2025/03/15/265116_tiny.mp4' },
+{ name: 'Background 302', url: 'https://cdn.pixabay.com/video/2025/03/04/262344_tiny.mp4' },
+{ name: 'Background 303', url: 'https://cdn.pixabay.com/video/2025/03/14/264741_tiny.mp4' },
+{ name: 'Background 304', url: 'https://cdn.pixabay.com/video/2024/09/24/232949_tiny.mp4' },
+{ name: 'Background 305', url: 'https://cdn.pixabay.com/video/2025/10/09/308947_tiny.mp4' },
+{ name: 'Background 306', url: 'https://cdn.pixabay.com/video/2024/12/16/246887_tiny.mp4' },
+{ name: 'Background 307', url: 'https://cdn.pixabay.com/video/2024/12/07/245434_tiny.mp4' },
+{ name: 'Background 308', url: 'https://cdn.pixabay.com/video/2025/08/20/298654_tiny.mp4' },
+{ name: 'Background 309', url: 'https://cdn.pixabay.com/video/2025/04/04/269669_tiny.mp4' },
+{ name: 'Background 310', url: 'https://cdn.pixabay.com/video/2025/08/03/295245_tiny.mp4' },
+{ name: 'Background 311', url: 'https://cdn.pixabay.com/video/2025/08/17/297867_tiny.mp4' },
+{ name: 'Background 312', url: 'https://cdn.pixabay.com/video/2025/08/04/295332_tiny.mp4' },
+{ name: 'Background 313', url: 'https://cdn.pixabay.com/video/2025/05/11/278282_tiny.mp4' },
+{ name: 'Background 314', url: 'https://cdn.pixabay.com/video/2024/12/16/246885_tiny.mp4' },
+{ name: 'Background 315', url: 'https://cdn.pixabay.com/video/2025/04/04/269668_tiny.mp4' },
+{ name: 'Background 316', url: 'https://cdn.pixabay.com/video/2024/09/02/229355_tiny.mp4' },
+{ name: 'Background 317', url: 'https://cdn.pixabay.com/video/2025/04/05/269956_tiny.mp4' },
+{ name: 'Background 318', url: 'https://cdn.pixabay.com/video/2025/04/05/269953_tiny.mp4' },
+{ name: 'Background 319', url: 'https://cdn.pixabay.com/video/2025/03/04/262392_tiny.mp4' },
+{ name: 'Background 320', url: 'https://cdn.pixabay.com/video/2025/03/04/262426_tiny.mp4' },
+{ name: 'Background 321', url: 'https://cdn.pixabay.com/video/2025/03/15/265107_tiny.mp4' },
+{ name: 'Background 322', url: 'https://cdn.pixabay.com/video/2025/08/17/297879_tiny.mp4' },
+
+  
+ 
+{ name: 'Background 323', url: 'https://cdn.pixabay.com/video/2016/09/22/5631-183849543_tiny.mp4' },
+{ name: 'Background 324', url: 'https://cdn.pixabay.com/video/2023/05/25/164517-830865498_tiny.mp4' },
+{ name: 'Background 325', url: 'https://cdn.pixabay.com/video/2024/06/14/216696_tiny.mp4' },
+{ name: 'Background 326', url: 'https://cdn.pixabay.com/video/2022/03/19/111244-690770621_tiny.mp4' },
+{ name: 'Background 327', url: 'https://cdn.pixabay.com/video/2023/09/19/181314-866094614_tiny.mp4' },
+{ name: 'Background 328', url: 'https://cdn.pixabay.com/video/2021/02/17/65438-514139134_tiny.mp4' },
+{ name: 'Background 329', url: 'https://cdn.pixabay.com/video/2022/01/24/105542-670503037_tiny.mp4' },
+{ name: 'Background 330', url: 'https://cdn.pixabay.com/video/2023/01/04/145320-786403437_tiny.mp4' },
+{ name: 'Background 331', url: 'https://cdn.pixabay.com/video/2022/02/27/109016-683077123_tiny.mp4' },
+{ name: 'Background 332', url: 'https://cdn.pixabay.com/video/2015/11/08/1287-145131537_tiny.mp4' },
+{ name: 'Background 333', url: 'https://cdn.pixabay.com/video/2024/05/31/214669_tiny.mp4' },
+{ name: 'Background 334', url: 'https://cdn.pixabay.com/video/2024/07/16/221469_tiny.mp4' },
+{ name: 'Background 335', url: 'https://cdn.pixabay.com/video/2024/07/24/222838_tiny.mp4' },
+{ name: 'Background 336', url: 'https://cdn.pixabay.com/video/2025/03/28/268290_tiny.mp4' },
+{ name: 'Background 337', url: 'https://cdn.pixabay.com/video/2023/02/15/150874-799327601_tiny.mp4' },
+{ name: 'Background 338', url: 'https://cdn.pixabay.com/video/2017/07/16/10685-226624850_tiny.mp4' },
+{ name: 'Background 339', url: 'https://cdn.pixabay.com/video/2022/01/21/105229-669669059_tiny.mp4' },
+{ name: 'Background 340', url: 'https://cdn.pixabay.com/video/2025/05/07/277211_tiny.mp4' },
+{ name: 'Background 341', url: 'https://cdn.pixabay.com/video/2022/09/02/129991-746164381_tiny.mp4' },
+{ name: 'Background 342', url: 'https://cdn.pixabay.com/video/2022/04/26/115176-703930484_tiny.mp4' },
+{ name: 'Background 343', url: 'https://cdn.pixabay.com/video/2022/03/27/112039-695204665_tiny.mp4' },
+{ name: 'Background 344', url: 'https://cdn.pixabay.com/video/2022/02/24/108771-681686549_tiny.mp4' },
+{ name: 'Background 345', url: 'https://cdn.pixabay.com/video/2023/02/19/151273-800360253_tiny.mp4' },
+{ name: 'Background 346', url: 'https://cdn.pixabay.com/video/2017/05/10/9090-217582224_tiny.mp4' },
+{ name: 'Background 347', url: 'https://cdn.pixabay.com/video/2016/04/05/2717-161687558_tiny.mp4' },
+{ name: 'Background 348', url: 'https://cdn.pixabay.com/video/2024/03/01/202576-918431455_tiny.mp4' },
+{ name: 'Background 349', url: 'https://cdn.pixabay.com/video/2022/09/02/129989-746164374_tiny.mp4' },
+{ name: 'Background 350', url: 'https://cdn.pixabay.com/video/2016/02/09/2104-154778744_tiny.mp4' },
+{ name: 'Background 351', url: 'https://cdn.pixabay.com/video/2021/08/16/85339-590730585_tiny.mp4' },
+{ name: 'Background 352', url: 'https://cdn.pixabay.com/video/2022/11/01/137430-766532393_tiny.mp4' },
+{ name: 'Background 353', url: 'https://cdn.pixabay.com/video/2020/05/15/39157-420257087_tiny.mp4' },
+{ name: 'Background 354', url: 'https://cdn.pixabay.com/video/2023/02/09/149939-797471089_tiny.mp4' },
+{ name: 'Background 355', url: 'https://cdn.pixabay.com/video/2024/09/03/229572_tiny.mp4' },
+{ name: 'Background 356', url: 'https://www.pexels.com/download/video/9897710/' },
+{ name: 'Background 357', url: 'https://www.pexels.com/download/video/28337272/' },
+{ name: 'Background 358', url: 'https://www.pexels.com/download/video/8816905/' },
+{ name: 'Background 359', url: 'https://www.pexels.com/download/video/19646001/' },
+{ name: 'Background 360', url: 'https://www.pexels.com/download/video/8667993/' },
+{ name: 'Background 361', url: 'https://www.pexels.com/download/video/32957693/' },
+{ name: 'Background 362', url: 'https://www.pexels.com/download/video/8500926/' },
+{ name: 'Background 363', url: 'https://www.pexels.com/download/video/34525184/' },
+{ name: 'Background 364', url: 'https://www.pexels.com/download/video/18336411/' },
+{ name: 'Background 365', url: 'https://www.pexels.com/download/video/28337271/' }
+
+
+  
+];
+
+  
+
+
+const KNOWLEDGE_ITEMS = [
+  {
+    text: "Riddle: I’m tall when I’m young and short when I’m old. What am I?",
+    textSW: "Kitendawili: Niko mrefu ninapokuwa mchanga na mfupi ninapokuwa mzee. Mimi ni nini?",
+    category: "Riddles", duration: 10, askComment: true
+  },
+ 
+  {
+    text: "Fun fact: Octopuses have three hearts and blue blood!",
+    textSW: "Fakta ya kufurahisha: Pweza wana mioyo mitatu na damu ya buluu!",
+    category: "Fun Science", duration: 9, askComment: false
+  },
+  {
+    text: "Riddle: The more you take, the more you leave behind. What am I?",
+    textSW: "Kitendawili: Kadri unavyotoa, ndivyo unavyobaki. Mimi ni nini?",
+    category: "Riddles", duration: 10, askComment: true
+  },
+  {
+    text: "Trivia: Your brain uses 20% of your body's energy but weighs only 2%.",
+    textSW: "Fakta: Ubongo wako hutumia 20% ya nishati ya mwili lakini unauza 2% tu.",
+    category: "Science", duration: 8, askComment: false
+  },
+
+  {
+    text: "Fun fact: Venus spins backward compared to most planets.",
+    textSW: "Fakta: Venus inazunguka kinyume na sayari nyingi.",
+    category: "Astronomy", duration: 8, askComment: false
+  },
+
+  {
+    text: "Trivia: The number 0 was invented in India.",
+    textSW: "Fakta: Sifuri ilibuniwa India.",
+    category: "Maths", duration: 7, askComment: true
+  },
+  {
+    text: "Riddle: What comes once in a minute, twice in a moment, but never in a thousand years?",
+    textSW: "Kitendawili: Nini huja mara moja kwa dakika, mara mbili kwa wakati, lakini kamwe katika miaka elfu moja?",
+    category: "Riddles", duration: 10, askComment: true
+  },
+  {
+    text: "Fun fact: A day on Venus is longer than a year on Venus!",
+    textSW: "Fakta: Siku kwenye Venus ni ndefu kuliko mwaka kwenye Venus!",
+    category: "Astronomy", duration: 8, askComment: false
+  },
+
+  {
+    text: "Fun Science: Honey never spoils. Archaeologists found edible honey in ancient tombs!",
+    textSW: "Fakta ya sayansi: Asali haiharibiki. Waakiolojia walipata asali inayokula katika makaburi ya kale!",
+    category: "Fun Science", duration: 10, askComment: false
+  },
+  {
+    text: "Riddle: I have keys but no locks. I have space but no room. You can enter but can’t go outside. What am I?",
+    textSW: "Kitendawili: Nina funguo lakini sina mnyozo. Nina nafasi lakini sina chumba. Unaweza kuingia lakini huwezi kutoka nje. Mimi ni nini?",
+    category: "Riddles", duration: 12, askComment: true
+  },
+
+  {
+    text: "Fun fact: The Moon has moonquakes.",
+    textSW: "Fakta: Mwezi una mitetemeko kama ya ardhi!",
+    category: "Astronomy", duration: 8, askComment: false
+  },
+  {
+    text: "Fun fact: Bananas are berries, but strawberries aren't.",
+    textSW: "Fakta: Ndizi ni tunda la beri, lakini stroberi sio!",
+    category: "Fun Science", duration: 9, askComment: true
+  },
+
+  {
+    text: "Riddle: What has hands but can’t clap?",
+    textSW: "Kitendawili: Kina mikono lakini hakiwezi kupiga makofi?",
+    category: "Riddles", duration: 9, askComment: true
+  },
+  {
+    text: "Fun fact: Water can boil and freeze at the same time!",
+    textSW: "Fakta: Maji yanaweza kuchemka na kuganda kwa wakati mmoja!",
+    category: "Fun Science", duration: 9, askComment: false
+  },
+
+  {
+    text: "Riddle: What gets wetter the more it dries?",
+    textSW: "Kitendawili: Nini kinapata unyevu zaidi kadri kinavyokaushwa?",
+    category: "Riddles", duration: 9, askComment: true
+  },
+ 
+  {
+    text: "Fun fact: Butterflies taste with their feet!",
+    textSW: "Fakta: Viwavi wanonja kwa miguu yao!",
+    category: "Biology", duration: 8, askComment: false
+  },
+  {
+    text: "Riddle: What has to be broken before you can use it?",
+    textSW: "Kitendawili: Nini kinahitaji kuvunjwa kabla hakijatumika?",
+    category: "Riddles", duration: 9, askComment: true
+  },
+ 
+  {
+    text: "Fun fact: Hot water freezes faster than cold water!",
+    textSW: "Fakta: Maji ya moto huganda haraka kuliko ya baridi!",
+    category: "Fun Science", duration: 8, askComment: false
+  },
+  {
+    text: "Trivia: Cats can’t taste sweetness.",
+    textSW: "Fakta: Paka hawawezi kutambua ladha tamu.",
+    category: "Animals", duration: 8, askComment: false
+  },
+  {
+    text: "Riddle: What can travel around the world while staying in a corner?",
+    textSW: "Kitendawili: Nini kinaweza kusafiri duniani kote huku kikiwa pembezoni tu?",
+    category: "Riddles", duration: 10, askComment: true
+  },
+  {
+    text: "Fun fact: Koalas have fingerprints like humans.",
+    textSW: "Fakta: Koala wana alama za vidole kama binadamu!",
+    category: "Animals", duration: 8, askComment: false
+  },
+  {
+    text: "Math trick: Think of any number, double it, add 6, halve it, subtract your original number. The answer is always 3!",
+    textSW: "Mbinu ya hesabu: Fikiria namba yoyote, zidisha mara 2, ongeza 6, gawanya kwa 2, toa namba ya kwanza — jibu daima ni 3!",
+    category: "Maths", duration: 10, askComment: true
+  },
+  {
+    text: "Riddle: What has an eye but cannot see?",
+    textSW: "Kitendawili: Kina jicho lakini hakiwezi kuona?",
+    category: "Riddles", duration: 8, askComment: true
+  },
+ 
+  {
+    text: "Fun fact: Rats laugh when tickled.",
+    textSW: "Fakta: Panya hucheka wanapochekeshwa!",
+    category: "Science", duration: 8, askComment: false
+  },
+  {
+    text: "Riddle: What has one eye but cannot see anything?",
+    textSW: "Kitendawili: Kina jicho moja lakini hakiwezi kuona chochote?",
+    category: "Riddles", duration: 8, askComment: true
+  },
+  {
+    text: "Fun fact: Humans share 60% of their DNA with bananas.",
+    textSW: "Fakta: Binadamu wanashiriki 60% ya DNA yao na ndizi!",
+    category: "Biology", duration: 9, askComment: false
+  },
+ 
+  {
+    text: "Riddle: The more you take, the more you leave behind. What am I?",
+    textSW: "Kitendawili: Kadri unavyotoa, ndivyo unavyobaki. Mimi ni nini?",
+    category: "Riddles", duration: 9, askComment: true
+  },
+  {
+    text: "Fun fact: Bees can recognize human faces.",
+    textSW: "Fakta: Nyuki wanaweza kutambua nyuso za binadamu!",
+    category: "Biology", duration: 9, askComment: false
+  },
+  {
+    text: "Laugh: Parallel lines have so much in common. It’s a shame they’ll never meet!",
+    textSW: "Kichekesho: Mistari sambamba ina mambo mengi sawa. Ni bahati mbaya hawatakutana kamwe!",
+    category: "Laughs", duration: 8, askComment: true
+  },
+  {
+    text: "Fun fact: A sneeze travels at about 160 km/h!",
+    textSW: "Fakta: Chafya husafiri kwa kasi ya zaidi ya kilomita 160 kwa saa!",
+    category: "Science", duration: 8, askComment: false
+  },
+  {
+    text: "Trivia: There’s enough DNA in your body to stretch to Pluto and back!",
+    textSW: "Fakta: Kuna DNA ya kutosha mwilini mwako kufika Pluto na kurudi!",
+    category: "Science", duration: 9, askComment: false
+  },
+  {
+    text: "Riddle: What begins with T, ends with T, and has T in it?",
+    textSW: "Kitendawili: Ni nini huanza na T, kuisha na T, na lina T ndani yake?",
+    category: "Riddles", duration: 9, askComment: true
+  },
+  {
+    text: "Fun fact: Some frogs can freeze solid and still survive!",
+    textSW: "Fakta: Baadhi ya vyura wanaweza kuganda kabisa na bado wakaishi!",
+    category: "Animals", duration: 9, askComment: false
+  },
+  {
+    text: "Trivia: There’s a species of jellyfish that can live forever.",
+    textSW: "Fakta: Kuna aina ya jellyfish isiyokufa kamwe!",
+    category: "Biology", duration: 9, askComment: false
+  },
+  {
+    text: "Math trick: Multiply your age by 7, then divide by 7 — your age doesn’t change!",
+    textSW: "Mbinu ya hesabu: Zidisha umri wako kwa 7, kisha gawanya kwa 7 — utabaki vilevile!",
+    category: "Maths", duration: 8, askComment: true
+  },
+ 
+  {
+    text: "Trivia: Tomatoes have more genes than humans!",
+    textSW: "Fakta: Nyanya zina jeni nyingi zaidi kuliko binadamu!",
+    category: "Biology", duration: 9, askComment: false
+  },
+  {
+    text: "History fact: The shortest war in history lasted only 38 minutes between Britain and Zanzibar.",
+    textSW: "Historia: Vita vifupi zaidi vilidumu dakika 38 pekee kati ya Uingereza na Zanzibar.",
+    category: "History", duration: 9, askComment: false
+  },
+  {
+    text: "Fun fact: A cloud can weigh more than a million kilograms!",
+    textSW: "Fakta: Wingu linaweza kuwa na uzito wa zaidi ya kilo milioni moja!",
+    category: "Science", duration: 8, askComment: false
+  },
+ 
+  {
+    text: "Fun fact: Lightning strikes the Earth about 8 million times a day!",
+    textSW: "Fakta: Radi hupiga Dunia takribani mara milioni 8 kwa siku!",
+    category: "Science", duration: 8, askComment: false
+  },
+  
+  {
+    text: "Fun fact: The average cumulus cloud weighs about 500 tons!",
+    textSW: "Fakta: Wingu la kawaida lina uzito wa tani 500!",
+    category: "Science", duration: 8, askComment: false
+  },
+
+  {
+    text: "Fun fact: It rains diamonds on Saturn and Jupiter!",
+    textSW: "Fakta ya kufurahisha: Kunanyesha almasi kwenye Saturn na Jupiter!",
+    category: "Astronomy", duration: 10, askComment: true
+  },
+  {
+    text: "Riddle: What has hands but can’t clap?",
+    textSW: "Kitendawili: Kina mikono lakini hakiwezi kupiga makofi?",
+    category: "Riddles", duration: 9, askComment: true
+  },
+  {
+    text: "Fun fact: A snail can sleep for three years.",
+    textSW: "Fakta: Konokono anaweza kulala kwa miaka mitatu!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "Did you know? Giraffes have the same number of neck bones as humans!",
+    textSW: "Je, wajua? Twiga wana idadi sawa ya mifupa ya shingo kama binadamu!",
+    category: "Biology", duration: 9, askComment: true
+  },
+  {
+    text: "Science fact: Earth’s rotation is slowing down — days are getting longer!",
+    textSW: "Fakta ya sayansi: Mzunguko wa Dunia unapungua — siku zinakuwa ndefu!",
+    category: "Science", duration: 9, askComment: false
+  },
+  {
+    text: "Riddle: What belongs to you but is used more by others?",
+    textSW: "Kitendawili: Ni chako lakini wengine hutumia zaidi?",
+    category: "Riddles", duration: 10, askComment: true
+  },
+ 
+  {
+    text: "Space fact: Space smells like burnt steak!",
+    textSW: "Fakta ya anga: Anga ina harufu kama nyama iliyochomeka!",
+    category: "Astronomy", duration: 9, askComment: false
+  },
+
+  {
+    text: "Fun fact: An ostrich’s eye is bigger than its brain.",
+    textSW: "Fakta: Jicho la mbuni ni kubwa kuliko ubongo wake.",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "Did you know? There are more trees on Earth than stars in the Milky Way.",
+    textSW: "Je, wajua? Kuna miti mingi zaidi duniani kuliko nyota katika Njia ya Maziwa.",
+    category: "Astronomy", duration: 9, askComment: true
+  },
+  {
+    text: "Science fact: Goldfish can see infrared and ultraviolet light.",
+    textSW: "Fakta ya sayansi: Samaki wa dhahabu wanaona mwanga wa infrared na ultraviolet.",
+    category: "Science", duration: 9, askComment: true
+  },
+  {
+    text: "Fun fact: A day on Mercury lasts 1,408 hours!",
+    textSW: "Fakta: Siku moja kwenye Mercury hudumu saa 1,408!",
+    category: "Astronomy", duration: 9, askComment: true
+  },
+  {
+    text: "Word fun: The dot over an 'i' or 'j' is called a tittle!",
+    textSW: "Furaha ya maneno: Nukta juu ya 'i' au 'j' huitwa 'tittle'!",
+    category: "Language", duration: 8, askComment: true
+  },
+  {
+    text: "Brain fact: Your brain generates about 20 watts — enough to power a light bulb!",
+    textSW: "Fakta ya ubongo: Ubongo wako huzalisha karibu watts 20 — za kutosha kuwasha balbu!",
+    category: "Science", duration: 9, askComment: true
+  },
+  {
+    text: "Fun fact: A teaspoon of honey is the life’s work of 12 bees!",
+    textSW: "Fakta: Kijiko kimoja cha asali ni kazi ya maisha ya nyuki 12!",
+    category: "Fun Science", duration: 9, askComment: false
+  },
+  {
+    text: "Riddle: What has a face and two hands but no arms or legs?",
+    textSW: "Kitendawili: Kina uso na mikono miwili lakini hakina mikono wala miguu?",
+    category: "Riddles", duration: 9, askComment: true
+  },
+  {
+    text: "Fun fact: Starfish can regrow their arms!",
+    textSW: "Fakta: Nyota wa baharini wanaweza kukuza mikono yao tena!",
+    category: "Biology", duration: 9, askComment: true
+  },
+  {
+    text: "Did you know? The human body has enough iron to make a small nail.",
+    textSW: "Je, wajua? Mwili wa binadamu una chuma cha kutosha kutengeneza msumari mdogo.",
+    category: "Human Body", duration: 9, askComment: true
+  },
+
+  {
+    text: "Trivia: Every minute, about 240 babies are born worldwide.",
+    textSW: "Fakta: Kila dakika, watoto 240 huzaliwa duniani kote.",
+    category: "Trivia", duration: 9, askComment: true
+  },
+  {
+    text: "Cool fact: Polar bears have black skin under their white fur!",
+    textSW: "Fakta: Dhibiti za polar zina ngozi nyeusi chini ya manyoya meupe!",
+    category: "Animals", duration: 9, askComment: false
+  },
+  {
+    text: "Myth buster: The Great Wall of China isn’t visible from the Moon.",
+    textSW: "Ukweli: Ukuta Mkubwa wa China hauonekani kutoka Mwezini.",
+    category: "History", duration: 9, askComment: true
+  },
+  {
+    text: "Animal fact: Elephants can’t jump!",
+    textSW: "Fakta ya wanyama: Tembo hawawezi kuruka!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "Fun fact: Dolphins sleep with one eye open.",
+    textSW: "Fakta: Pomboo hulala na jicho moja likiwa wazi!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Science fact: Earth is hit by lightning 100 times every second.",
+    textSW: "Fakta ya sayansi: Dunia hupigwa radi mara 100 kila sekunde.",
+    category: "Science", duration: 8, askComment: false
+  },
+  {
+    text: "Fun fact: Rainbows can appear at night — they’re called moonbows!",
+    textSW: "Fakta: Upinde wa mvua unaweza kuonekana usiku — unaitwa moonbow!",
+    category: "Astronomy", duration: 8, askComment: true
+  },
+  {
+    text: "Weird fact: The longest hiccup spree lasted 68 years!",
+    textSW: "Fakta ya ajabu: Mtu mmoja alipiga hipo kwa miaka 68 mfululizo!",
+    category: "Human Body", duration: 10, askComment: true
+  },
+  {
+    text: "Funny fact: Mosquitoes are attracted to people who just ate bananas!",
+    textSW: "Fakta ya kuchekesha: Mbu huvutiwa na watu waliokula ndizi hivi punde!",
+    category: "Fun Science", duration: 9, askComment: true
+  },
+  {
+    text: "Did you know? Your tongue print is unique like your fingerprint.",
+    textSW: "Je, wajua? Alama ya ulimi wako ni ya kipekee kama ya kidole chako.",
+    category: "Human Body", duration: 8, askComment: true
+  },
+  {
+    text: "Fun fact: There are more stars in the universe than atoms in a grain of sand.",
+    textSW: "Fakta: Kuna nyota nyingi zaidi ulimwenguni kuliko atomi kwenye punje ya mchanga.",
+    category: "Astronomy", duration: 10, askComment: false
+  },
+  {
+    text: "Food fact: Peanuts are not nuts — they’re legumes!",
+    textSW: "Fakta ya chakula: Njugu si karanga, ni mbegu za kunde!",
+    category: "Food", duration: 8, askComment: true
+  },
+  {
+    text: "Fun fact: Birds are the closest living relatives of dinosaurs.",
+    textSW: "Fakta: Ndege ni jamaa wa karibu wa wanyama wa kale (dinosaurs).",
+    category: "Science", duration: 9, askComment: true
+  },
+  {
+    text: "Science fact: Octopuses have blue blood!",
+    textSW: "Fakta ya sayansi: Pweza wana damu ya bluu!",
+    category: "Biology", duration: 8, askComment: true
+  },
+
+  {
+    text: "Crazy fact: Some cats are allergic to humans!",
+    textSW: "Fakta: Baadhi ya paka wana mzio wa binadamu!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "Astronomy fact: Saturn’s rings could disappear in 100 million years.",
+    textSW: "Fakta ya anga: Pete za Saturn zinaweza kutoweka ndani ya miaka milioni 100!",
+    category: "Astronomy", duration: 9, askComment: true
+  },
+  {
+    text: "Fun fact: The inventor of the Pringles can is buried in one!",
+    textSW: "Fakta: Mvumbuzi wa kopo la Pringles alizikwa ndani yake!",
+    category: "Trivia", duration: 9, askComment: true
+  },
+  {
+    text: "Word trivia: A 'moment' technically means 90 seconds.",
+    textSW: "Trivia ya maneno: 'Moment' kihistoria inamaanisha sekunde 90!",
+    category: "Language", duration: 8, askComment: true
+  },
+  {
+    text: "Animal fact: Rabbits can see behind them without turning their heads!",
+    textSW: "Fakta ya wanyama: Sungura wanaweza kuona nyuma bila kugeuza vichwa!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Mind fact: There are more possible chess moves than atoms in the known universe!",
+    textSW: "Fakta ya akili: Kuna miondoko zaidi kwenye chess kuliko atomi katika ulimwengu unaojulikana!",
+    category: "Mind Games", duration: 10, askComment: true
+  },
+  {
+    text: "Science fact: Bees can’t see red but can see ultraviolet light.",
+    textSW: "Fakta: Nyuki hawaoni rangi nyekundu lakini wanaona mwanga wa ultraviolet.",
+    category: "Fun Science", duration: 8, askComment: true
+  },
+  {
+    text: "Weird fact: Humans shed about 600,000 particles of skin every hour!",
+    textSW: "Fakta: Binadamu hupoteza chembe 600,000 za ngozi kila saa!",
+    category: "Human Body", duration: 9, askComment: false
+  },
+  {
+    text: "Record fact: The longest time between two twins being born is 87 days!",
+    textSW: "Fakta: Tofauti ndefu zaidi kati ya mapacha kuzaliwa ni siku 87!",
+    category: "Trivia", duration: 9, askComment: true
+  },
+  {
+    text: "Science fact: Octopus ink doesn’t just hide them — it dulls predators’ sense of smell.",
+    textSW: "Fakta ya sayansi: Wino wa pweza hauwafichi tu — hupunguza harufu ya wanyama wanaowawinda!",
+    category: "Biology", duration: 10, askComment: true
+  },
+  {
+    text: "History twist: The first oranges weren’t orange — they were green!",
+    textSW: "Fakta ya kihistoria: Machungwa ya kwanza hayakuwa ya rangi ya chungwa — yalikuwa ya kijani!",
+    category: "Food", duration: 8, askComment: true
+  },
+  
+  {
+    text: "Science fact: Some metals can remember their shape!",
+    textSW: "Fakta ya sayansi: Baadhi ya metali hukumbuka umbo lao asilia!",
+    category: "Science", duration: 9, askComment: true
+  },
+  {
+    text: "Trivia: The shortest commercial flight lasts only 57 seconds!",
+    textSW: "Fakta: Safari fupi zaidi ya ndege kibiashara hudumu sekunde 57 tu!",
+    category: "Trivia", duration: 8, askComment: true
+  },
+  {
+    text: "Fun fact: Dogs can smell time!",
+    textSW: "Fakta: Mbwa wanaweza kunusa muda!",
+    category: "Animals", duration: 9, askComment: true
+  },
+      {
+    text: "Space fact: One day on Venus is longer than one year on Venus!",
+    textSW: "Fakta ya anga: Siku moja kwenye sayari ya Venus ni ndefu kuliko mwaka mmoja huko!",
+    category: "Astronomy", duration: 9, askComment: true
+  },
+  {
+    text: "Science fact: You can’t burp in space — there’s no gravity to separate gas from liquid!",
+    textSW: "Fakta ya sayansi: Huwezi kubelchi kwenye anga — hakuna mvuto wa kutenganisha gesi na kioevu!",
+    category: "Science", duration: 10, askComment: true
+  },
+  {
+    text: "Fun fact: The heart of a blue whale is the size of a small car!",
+    textSW: "Fakta: Moyo wa nyangumi wa bluu ni mkubwa kama gari dogo!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Mind trick: Rearrange the letters of 'Listen' and you get 'Silent'!",
+    textSW: "Hila ya akili: Ukipanga upya herufi za 'Listen', unapata 'Silent'!",
+    category: "Language", duration: 9, askComment: true
+  },
+  {
+    text: "History fact: The first email was sent in 1971!",
+    textSW: "Fakta ya kihistoria: Barua pepe ya kwanza ilitumwa mwaka 1971!",
+    category: "History", duration: 8, askComment: false
+  },
+  {
+    text: "Science fact: The human nose can detect over 1 trillion different smells!",
+    textSW: "Fakta ya sayansi: Pua ya binadamu inaweza kutambua zaidi ya harufu trilioni moja!",
+    category: "Human Body", duration: 9, askComment: false
+  },
+  {
+    text: "Fun fact: Octopuses have three hearts!",
+    textSW: "Fakta: Pweza wana mioyo mitatu!",
+    category: "Biology", duration: 8, askComment: true
+  },
+  {
+    text: "Riddle: What has a neck but no head?",
+    textSW: "Kitendawili: Kina shingo lakini hakina kichwa?",
+    category: "Riddles", duration: 8, askComment: true
+  },
+  {
+    text: "Fun fact: The fingerprints of twins are never identical.",
+    textSW: "Fakta: Alama za vidole za mapacha hazifanani kamwe!",
+    category: "Human Body", duration: 8, askComment: false
+  },
+  {
+    text: "Trivia: The inventor of the microwave oven discovered it by accident with a chocolate bar!",
+    textSW: "Fakta: Mvumbuzi wa oveni ya microwave aliigundua kwa bahati baada ya chokoleti kuyeyuka mfukoni!",
+    category: "Science", duration: 10, askComment: true
+  },
+  {
+    text: "Fun fact: Camels have three eyelids to protect against sand.",
+    textSW: "Fakta: Ngamia wana kope tatu kulinda macho yao kutokana na mchanga!",
+    category: "Animals", duration: 9, askComment: false
+  },
+  {
+    text: "Mind fact: You can’t tickle yourself — your brain knows it’s coming!",
+    textSW: "Fakta ya akili: Huwezi kujichekesha kwa kujiwasha — ubongo wako unajua kinachokuja!",
+    category: "Mind Games", duration: 9, askComment: true
+  },
+  {
+    text: "Science fact: Sound travels 4 times faster in water than in air!",
+    textSW: "Fakta ya sayansi: Sauti husafiri mara 4 kwa kasi zaidi majini kuliko hewani!",
+    category: "Science", duration: 9, askComment: false
+  },
+  {
+    text: "Fun fact: Pineapples take about two years to grow.",
+    textSW: "Fakta: Mananasi huchukua takribani miaka miwili kukua!",
+    category: "Food", duration: 8, askComment: false
+  },
+  {
+    text: "History fact: The first Olympic Games were held in 776 BC in Greece.",
+    textSW: "Fakta ya kihistoria: Michezo ya kwanza ya Olimpiki ilifanyika mwaka 776 KK huko Ugiriki.",
+    category: "History", duration: 9, askComment: false
+  },
+  {
+    text: "Riddle: The more you take away, the bigger I get. What am I?",
+    textSW: "Kitendawili: Kadri unavyotoa, ndivyo ninavyokuwa mkubwa. Mimi ni nani?",
+    category: "Riddles", duration: 10, askComment: true
+  },
+  {
+    text: "Fun fact: The dot on the number 9 of most calculators is not decoration — it shows polarity!",
+    textSW: "Fakta: Nukta juu ya namba 9 kwenye kalkuleta nyingi si mapambo — inaonyesha polarity!",
+    category: "Tech", duration: 9, askComment: false
+  },
+  
+  {
+    text: "Science fact: The smell of rain has a name — petrichor!",
+    textSW: "Fakta ya sayansi: Harufu ya mvua inaitwa 'petrichor'!",
+    category: "Science", duration: 8, askComment: true
+  },
+ 
+  {
+    text: "Trivia: The shortest complete sentence in English is 'I am.'",
+    textSW: "Fakta: Sentensi fupi zaidi kamili kwa Kiingereza ni 'I am.'",
+    category: "Language", duration: 8, askComment: false
+  },
+  {
+    text: "Fun fact: Honey never spoils — archaeologists found edible honey in ancient tombs!",
+    textSW: "Fakta: Asali haiozi — watafiti walipata asali inayoweza kuliwa kwenye makaburi ya kale!",
+    category: "Food", duration: 10, askComment: true
+  },
+  {
+    text: "Science fact: Jupiter’s gravity is 2.5 times stronger than Earth’s!",
+    textSW: "Fakta ya sayansi: Mvuto wa Jupiter ni mara 2.5 zaidi ya ule wa Dunia!",
+    category: "Astronomy", duration: 9, askComment: true
+  },
+  {
+    text: "Animal fact: Frogs drink water through their skin, not their mouths!",
+    textSW: "Fakta ya wanyama: Vyura hunywa maji kupitia ngozi yao, si midomo!",
+    category: "Animals", duration: 9, askComment: false
+  },
+  {
+    text: "Riddle: What has a ring but no finger?",
+    textSW: "Kitendawili: Kina pete lakini hakina kidole?",
+    category: "Riddles", duration: 8, askComment: true
+  },
+  {
+    text: "Fun fact: The world’s largest desert isn’t the Sahara — it’s Antarctica!",
+    textSW: "Fakta: Jangwa kubwa zaidi duniani si Sahara, ni Antaktika!",
+    category: "Geography", duration: 9, askComment: true
+  },
+  {
+    text: "History fact: Paper was invented in China over 2,000 years ago.",
+    textSW: "Fakta ya kihistoria: Karatasi ilivumbuliwa China zaidi ya miaka 2,000 iliyopita.",
+    category: "History", duration: 8, askComment: false
+  },
+  {
+    text: "Fun fact: Human bones are about five times stronger than steel!",
+    textSW: "Fakta: Mifupa ya binadamu ni imara mara tano kuliko chuma!",
+    category: "Human Body", duration: 9, askComment: true
+  },
+  {
+    text: "Trivia: The longest English word has 189,819 letters — it’s the chemical name for 'Titin'!",
+    textSW: "Fakta: Neno refu zaidi kwa Kiingereza lina herufi 189,819 — jina la kemikali 'Titin'!",
+    category: "Language", duration: 10, askComment: true
+  },
+ 
+  {
+    text: "Mind-blowing fact: Every two minutes, humans take more photos than all of humanity did in the 1800s!",
+    textSW: "Fakta ya kushangaza: Kila dakika mbili, binadamu wanapiga picha nyingi zaidi kuliko karne ya 19 nzima!",
+    category: "Trivia", duration: 10, askComment: true
+  },
+  {
+    text: "Fun fact: A group of owls is called a 'parliament'!",
+    textSW: "Fakta: Kundi la bundi huitwa 'parliament'!",
+    category: "Animals", duration: 8, askComment: false
+  }, 
+  
+  
+  {
+  text: "Fun fact: Octopuses have three hearts and blue blood.",
+  textSW: "Fakta: Pweza ana mioyo mitatu na damu ya buluu.",
+  category: "Marine Life", duration: 9, askComment: false
+},
+
+{
+  text: "Fun fact: There’s a planet made entirely of diamonds!",
+  textSW: "Fakta: Kuna sayari iliyotengenezwa kabisa kwa almasi!",
+  category: "Astronomy", duration: 10, askComment: false
+},
+{
+  text: "Laugh: Why did the student eat his homework? Because the teacher said it was a piece of cake!",
+  textSW: "Cheka: Kwa nini mwanafunzi alikula kazi yake ya nyumbani? Kwa sababu mwalimu alisema ni kipande cha keki!",
+  category: "Laughs", duration: 12, askComment: false
+},
+
+{
+  text: "Fun fact: Horses can’t vomit — ever.",
+  textSW: "Fakta: Farasi hawawezi kutapika kamwe.",
+  category: "Animals", duration: 8, askComment: false
+},
+{
+  text: "Fun fact: Bananas glow blue under black light!",
+  textSW: "Fakta: Ndizi huangaza buluu chini ya mwanga mweusi!",
+  category: "Fun Science", duration: 9, askComment: false
+},
+
+{
+  text: "Fun fact: Cows produce more milk when they listen to music.",
+  textSW: "Fakta: Ng’ombe huzalisha maziwa zaidi wakisikiliza muziki.",
+  category: "Science", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Your small intestine is about 6 meters long.",
+  textSW: "Fakta: Utumbo wako mdogo una urefu wa mita 6 hivi.",
+  category: "Biology", duration: 8, askComment: false
+},
+
+
+{
+  text: "Fun fact: Butterflies can’t fly if they’re too cold.",
+  textSW: "Fakta: Viwavi hawana uwezo wa kuruka wakiwa baridi sana.",
+  category: "Animals", duration: 9, askComment: false
+},
+
+{
+  text: "Fun fact: Venus rotates backward compared to most planets.",
+  textSW: "Fakta: Sayari ya Venus huzunguka kinyume na sayari nyingi.",
+  category: "Astronomy", duration: 9, askComment: false
+},
+
+{
+  text: "Laugh: I told my computer I needed a break — it froze!",
+  textSW: "Cheka: Nilimwambia kompyuta yangu nataka mapumziko — ikaganda!",
+  category: "Tech Humor", duration: 8, askComment: false
+},
+{
+  text: "Fun fact: Some fish can climb trees.",
+  textSW: "Fakta: Samaki wengine wanaweza kupanda miti!",
+  category: "Nature", duration: 8, askComment: false
+},
+{
+  text: "Riddle: What comes once in a minute, twice in a moment, but never in a thousand years?",
+  textSW: "Kitendawili: Nini huja mara moja kwa dakika, mara mbili kwa muda, lakini si kwa miaka elfu?",
+  category: "Riddles", duration: 11, askComment: true
+},
+{
+  text: "Fun fact: Owls can’t move their eyes — they turn their heads instead!",
+  textSW: "Fakta: Bundi hawawezi kuzungusha macho, badala yake huzungusha vichwa vyao!",
+  category: "Animals", duration: 9, askComment: false
+},
+
+{
+  text: "Mind Trick: Read this aloud — ‘Eye Yam Stew Peed.’ What did you just say? (I am stupid!)",
+  textSW: "Udanganyifu wa akili: Sema kwa sauti — ‘Ai Yam Stupid’. Umesema nini sasa? 😅",
+  category: "Mind Trick", duration: 10, askComment: true
+},
+{
+  text: "Fun fact: Human saliva contains a painkiller stronger than morphine.",
+  textSW: "Fakta: Mate ya binadamu yana dawa ya maumivu yenye nguvu kuliko morphine.",
+  category: "Biology", duration: 10, askComment: false
+},
+{
+  text: "Fun fact: Lobsters taste with their legs.",
+  textSW: "Fakta: Kamba hula kwa kutumia miguu yao!",
+  category: "Marine Life", duration: 8, askComment: false
+},
+
+{
+  text: "Fun fact: Sea cucumbers eat with their feet.",
+  textSW: "Fakta: Tango la baharini hula kwa kutumia miguu yake!",
+  category: "Marine Life", duration: 8, askComment: false
+},
+
+{
+  text: "Fun fact: Bubble wrap was originally invented as wallpaper!",
+  textSW: "Fakta: Bubble wrap ilibuniwa awali kama karatasi ya ukutani!",
+  category: "Inventions", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Some spiders can fly using electricity in the air.",
+  textSW: "Fakta: Buibui wengine huruka kwa kutumia umeme wa anga!",
+  category: "Science", duration: 9, askComment: false
+},
+{
+  text: "Riddle: What can fill a room but takes up no space?",
+  textSW: "Kitendawili: Nini kinaweza kujaza chumba lakini hakina nafasi?",
+  category: "Riddles", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Your brain shrinks slightly when you’re dehydrated.",
+  textSW: "Fakta: Ubongo wako hupungua kidogo ukikosa maji!",
+  category: "Health", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Blue whales have hearts the size of small cars!",
+  textSW: "Fakta: Mioyo ya nyangumi wa buluu ni mikubwa kama gari ndogo!",
+  category: "Animals", duration: 9, askComment: false
+},
+{
+  text: "Laugh: I told a chemistry joke… but there was no reaction!",
+  textSW: "Cheka: Nilichekesha kwa utani wa kemia… lakini hakuna aliyeitikia!",
+  category: "Science Humor", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Apples float in water because they’re 25% air.",
+  textSW: "Fakta: Tufaha huogelea kwa sababu yana hewa kwa asilimia 25!",
+  category: "Science", duration: 9, askComment: false
+},
+
+
+
+
+
+
+  
+{
+  text: "Fun fact: Humans are the only animals that cook food.",
+  textSW: "Fakta: Binadamu ndio wanyama pekee wanaopika chakula.",
+  category: "Anthropology", duration: 9, askComment: false
+},
+
+{
+  text: "Fun fact: The inventor of the frisbee was turned into a frisbee after he died!",
+  textSW: "Fakta: Mvumbuzi wa frisbee aligeuzwa kuwa frisbee baada ya kufa!",
+  category: "Weird Facts", duration: 10, askComment: false
+},
+{
+  text: "Fun fact: Crows can recognize and remember human faces.",
+  textSW: "Fakta: Kunguru wanaweza kutambua na kukumbuka uso wa binadamu!",
+  category: "Animals", duration: 9, askComment: false
+},
+
+{
+  text: "Riddle: What belongs to you but others use it more?",
+  textSW: "Kitendawili: Nini ni chako lakini wengine hutumia zaidi?",
+  category: "Riddles", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Carrots were originally purple, not orange!",
+  textSW: "Fakta: Karoti awali zilikuwa za zambarau, si machungwa!",
+  category: "History", duration: 9, askComment: false
+},
+
+
+{
+  text: "Fun fact: Koalas sleep up to 22 hours a day!",
+  textSW: "Fakta: Koala hulala hadi saa 22 kwa siku!",
+  category: "Animals", duration: 9, askComment: false
+},
+{
+  text: "Riddle: The more of me you take, the more you leave behind. What am I?",
+  textSW: "Kitendawili: Kadri unavyonichukua zaidi, ndivyo unavyobaki nyuma zaidi. Mimi ni nani?",
+  category: "Riddles", duration: 10, askComment: true
+},
+{
+  text: "Fun fact: Your tongue is the strongest muscle relative to its size.",
+  textSW: "Fakta: Ulimi wako ndio misuli yenye nguvu zaidi kulingana na ukubwa wake.",
+  category: "Biology", duration: 9, askComment: false
+},
+
+{
+  text: "Fun fact: Some jellyfish can clone themselves.",
+  textSW: "Fakta: Baadhi ya samaki wa jelly wanaweza kujizalisha upya!",
+  category: "Marine Life", duration: 9, askComment: false
+},
+
+{
+  text: "Fun fact: Chewing gum helps you concentrate.",
+  textSW: "Fakta: Kutafuna Big G kunasaidia kuzingatia zaidi!",
+  category: "Science", duration: 9, askComment: false
+},
+
+{
+  text: "Fun fact: A strand of spider silk is thinner than hair but 5× stronger than steel!",
+  textSW: "Fakta: Uzi wa buibui ni mwembamba kuliko nywele lakini mara 5 imara kuliko chuma!",
+  category: "Science", duration: 10, askComment: false
+},
+{
+  text: "Riddle: What has a head, a tail, but no body?",
+  textSW: "Kitendawili: Nini kina kichwa na mkia lakini hakina mwili?",
+  category: "Riddles", duration: 8, askComment: true
+},
+{
+  text: "Fun fact: The average person produces 25,000 quarts of saliva in a lifetime.",
+  textSW: "Fakta: Mtu wa kawaida huzalisha mate zaidi ya lita 25,000 katika maisha yake.",
+  category: "Biology", duration: 10, askComment: false
+},
+{
+  text: "Mind Trick: Try to hum while holding your nose — you can’t!",
+  textSW: "Udanganyifu wa akili: Jaribu kupiga mluzi ukiwa umefunga pua — haiwezekani!",
+  category: "Mind Trick", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Bees sometimes sting other bees.",
+  textSW: "Fakta: Nyuki wakati mwingine huwadhuru nyuki wenzao!",
+  category: "Nature", duration: 8, askComment: false
+},
+{
+  text: "Fun fact: The inventor of matchsticks was a pharmacist.",
+  textSW: "Fakta: Mvumbuzi wa viberiti alikuwa mfamasia!",
+  category: "Inventions", duration: 9, askComment: false
+},
+{
+  text: "Riddle: What can you catch but not throw?",
+  textSW: "Kitendawili: Nini unaweza kukamata lakini si kutupa?",
+  category: "Riddles", duration: 8, askComment: true
+},
+{
+  text: "Fun fact: The fingerprints of twins are different.",
+  textSW: "Fakta: Alama za vidole vya mapacha ni tofauti!",
+  category: "Human Body", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Antarctica is the largest desert on Earth!",
+  textSW: "Fakta: Antaktika ndio jangwa kubwa zaidi duniani!",
+  category: "Geography", duration: 9, askComment: false
+},
+{
+  text: "Laugh: I told my Wi-Fi a joke — it didn’t get the connection!",
+  textSW: "Cheka: Nilimchekesha Wi-Fi yangu — haikupata 'connection'!",
+  category: "Tech Humor", duration: 9, askComment: false
+},
+
+{
+  text: "Fun fact: Your taste buds live for only about 10 days.",
+  textSW: "Fakta: Vionjo vya ulimi wako huishi takribani siku 10 pekee.",
+  category: "Biology", duration: 9, askComment: false
+},
+{
+  text: "Riddle: What’s full of holes but still holds water?",
+  textSW: "Kitendawili: Nini kimejaa mashimo lakini bado kinabeba maji?",
+  category: "Riddles", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: A single sneeze can spread over 100,000 germs!",
+  textSW: "Fakta: Chafya moja tu inaweza kutawanya vijidudu zaidi ya 100,000!",
+  category: "Health", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Sharks can live up to 500 years!",
+  textSW: "Fakta: Papa wanaweza kuishi hadi miaka 500!",
+  category: "Marine Life", duration: 9, askComment: false
+},
+{
+  text: "Mind Trick: Read the color, not the word — GREEN, RED, BLUE — confused yet?",
+  textSW: "Udanganyifu wa akili: Soma rangi, sio neno — KIJANI, NYEKUNDU, BLUU — umechanganyikiwa?",
+  category: "Mind Trick", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Some plants can count and do math!",
+  textSW: "Fakta: Mimea mingine inaweza kuhesabu na kufanya mahesabu!",
+  category: "Botany", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: The smell of vanilla sometimes comes from beaver glands.",
+  textSW: "Fakta: Harufu ya vanilla katika baadhi ya manukato hutoka kwenye tezi za beaver!",
+  category: "Weird Facts", duration: 10, askComment: false
+},
+{
+  text: "Riddle: What word is spelled incorrectly in every dictionary?",
+  textSW: "Kitendawili: Neno gani limeandikwa vibaya kwenye kamusi zote?",
+  category: "Riddles", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: A bolt of lightning is five times hotter than the sun.",
+  textSW: "Fakta: Umeme wa radi ni mara tano zaidi ya joto la jua!",
+  category: "Science", duration: 10, askComment: false
+},
+{
+  text: "Fun fact: The average human eats 70 insects a year while sleeping!",
+  textSW: "Fakta: Mtu wa kawaida hula wadudu 70 kila mwaka akiwa amelala!",
+  category: "Weird Facts", duration: 9, askComment: false
+},
+{
+  text: "Laugh: Why did the physics teacher break up with the biology teacher? There was no chemistry!",
+  textSW: "Cheka: Kwa nini mwalimu wa fizikia aliachana na wa baiolojia? Hakukuwa na 'chemistry'!",
+  category: "Laughs", duration: 10, askComment: false
+},
+{
+  text: "Fun fact: Tigers’ skin is striped, not just their fur!",
+  textSW: "Fakta: Ngozi ya chui ina mistari, si manyoya tu!",
+  category: "Animals", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Dolphins sleep with half their brain at a time.",
+  textSW: "Fakta: Pomboo hulala nusu ya ubongo kwa wakati mmoja!",
+  category: "Marine Life", duration: 9, askComment: false
+},
+
+{
+  text: "Fun fact: Bees can make colored honey if they eat colored syrup.",
+  textSW: "Fakta: Nyuki wanaweza kutengeneza asali yenye rangi wakila sharubati yenye rangi!",
+  category: "Nature", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Snakes can help predict earthquakes.",
+  textSW: "Fakta: Nyoka wanaweza kutabiri matetemeko ya ardhi!",
+  category: "Nature", duration: 9, askComment: false
+},
+{
+  text: "Riddle: I’m tall when I’m young and short when I’m old. What am I?",
+  textSW: "Kitendawili: Mimi ni mrefu nikiwa mchanga, mfupi nikiwa mzee. Mimi ni nani?",
+  category: "Riddles", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Some turtles can live over a year without food.",
+  textSW: "Fakta: Kasa wengine wanaweza kuishi zaidi ya mwaka bila chakula!",
+  category: "Animals", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Humans are born with 300 bones but die with 206.",
+  textSW: "Fakta: Binadamu huzaliwa na mifupa 300 lakini hufa wakiwa na 206!",
+  category: "Biology", duration: 9, askComment: false
+},
+
+{
+  text: "Fun fact: Caterpillars have 12 eyes!",
+  textSW: "Fakta: Funza wana macho 12!",
+  category: "Animals", duration: 8, askComment: false
+},
+{
+  text: "Fun fact: There’s a mushroom that can control ants’ minds.",
+  textSW: "Fakta: Kuna uyoga unaoweza kudhibiti akili za sisimizi!",
+  category: "Fungi", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Elephants use their trunks as snorkels.",
+  textSW: "Fakta: Tembo hutumia midomo yao kama bomba la kupumua majini!",
+  category: "Animals", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Bats always turn left when leaving a cave.",
+  textSW: "Fakta: Popo daima hugeuka kushoto wanapotoka pangoni!",
+  category: "Animals", duration: 9, askComment: false
+},
+
+{
+  text: "Fun fact: Pineapple works as a natural meat tenderizer.",
+  textSW: "Fakta: Tunda la nanasi hufanya nyama kuwa laini kwa asili!",
+  category: "Food Science", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Ants can lift up to 50 times their body weight.",
+  textSW: "Fakta: Mchwa anaweza kuinua uzito mara 50 wa mwili wake!",
+  category: "Insects", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Rain contains vitamin B12!",
+  textSW: "Fakta: Mvua ina vitamini B12!",
+  category: "Nature", duration: 8, askComment: false
+},
+
+{
+  text: "Fun fact: You can’t breathe and swallow at the same time.",
+  textSW: "Fakta: Huwezi kupumua na kumeza kwa wakati mmoja!",
+  category: "Human Body", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Cows moo in regional accents!",
+  textSW: "Fakta: Ng’ombe hubamba kwa lafudhi tofauti kulingana na maeneo!",
+  category: "Animals", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Goldfish lose color if kept in dim light.",
+  textSW: "Fakta: Samaki wa dhahabu hupoteza rangi wakikaa gizani!",
+  category: "Animals", duration: 9, askComment: false
+},
+{
+  text: "Riddle: What word becomes shorter when you add two letters to it?",
+  textSW: "Kitendawili: Neno gani linakuwa fupi zaidi ukiongeza herufi mbili?",
+  category: "Riddles", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: There’s a phobia of long words called hippopotomonstrosesquippedaliophobia!",
+  textSW: "Fakta: Kuna hofu ya maneno marefu inayoitwa hippopotomonstrosesquippedaliophobia!",
+  category: "Weird Facts", duration: 11, askComment: false
+},
+{
+  text: "Fun fact: Humans are the only animals that cry emotional tears.",
+  textSW: "Fakta: Binadamu pekee ndio hulia kwa hisia!",
+  category: "Human Body", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: The unicorn is Scotland’s national animal.",
+  textSW: "Fakta: Mnyama wa taifa wa Scotland ni farasi wa pembe moja!",
+  category: "Culture", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Dragonflies have six legs but can’t walk!",
+  textSW: "Fakta: Panzi wa maji wana miguu sita lakini hawawezi kutembea!",
+  category: "Insects", duration: 9, askComment: false
+},
+{
+  text: "Fun fact: Some sea cucumbers fight by vomiting their organs!",
+  textSW: "Fakta: Tango la baharini hupigana kwa kutapika viungo vyao vya ndani!",
+  category: "Marine Life", duration: 10, askComment: false
+}, 
+{
+  text: "Fun fact: The average person will spend six years of their life dreaming.",
+  textSW: "Fakta: Mtu wa kawaida hutumia miaka sita ya maisha yake akihota ndoto!",
+  category: "Fun Science", duration: 10, askComment: true
+},
+{
+  text: "Fun fact: Giraffes only sleep about 30 minutes a day.",
+  textSW: "Fakta: Twiga hulala kwa dakika 30 pekee kwa siku!",
+  category: "Animals", duration: 9, askComment: true
+},
+
+{
+  text: "Fun fact: Slugs have four noses!",
+  textSW: "Fakta: Slug wana pua nne!",
+  category: "Animals", duration: 9, askComment: true
+},
+{
+  text: "Laugh: If sleep is so important, why does school start so early? 😅",
+  textSW: "Cheka kidogo: Kama usingizi ni muhimu, mbona shule inaanza mapema hivi? 😅",
+  category: "Laughs", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Male seahorses give birth to babies.",
+  textSW: "Fakta: Wanaume wa samaki farasi ndio hujifungua watoto!",
+  category: "Nature", duration: 10, askComment: true
+},
+{
+  text: "Trick: Can you name three consecutive days without using Monday, Tuesday, or Wednesday?",
+  textSW: "Kichanganyo: Taja siku tatu mfululizo bila kusema Jumatatu, Jumanne au Jumatano!",
+  category: "Tricks", duration: 11, askComment: true
+},
+{
+  text: "Fun fact: Roses can grow taller than humans in some regions.",
+  textSW: "Fakta: Waridi hukua urefu kuliko binadamu katika baadhi ya maeneo!",
+  category: "Plants", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Coconuts kill more people each year than sharks!",
+  textSW: "Fakta: Nazi huua watu wengi zaidi kila mwaka kuliko papa!",
+  category: "Weird Facts", duration: 10, askComment: true
+},
+
+{
+  text: "Fun fact: Some animals dream just like humans.",
+  textSW: "Fakta: Baadhi ya wanyama huota ndoto kama binadamu!",
+  category: "Animals", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Bees can fly higher than Mount Everest!",
+  textSW: "Fakta: Nyuki wanaweza kuruka juu kuliko Mlima Everest!",
+  category: "Nature", duration: 9, askComment: true
+},
+{
+  text: "Laugh: My brain has too many tabs open. 🧠💭",
+  textSW: "Cheka kidogo: Ubongo wangu umefungua tabs nyingi sana. 🧠💭",
+  category: "Laughs", duration: 8, askComment: true
+},
+{
+  text: "Fun fact: Kangaroos can’t walk backward!",
+  textSW: "Fakta: Kangaroo hawawezi kutembea kurudi nyuma!",
+  category: "Animals", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Your brain is 73% water.",
+  textSW: "Fakta: Ubongo wako una maji kwa asilimia 73!",
+  category: "Human Body", duration: 9, askComment: true
+},
+
+
+{
+  text: "Trick: If you throw a red stone into the blue sea, what will it become?",
+  textSW: "Kichanganyo: Ukiitupa jiwe jekundu baharini, litakuwa nini?",
+  category: "Tricks", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Ravens can solve puzzles as well as seven-year-old children.",
+  textSW: "Fakta: Kunguru wanaweza kutatua mafumbo kama watoto wa miaka saba!",
+  category: "Animals", duration: 10, askComment: true
+},
+{
+  text: "Laugh: I told my Wi-Fi we needed space... now we’re not connecting. 😆",
+  textSW: "Cheka kidogo: Niliambia Wi-Fi tunahitaji nafasi... sasa haingi tena! 😆",
+  category: "Laughs", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Some frogs give birth through their skin.",
+  textSW: "Fakta: Vyura wengine hujifungua kupitia ngozi yao!",
+  category: "Nature", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Humans and cows share about 80% of their DNA.",
+  textSW: "Fakta: Binadamu na ng’ombe wanashiriki takribani asilimia 80 ya DNA!",
+  category: "Science", duration: 9, askComment: true
+},
+
+{
+  text: "Fun fact: Sharks are older than dinosaurs.",
+  textSW: "Fakta: Papa waliishi kabla ya dinosaurs!",
+  category: "Science", duration: 9, askComment: true
+},
+{
+  text: "Laugh: My wallet is like an onion. Opening it makes me cry. 💸😂",
+  textSW: "Cheka kidogo: Mkoba wangu ni kama kitunguu. Kukiufungua tu, machozi yanatoka. 💸😂",
+  category: "Laughs", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Bananas share 50% of their DNA with humans.",
+  textSW: "Fakta: Ndizi zinashiriki nusu ya DNA yao na binadamu!",
+  category: "Science", duration: 9, askComment: true
+},
+{
+  text: "Riddle: What has one eye but can’t see?",
+  textSW: "Kitendawili: Kina jicho moja lakini hakiwezi kuona, ni nini?",
+  category: "Riddles", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Otters use rocks as tools to open food.",
+  textSW: "Fakta: Vifaru wa majini hutumia mawe kufungua chakula!",
+  category: "Animals", duration: 9, askComment: true
+},
+{
+  text: "Trick: Can you say 'Toy Boat' five times fast without messing up?",
+  textSW: "Kichanganyo: Unaweza kusema 'Toy Boat' mara tano haraka bila kukosea?",
+  category: "Tricks", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: You are taller in the morning than at night.",
+  textSW: "Fakta: Unakuwa mrefu zaidi asubuhi kuliko jioni!",
+  category: "Human Body", duration: 9, askComment: true
+},
+{
+  text: "Laugh: My bed and I have a love-hate relationship. I love it, it hates to let me go. 😴",
+  textSW: "Cheka kidogo: Kitanda changu na mimi tuna uhusiano wa mapenzi. Mimi nakipenda, nacho hakinitaki niondoke. 😴",
+  category: "Laughs", duration: 9, askComment: true
+},
+{
+  text: "Fun fact: Some plants can hear themselves being eaten!",
+  textSW: "Fakta: Mimea mingine inaweza kusikia ikiliwa!",
+  category: "Plants", duration: 9, askComment: true
+},
+
+{
+  text: "Fun fact: Butterflies can see ultraviolet light.",
+  textSW: "Fakta: Kipepeo wanaweza kuona mwanga wa ultraviolet!",
+  category: "Nature", duration: 9, askComment: true
+},
+{
+  text: "Trick: If an electric train is moving north at 100 km/h and the wind is blowing east, which way does the smoke go?",
+  textSW: "Kichanganyo: Treni ya umeme inasafiri kaskazini kwa 100 km/h na upepo unavuma mashariki, moshi utaenda upande gani?",
+  category: "Tricks", duration: 11, askComment: true
+},
+
+{
+  text: "Laugh: I need a six-month vacation, twice a year. 😂",
+  textSW: "Cheka kidogo: Nahitaji likizo ya miezi sita, mara mbili kwa mwaka. 😂",
+  category: "Laughs", duration: 8, askComment: true
+},
+{
+  text: "Fun fact: Rabbits can’t vomit!",
+  textSW: "Fakta: Sungura hawawezi kutapika!",
+  category: "Animals", duration: 8, askComment: true
+},
+
+{
+  text: "Fun fact: A baby blue whale gains 90 kilograms every day.",
+  textSW: "Fakta: Mtoto wa nyangumi wa buluu huongeza kilo 90 kila siku!",
+  category: "Animals", duration: 9, askComment: true
+},
+
+{
+  text: "Fun fact: A starfish has no brain or blood.",
+  textSW: "Fakta: Nyota wa baharini hana ubongo wala damu!",
+  category: "Sea Life", duration: 8, askComment: true
+},
+
+{
+  text: "Fun fact: An octopus has nine brains and three hearts.",
+  textSW: "Fakta: Pweza ana ubongo tisa na mioyo mitatu!",
+  category: "Sea Life", duration: 9, askComment: true
+},
+
+
+
+
+  
+
+  {
+    text: "Riddle: I speak without a mouth and hear without ears. What am I?",
+    textSW: "Kitendawili: Ninasema bila kinywa na kusikia bila masikio. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+ 
+
+  {
+    text: "Brain teaser: What has keys but can't open locks?",
+    textSW: "Kitendawili: Nini kina funguo lakini hakiwezi kufungua milango?",
+    category: "Riddle", duration: 9, askComment: true
+  },
+  {
+    text: "Magic trick: You can predict the number someone is thinking by adding 5, doubling, subtracting 4, halving, then subtracting the original number.",
+    textSW: "Njia ya ujanja: Unaweza kutabiri namba anayofikiria mtu kwa kuongeza 5, kuzidisha kwa 2, kutoa 4, kugawanya kwa nusu, kisha kutoa namba ya awali.",
+    category: "Trick", duration: 12, askComment: true
+  },
+ 
+ 
+  {
+    text: "Joke: Why did the computer go to the doctor? It caught a virus!",
+    textSW: "Ucheshi: Kwa nini kompyuta ilienda kwa daktari? Ilipata virusi!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Brain teaser: Forward I am heavy, backward I am not. What am I?",
+    textSW: "Kitendawili: Kwanza mimi ni mzito, nyuma mimi siyo. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Magic trick: Pick a number between 1-10, multiply by 9, add digits together, it always equals 9.",
+    textSW: "Njia ya ujanja: Chagua namba kati ya 1-10, zidisha kwa 9, jumlisha tarakimu, daima inakuwa 9.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Riddle: I have branches, but no fruit, trunk or leaves. What am I?",
+    textSW: "Kitendawili: Nina matawi lakini sina matunda, shina au majani. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+ 
+  {
+    text: "Joke: Why can't your nose be 12 inches long? Because then it would be a foot!",
+    textSW: "Ucheshi: Kwa nini pua yako haiwezi kuwa inchi 12 ndefu? Kwa sababu basi ingekuwa mguu!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Brain teaser: What has a head, a tail, is brown, and has no legs?",
+    textSW: "Kitendawili: Nini kina kichwa, mkia, ni kahawia, na haina miguu?",
+    category: "Riddle", duration: 9, askComment: true
+  },
+  {
+    text: "Magic trick: Think of a number, double it, add 10, halve it, subtract original number, result is always 5.",
+    textSW: "Njia ya ujanja: Fikiria namba, zidisha kwa 2, ongeza 10, gawanya kwa nusu, toa namba ya awali, matokeo daima ni 5.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Trivia: The honeybee can recognize human faces.",
+    textSW: "Ufafanuzi: Ndege mdogo wa mbee anaweza kutambua nyuso za binadamu.",
+    category: "Trivia", duration: 9, askComment: true
+  },
+  {
+    text: "Riddle: What comes once in a minute, twice in a moment, but never in a thousand years?",
+    textSW: "Kitendawili: Nini huja mara moja kwa dakika, mara mbili kwa muda mfupi, lakini kamwe si kwa miaka elfu?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+ 
+  {
+    text: "Magic trick: Ask someone to think of a number, multiply by 2, add 8, divide by 2, subtract the original number, result is always 4.",
+    textSW: "Njia ya ujanja: Waombe mtu afikirie namba, zidisha kwa 2, ongeza 8, gawanya kwa 2, toa namba ya awali, matokeo daima ni 4.",
+    category: "Trick", duration: 12, askComment: true
+  },
+ 
+
+
+  {
+    text: "Magic trick: Think of any number, multiply by 3, add 3, divide by 3, subtract 1, the result is always the original number.",
+    textSW: "Njia ya ujanja: Fikiria namba yoyote, zidisha kwa 3, ongeza 3, gawanya kwa 3, toa 1, matokeo ni daima namba ya awali.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Trivia: Sea otters hold hands while sleeping to keep from drifting apart.",
+    textSW: "Ufafanuzi: Chui wa baharini hushikana mikono wakati wa kulala ili wasigawanyike.",
+    category: "Trivia", duration: 9, askComment: true
+  },
+  {
+    text: "Riddle: What has a heart that doesn't beat?",
+    textSW: "Kitendawili: Nini kina moyo lakini hakipigi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Joke: Why did the math book look sad? Because it had too many problems!",
+    textSW: "Ucheshi: Kwa nini kitabu cha hisabati kilionekana huzuni? Kwa sababu kilikuwa na matatizo mengi!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Brain teaser: I have cities but no houses, forests but no trees, and rivers but no water. What am I?",
+    textSW: "Kitendawili: Nina miji lakini sina nyumba, misitu lakini sina miti, mito lakini sina maji. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Magic trick: Ask someone to pick a number 1-5, double it, add 8, divide by 2, subtract original, result is always 4.",
+    textSW: "Njia ya ujanja: Waombe mtu achague namba 1-5, zidisha kwa 2, ongeza 8, gawanya kwa 2, toa namba ya awali, matokeo daima ni 4.",
+    category: "Trick", duration: 12, askComment: true
+  },
+ 
+  
+
+  {
+    text: "Riddle: What has a bottom at the top?",
+    textSW: "Kitendawili: Nini kina chini kilicho juu?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Joke: Why did the bicycle fall over? Because it was two-tired!",
+    textSW: "Ucheshi: Kwa nini baiskeli ilidondoka? Kwa sababu ilikuwa na magurudumu mawili!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Trivia: A shrimp’s heart is located in its head.",
+    textSW: "Ufafanuzi: Moyo wa kamba uko kichwani mwake.",
+    category: "Trivia", duration: 9, askComment: true
+  },
+  {
+    text: "Magic trick: Choose a number, multiply by 5, add 10, divide by 5, subtract original, result is always 2.",
+    textSW: "Njia ya ujanja: Chagua namba yoyote, zidisha kwa 5, ongeza 10, gawanya kwa 5, toa namba ya awali, matokeo daima ni 2.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Brain teaser: The more you take away from me, the bigger I get. What am I?",
+    textSW: "Kitendawili: Unapondoa zaidi kutoka kwangu, ninaongezeka. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+ 
+ 
+  {
+    text: "Magic trick: Ask someone to pick any number, add 7, double it, subtract 14, halve it, subtract original number, result is always 3.",
+    textSW: "Njia ya ujanja: Waombe mtu achague namba yoyote, ongeza 7, zidisha kwa 2, toa 14, gawanya kwa 2, toa namba ya awali, matokeo daima ni 3.",
+    category: "Trick", duration: 12, askComment: true
+  },
+ 
+
+  {
+    text: "Brain teaser: What comes down but never goes up?",
+    textSW: "Kitendawili: Nini hukushuka lakini hakipandi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Magic trick: Pick any number, multiply by 4, add 8, divide by 2, subtract original number, result is always 2.",
+    textSW: "Njia ya ujanja: Chagua namba yoyote, zidisha kwa 4, ongeza 8, gawanya kwa 2, toa namba ya awali, matokeo daima ni 2.",
+    category: "Trick", duration: 12, askComment: true
+  },
+ 
+ 
+  {
+    text: "Magic trick: Ask someone to pick a number, triple it, add 6, divide by 3, subtract original number, result is always 2.",
+    textSW: "Njia ya ujanja: Waombe mtu achague namba, zidisha mara 3, ongeza 6, gawanya kwa 3, toa namba ya awali, matokeo daima ni 2.",
+    category: "Trick", duration: 12, askComment: true
+  },
+ 
+ 
+
+  {
+    text: "Magic trick: Ask someone to pick a number, multiply by 2, add 12, divide by 2, subtract original, result is always 6.",
+    textSW: "Njia ya ujanja: Waombe mtu achague namba, zidisha kwa 2, ongeza 12, gawanya kwa 2, toa namba ya awali, matokeo daima ni 6.",
+    category: "Trick", duration: 12, askComment: true
+  },
+
+  {
+    text: "Trivia: Sharks can detect one drop of blood in 25 gallons of water.",
+    textSW: "Ufafanuzi: Papa wanaweza kugundua tone moja la damu katika galoni 25 za maji.",
+    category: "Trivia", duration: 9, askComment: true
+  },
+ 
+  {
+    text: "Magic trick: Pick any number, multiply by 3, add 15, divide by 3, subtract original number, result is always 5.",
+    textSW: "Njia ya ujanja: Chagua namba yoyote, zidisha kwa 3, ongeza 15, gawanya kwa 3, toa namba ya awali, matokeo daima ni 5.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Joke: Why was the math lecture so long? The professor kept going off on tangents!",
+    textSW: "Ucheshi: Kwa nini mhadhara wa hisabati ulikuwa mrefu sana? Profesa aliendelea kutoa tangenti!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  {
+    text: "Trivia: Penguins propose to their mates with a pebble.",
+    textSW: "Ufafanuzi: Pingwini hutoa jiwe kwa wapenzi wao kama pendekezo.",
+    category: "Trivia", duration: 9, askComment: true
+  },
+ 
+  {
+    text: "Brain teaser: I’m light as a feather, yet the strongest person can’t hold me for long. What am I?",
+    textSW: "Kitendawili: Mimi ni mwepesi kama manyoya, lakini mtu mwenye nguvu hawezi kunishika kwa muda mrefu. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Magic trick: Ask someone to pick a number, add 9, multiply by 2, subtract 10, divide by 2, subtract original, result is always 4.",
+    textSW: "Njia ya ujanja: Waombe mtu achague namba, ongeza 9, zidisha kwa 2, toa 10, gawanya kwa 2, toa namba ya awali, matokeo daima ni 4.",
+    category: "Trick", duration: 12, askComment: true
+  },
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  {
+    text: "Trivia: A raindrop falls at an average speed of 14 km/h.",
+    textSW: "Ufafanuzi: Tone la mvua linaanguka kwa kasi ya wastani ya km 14/h!",
+    category: "Nature", duration: 8, askComment: true
+  },
+  {
+    text: "Trivia: Some ants farm fungi for food.",
+    textSW: "Ufafanuzi: Baadhi ya ants hufuga uyoga kama chakula!",
+    category: "Animals", duration: 8, askComment: true
+  },
+ 
+  {
+    text: "Trivia: Bees communicate through a dance called the waggle dance.",
+    textSW: "Ufafanuzi: Nyuki huwasiliana kwa kucheza kilichoitwa 'waggle dance'!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Trivia: The average lifespan of a red blood cell is 120 days.",
+    textSW: "Ufafanuzi: Umri wa kawaida wa seli nyekundu za damu ni siku 120!",
+    category: "Human Body", duration: 8, askComment: true
+  },
+  {
+    text: "Trivia: There’s a metal that melts in your hand — gallium.",
+    textSW: "Ufafanuzi: Kuna chuma kinachoyeyuka mkononi mwako — gallium!",
+    category: "Science", duration: 9, askComment: true
+  },
+  {
+    text: "Trivia: Some species of worms can regrow their entire bodies from a fragment.",
+    textSW: "Ufafanuzi: Baadhi ya aina za minyoo zinaweza kukua tena mwili mzima kutoka kipande!",
+    category: "Animals", duration: 10, askComment: true
+  },
+  {
+    text: "Trivia: Cats dream when they sleep deeply, just like humans.",
+    textSW: "Ufafanuzi: Paka husingizia wanapolala kwa usingizi mzito, kama binadamu!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Trivia: The heaviest onion ever grown weighed over 8 kilograms.",
+    textSW: "Ufafanuzi: Kitunguu kikubwa zaidi kilichokuzwa kilikuwa na uzito wa kilo 8!",
+    category: "Food", duration: 8, askComment: true
+  },
+  {
+    text: "Trivia: Some fish can change their gender.",
+    textSW: "Ufafanuzi: Samaki wengine wanaweza kubadilisha jinsia yao!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  
+  {
+    text: "Trivia: The first recorded use of the word 'robot' was in 1921.",
+    textSW: "Ufafanuzi: Matumizi ya kwanza ya neno 'robot' yaliorekodiwa mwaka 1921!",
+    category: "History", duration: 9, askComment: true
+  },
+  {
+    text: "Trivia: The Amazon rainforest produces 20% of the world’s oxygen.",
+    textSW: "Ufafanuzi: Msitu wa mvua wa Amazon hutoa asilimia 20 ya oksijeni duniani!",
+    category: "Nature", duration: 10, askComment: true
+  },
+  {
+    text: "Trivia: Venus is hotter than Mercury despite being farther from the Sun.",
+    textSW: "Ufafanuzi: Venus ni moto kuliko Mercury ingawa ipo mbali na Jua!",
+    category: "Space", duration: 9, askComment: true
+  },
+ 
+  {
+    text: "Trivia: It’s impossible to burp in space without vomiting.",
+    textSW: "Ufafanuzi: Haiwezekani kuruka kwa hewa kwenye nafasi bila kutapika!",
+    category: "Space", duration: 9, askComment: true
+  },
+  {
+    text: "Trivia: Polar bear fur is transparent, not white.",
+    textSW: "Ufafanuzi: Nywele za dubu wa polar ni wazi, si nyeupe!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Trivia: A day on Jupiter is only 10 hours long.",
+    textSW: "Ufafanuzi: Siku moja kwenye Jupiter ni saa 10 tu!",
+    category: "Space", duration: 8, askComment: true
+  },
+  {
+    text: "Riddle: I’m always in front of you but can’t be seen. What am I?",
+    textSW: "Kitendawili: Mimi niko mbele yako kila wakati lakini siwezi kuonekana. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+ 
+  {
+    text: "Magic trick: Ask someone to pick any number, add 5, multiply by 2, subtract 4, divide by 2, subtract original number, result is always 3.",
+    textSW: "Njia ya ujanja: Waombe mtu achague namba yoyote, ongeza 5, zidisha kwa 2, toa 4, gawanya kwa 2, toa namba ya awali, matokeo daima ni 3.",
+    category: "Trick", duration: 12, askComment: true
+  },
+ 
+  
+
+
+
+
+
+  {
+    text: "Magic trick: Think of any number, double it, add 10, halve it, subtract original number, result is always 5.",
+    textSW: "Njia ya ujanja: Fikiria namba yoyote, zidisha kwa 2, ongeza 10, gawanya kwa nusu, toa namba ya awali, matokeo daima ni 5.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  
+  {
+    text: "Trivia: The tongue of a blue whale weighs as much as an elephant.",
+    textSW: "Ufafanuzi: Ulimi wa nyangumi wa buluu unazidi uzito wa tembo!",
+    category: "Animals", duration: 9, askComment: true
+  },
+ 
+  {
+    text: "Trivia: Pigeons can recognize themselves in a mirror.",
+    textSW: "Ufafanuzi: Njiwa wanaweza kujitambua kwenye kioo!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  
+  {
+    text: "Magic trick: Pick any three-digit number, reverse it, subtract smaller from larger, sum digits until one number, answer is always 9.",
+    textSW: "Njia ya ujanja: Chagua namba yoyote ya tarakimu tatu, geuza, toa ndogo kutoka kubwa, jumlisha tarakimu hadi namba moja, jibu daima ni 9.",
+    category: "Trick", duration: 12, askComment: true
+  },
+ 
+
+  {
+    text: "Trivia: Starfish can regenerate lost arms.",
+    textSW: "Ufafanuzi: Nyota za baharini zinaweza kukua tena mikono iliyopotea.",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Magic trick: Ask someone to think of a number, multiply by 9, sum the digits, answer is always 9.",
+    textSW: "Njia ya ujanja: Waombe mtu afikirie namba yoyote, zidisha kwa 9, jumlisha tarakimu, jibu daima ni 9.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Trivia: Elephants are right or left-tusked, like humans are right or left-handed.",
+    textSW: "Ufafanuzi: Tembo wana pembe ya kulia au kushoto, kama binadamu ni wa mkono wa kulia au kushoto.",
+    category: "Animals", duration: 9, askComment: true
+  },
+ 
+  
+
+  {
+    text: "Magic trick: Think of a number, multiply by 2, add 8, divide by 2, subtract original number, result is always 4.",
+    textSW: "Njia ya ujanja: Fikiria namba yoyote, zidisha kwa 2, ongeza 8, gawanya kwa 2, toa namba ya awali, matokeo daima ni 4.",
+    category: "Trick", duration: 12, askComment: true
+  },
+ 
+  {
+    text: "Trivia: Crows can recognize individual human faces.",
+    textSW: "Ufafanuzi: Kunguru wanaweza kutambua uso wa mtu mmoja mmoja.",
+    category: "Animals", duration: 9, askComment: true
+  },
+ 
+  {
+    text: "Magic trick: Think of a number, multiply by 3, add 3, multiply by 3 again, subtract 9, divide by 9, result is original number plus 1.",
+    textSW: "Njia ya ujanja: Fikiria namba yoyote, zidisha kwa 3, ongeza 3, zidisha tena kwa 3, toa 9, gawanya kwa 9, matokeo ni namba ya awali + 1.",
+    category: "Trick", duration: 12, askComment: true
+  },
+ 
+  {
+    text: "Riddle: I am always hungry and will die if not fed, but whatever I touch, I soon devour. What am I?",
+    textSW: "Kitendawili: Mimi siku zote nina njaa na nitakufa kama sitakuliwa, lakini ninachogusa, hivi karibuni hula. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Trivia: Some birds can sleep while flying.",
+    textSW: "Ufafanuzi: Baadhi ya ndege wanaweza kulala huku wakiendelea kuruka.",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Magic trick: Pick any number, add 7, double it, subtract 14, divide by 2, result is original number plus 3.",
+    textSW: "Njia ya ujanja: Chagua namba yoyote, ongeza 7, zidisha kwa 2, toa 14, gawanya kwa 2, matokeo ni namba ya awali + 3.",
+    category: "Trick", duration: 12, askComment: true
+  },
+ 
+
+  {
+    text: "Trivia: The fingerprints of chimpanzees are nearly identical to humans.",
+    textSW: "Ufafanuzi: Alama za kidole za sokwe karibu sawa kabisa na za binadamu.",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Riddle: The more you take from me, the bigger I get. What am I?",
+    textSW: "Kitendawili: Unapochukua kutoka kwangu zaidi, ninaongezeka. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+
+
+
+
+  {
+    text: "Riddle: I fly without wings. I cry without eyes. Wherever I go, darkness flies. What am I?",
+    textSW: "Kitendawili: Nina kuruka bila mabawa. Nalia bila macho. Popote ninapoenda, giza linaondoka. Nini mimi?",
+    category: "Riddle", duration: 10, askComment: true
+  },
+  {
+    text: "Trivia: Some snakes can fly — they glide through the air using their ribs.",
+    textSW: "Ufafanuzi: Nyoka wengine wanaweza kuruka — wanapita hewani kwa kutumia mifupa yao!",
+    category: "Animals", duration: 10, askComment: true
+  },
+  {
+    text: "Brain teaser: Your liver can regenerate up to 75% of its tissue. How is this useful to humans?",
+    textSW: "Kitendawili: Ini lako linaweza kurekebisha hadi asilimia 75 ya tishu zake. Hii ni muhimu vipi kwa binadamu?",
+    category: "Human Body", duration: 9, askComment: true
+  },
+  {
+    text: "Magic trick: Pick a number, double it, add 10, divide by 2, subtract your original number — the answer is always 5.",
+    textSW: "Njia ya ujanja: Chagua namba yoyote, zidisha kwa 2, ongeza 10, gawanya kwa 2, toa namba ya awali — jibu daima ni 5.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Trivia: There’s a spider that can jump 50 times its body length.",
+    textSW: "Ufafanuzi: Kuna buibui anayeruka mara 50 ya urefu wake!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "Joke: Why did the giraffe get bad grades? Because it had its head in the clouds!",
+    textSW: "Ucheshi: Kwa nini twiga alipata alama mbaya? Kwa sababu alikuwa na kichwa chake kwenye mawingu!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+  
+  {
+    text: "Trivia: Every year, thousands of new species are discovered.",
+    textSW: "Ufafanuzi: Kila mwaka, aina elfu mpya za viumbe zinagundulika!",
+    category: "Nature", duration: 8, askComment: true
+  },
+  {
+    text: "Brain teaser: Rainbows can form full circles, but we usually see only half. How does this happen?",
+    textSW: "Kitendawili: Upinde wa mvua unaweza kuunda mduara kamili, lakini kawaida tunaona nusu tu. Hii inatokea vipi?",
+    category: "Nature", duration: 9, askComment: true
+  },
+  {
+    text: "Magic trick: Think of a number, triple it, add 9, divide by 3, subtract your original number — result is always 3.",
+    textSW: "Njia ya ujanja: Fikiria namba yoyote, zidisha mara 3, ongeza 9, gawanya kwa 3, toa namba ya awali — matokeo daima ni 3.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  {
+    text: "Trivia: Sharks can be born from unfertilized eggs in rare cases (parthenogenesis).",
+    textSW: "Ufafanuzi: Papa wanaweza kuzaliwa kutoka mayai yasiyo ya mbolea katika hali nadra (parthenogenesis)!",
+    category: "Animals", duration: 10, askComment: true
+  },
+  {
+    text: "Joke: Why did the sun go to school? To get a little brighter!",
+    textSW: "Ucheshi: Kwa nini jua lilienda shuleni? Ili kuwa na mwangaza kidogo zaidi!",
+    category: "Laugh", duration: 8, askComment: false
+  },
+ 
+  {
+    text: "Brain teaser: Most of the oxygen you breathe comes from ocean algae. How does this affect life on Earth?",
+    textSW: "Kitendawili: Sehemu kubwa ya oksijeni unayopumua inatoka kwa mwani wa baharini. Hii inaathiri vipi maisha duniani?",
+    category: "Nature", duration: 9, askComment: true
+  },
+  {
+    text: "Trivia: The world’s smallest mammal is the bumblebee bat.",
+    textSW: "Ufafanuzi: Mnyama mdogo zaidi duniani ni popo mdogo wa nyuki (bumblebee bat)!",
+    category: "Animals", duration: 8, askComment: true
+  },
+
+
+
+
+
+
+  
+  {
+    text: "Magic trick: Pick any number, add 5, double it, subtract 4, divide by 2, subtract your original number — answer is always 3.",
+    textSW: "Njia ya ujanja: Chagua namba yoyote, ongeza 5, zidisha kwa 2, toa 4, gawanya kwa 2, toa namba ya awali — jibu daima ni 3.",
+    category: "Trick", duration: 12, askComment: true
+  },
+  
+  {
+    text: "Trivia: Giraffes clean their ears with their 45 cm-long tongues.",
+    textSW: "Ufafanuzi: Twiga husafisha masikio yao kwa kutumia ulimi wa cm 45!",
+    category: "Animals", duration: 9, askComment: false
+  },
+
+
+
+
+  {
+    text: "😂 Meme: Some ants explode themselves to protect the colony. Talk about going out with a bang!",
+    textSW: "😂 Meme: Baadhi ya ants hujirusha ili kulinda koloni! Hii ni kuondoka kwa mlipuko!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "🧠 Brain teaser: Wolves have over 200 million scent cells in their noses. Can you guess how this helps them track prey?",
+    textSW: "🧠 Kitendawili: Mbwa mwitu wana seli za harufu zaidi ya milioni 200 kwenye pua zao. Unadhani inawasaidia vipi kuwinda?",
+    category: "Animals", duration: 9, askComment: false
+  },
+  {
+    text: "😲 Fun fact: A shark can lose and regrow over 20,000 teeth in a lifetime!",
+    textSW: "😲 Fakta: Papa wanaweza kupoteza na kukua tena meno zaidi ya 20,000!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "🧩 Riddle: I orbit a star, have no moons or rings, and shine bright in the sky. What am I?",
+    textSW: "🧩 Kitendawili: Ninazunguka nyota, sina mwezi wala pete, na ninaangaza angani. Nini mimi?",
+    category: "Space", duration: 8, askComment: true
+  },
+ 
+  {
+    text: "🤣 Fun fact + laugh: Bananas grow upside down. Nature really likes to mess with us!",
+    textSW: "🤣 Fakta + kicheko: Ndizi hukua kinyume na mwelekeo wa chini juu! Asili kweli inatupendeza!",
+    category: "Food", duration: 8, askComment: true
+  },
+
+  {
+    text: "🧩 Riddle: I can jump 50 times my own length, but I’m tiny. Who am I?",
+    textSW: "🧩 Kitendawili: Ninaweza kuruka mara 50 ya urefu wangu, lakini mimi ni mdogo. Nani mimi?",
+    category: "Animals", duration: 9, askComment: true
+  },
+
+
+
+
+  {
+    text: "😲 Fun fact: A hummingbird’s wings beat up to 80 times per second!",
+    textSW: "😲 Fakta: Mabawa ya nyuki wanaubwaki mara 80 kwa sekunde!",
+    category: "Animals", duration: 8, askComment: true
+  },
+ 
+
+  {
+    text: "😂 Joke: The deepest living fish was found over 8,000 meters below sea level. Talk about a deep dive!",
+    textSW: "😂 Ucheshi: Samaki anayeishi kwa kina kirefu zaidi alipatikana zaidi ya mita 8,000 chini ya usawa wa bahari! Hii ni 'deep dive' kweli!",
+    category: "Animals", duration: 9, askComment: false
+  },
+  {
+    text: "🪄 Magic fact: Spiders can’t chew; they liquefy their food before eating. Show a friend with some syrup!",
+    textSW: "🪄 Uchawi: Buibui hawawezi kukanyaga; wananyunyiza chakula chao kabla ya kula. Onyesha rafiki yako kwa syrup!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "😲 Did you know: There’s a lake in Tanzania that turns animals into stone!",
+    textSW: "😲 Je, unajua: Kuna ziwa Tanzania linalobadilisha wanyama kuwa mawe!",
+    category: "Nature", duration: 9, askComment: true
+  },
+  {
+    text: "😲 Fun fact: Some jellyfish can turn back into their younger form after maturity!",
+    textSW: "😲 Fakta: Baadhi ya jellyfish zinaweza kurudi kwenye umri mdogo baada ya kuwa wazima!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  
+  {
+    text: "😂 Joke: Your ears never stop growing. Better watch your headphones size!",
+    textSW: "😂 Ucheshi: Masikio yako hayaishi kukua. Angalia ukubwa wa headphones zako!",
+    category: "Human Body", duration: 8, askComment: false
+  },
+  {
+    text: "😲 Fun fact: Horseshoe crabs have blue blood due to copper.",
+    textSW: "😲 Fakta: Ngamia wa kifaransa wana damu ya buluu kutokana na shaba!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "😲 Fun fact: Cats can jump up to six times their body length!",
+    textSW: "😲 Fakta: Paka wanaweza kuruka mara sita urefu wa miili yao!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "🧠 Brain teaser: The smallest bone in the human body is in the ear. Can you name it?",
+    textSW: "🧠 Kitendawili: Mfupa mdogo zaidi katika mwili wa binadamu uko masikioni. Unaweza kulitaja?",
+    category: "Human Body", duration: 8, askComment: true
+  },
+  {
+    text: "😲 Fun fact: Each taste bud has about 50 sensory cells.",
+    textSW: "😲 Fakta: Kila chembe ya ladha ina takriban seli 50 za hisia!",
+    category: "Human Body", duration: 8, askComment: true
+  },
+  {
+    text: "😂 Joke: Dogs’ sense of smell is 40 times better than humans’. Imagine sniffing your homework!",
+    textSW: "😂 Ucheshi: Hisia za harufu za mbwa ni mara 40 bora kuliko binadamu! Fikiria wanapofukia kazi yako ya nyumbani!",
+    category: "Animals", duration: 8, askComment: false
+  },
+  {
+    text: "😲 Fun fact: The largest volcano in the solar system is Olympus Mons on Mars!",
+    textSW: "😲 Fakta: Volcano kubwa zaidi katika mfumo wa jua ni Olympus Mons kwenye Mars!",
+    category: "Space", duration: 9, askComment: true
+  },
+ 
+  {
+    text: "🧠 Brain teaser: A full moon always rises at sunset. Can you guess why?",
+    textSW: "🧠 Kitendawili: Mwezi kamili huchomoza kila wakati jua linapozama. Unadhani kwa nini?",
+    category: "Space", duration: 8, askComment: true
+  },
+  {
+    text: "😲 Fun fact: The Great Wall of China is over 21,000 kilometers long!",
+    textSW: "😲 Fakta: Ukuta Mkubwa wa China una urefu wa zaidi ya km 21,000!",
+    category: "History", duration: 9, askComment: true
+  },
+  {
+    text: "😲 Fun fact: Tigers have striped skin as well as fur.",
+    textSW: "😲 Fakta: Tiger wana ngozi yenye mistari pamoja na manyoya!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "😲 Fun fact: There’s a frog that gives birth through its mouth!",
+    textSW: "😲 Fakta: Kuna chura linalozalia kupitia mdomo wake!",
+    category: "Animals", duration: 8, askComment: false
+  },
+  {
+    text: "😲 Fun fact: Ants never sleep but do take naps!",
+    textSW: "😲 Fakta: Kipepeo hawalala kamwe lakini hupumzika kidogo!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "😲 Fun fact: Clouds move at speeds of up to 160 km/h!",
+    textSW: "😲 Fakta: Wingu husogea kwa kasi ya hadi km 160/h!",
+    category: "Nature", duration: 8, askComment: true
+  },
+  {
+    text: "😲 Fun fact: The human heart creates enough pressure to squirt blood 9 meters!",
+    textSW: "😲 Fakta: Moyo wa binadamu unaunda shinikizo la kutosha kurushia damu hadi mita 9!",
+    category: "Human Body", duration: 9, askComment: true
+  },
+ 
+  {
+    text: "😲 Fun fact: The oldest known animal lived for 507 years!",
+    textSW: "😲 Fakta: Mnyama mzee zaidi aliyojulikana aliishi miaka 507!",
+    category: "Animals", duration: 9, askComment: false
+  },
+  {
+    text: "😲 Fun fact: Whales sleep vertically in the water!",
+    textSW: "😲 Fakta: Nyangumi hula wakiwa wamesimama wima kwenye maji!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "😲 Fun fact: The heaviest rain ever recorded fell in 1 minute — 31 mm!",
+    textSW: "😲 Fakta: Mvua nzito zaidi iliyorekodiwa ilipungua kwa dakika 1 — mm 31!",
+    category: "Nature", duration: 8, askComment: true
+  },
+ 
+
+
+
+
+
+
+
+  {
+    text: "😲 Fun fact: The fingerprints of pandas are nearly indistinguishable from humans!",
+    textSW: "😲 Fakta: Vidole vya panda karibu havitofautiani na vya binadamu!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "🧩 Riddle: Birds can see Earth’s magnetic field. Can you figure out how they navigate?",
+    textSW: "🧩 Kitendawili: Ndege wanaona shamba la sumaku la Dunia. Unaweza kubaini jinsi wanavyosafiri?",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "😂 Joke: The first camera took eight hours to capture an image. Imagine waiting that long for a selfie!",
+    textSW: "😂 Ucheshi: Kamera ya kwanza ilichukua masaa 8 kupiga picha. Fikiria kusubiri selfie hiyo!",
+    category: "History", duration: 9, askComment: true
+  },
+  {
+    text: "🌈 Fun fact: Rainbows can appear at 360 degrees from an airplane!",
+    textSW: "🌈 Fakta: Upinde wa mvua unaweza kuonekana kwa digrii 360 kutoka ndege!",
+    category: "Nature", duration: 8, askComment: true
+  },
+  {
+    text: "🧠 Brain teaser: There are more bacteria in your mouth than people on Earth. How many do you think?",
+    textSW: "🧠 Kitendawili: Kuna bakteria zaidi mdomoni mwako kuliko watu wote duniani. Unadhani ni wangapi?",
+    category: "Human Body", duration: 9, askComment: true
+  },
+  {
+    text: "😲 Fun fact: Venus’s clouds rain sulfuric acid!",
+    textSW: "😲 Fakta: Mawingu ya Venus hunyesha asidi ya sulfuri!",
+    category: "Space", duration: 8, askComment: false
+  },
+  {
+    text: "🪄 Science trick: Jupiter’s moon Europa has more water than Earth. Can you imagine swimming there?",
+    textSW: "🪄 Njia ya Sayansi: Mwezi wa Jupiter Europa una maji zaidi kuliko Dunia. Unaweza kufikiria kuogelea hapo?",
+    category: "Space", duration: 9, askComment: true
+  },
+  {
+    text: "🧠 Brain teaser: An adult human has about 37 trillion cells. How many can you guess in your body?",
+    textSW: "🧠 Kitendawili: Binadamu mzima ana takriban seli trilioni 37. Unaweza kubaini ngapi mwilini mwako?",
+    category: "Human Body", duration: 9, askComment: true
+  },
+  {
+    text: "🐝 Fun fact: Honey bees flap their wings about 230 times per second!",
+    textSW: "🐝 Fakta: Nyuki wa asali hupiga mabawa yao mara 230 kwa sekunde!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "🌌 Fun fact: Earth’s atmosphere extends over 10,000 km into space!",
+    textSW: "🌌 Fakta: Anga la Dunia linaenea zaidi ya km 10,000 kwenye anga!",
+    category: "Space", duration: 9, askComment: true
+  },
+  {
+    text: "😂 Joke: Some fish can walk on land. Next time, watch out for road crossings!",
+    textSW: "😂 Ucheshi: Baadhi ya samaki wanaweza kutembea ardhini! Wakati mwingine, angalia barabara!",
+    category: "Animals", duration: 8, askComment: false
+  },
+  {
+    text: "🧩 Math trick: A 'jiffy' is 1/100 of a second. How many jiffies in an hour?",
+    textSW: "🧩 Njia ya Hisabati: 'Jiffy' ni 1/100 ya sekunde. Kuna jiffies ngapi kwa saa?",
+    category: "Science", duration: 9, askComment: true
+  },
+  {
+    text: "🌩️ Fun fact: Lightning can strike the same place twice — and often does!",
+    textSW: "🌩️ Fakta: Radi inaweza kugonga mahali pale pale mara mbili — na mara nyingi hufanya hivyo!",
+    category: "Nature", duration: 9, askComment: true
+  },
+ 
+  {
+    text: "🎵 Fun fact: Rats and mice can sing ultrasonic songs. Can you hear them?",
+    textSW: "🎵 Fakta: Panya na mjerumani wanaweza kuimba nyimbo za ultrasonic! Unaweza kuzisikia?",
+    category: "Animals", duration: 9, askComment: false
+  },
+  {
+    text: "🧠 Brain teaser: Crows can use tools and understand cause and effect. Can you do the same?",
+    textSW: "🧠 Kitendawili: Kunguru wanaweza kutumia zana na kuelewa sababu na matokeo. Unaweza kufanya sawa?",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "🌌 Fun fact: A teaspoon of neutron star material weighs about a billion tons!",
+    textSW: "🌌 Fakta: Kijiko kimoja cha nyenzo ya nyota ya neutron kina uzito wa takriban bilioni moja ya tani!",
+    category: "Space", duration: 9, askComment: true
+  },
+  {
+    text: "🍄 Fun fact: The largest living organism is a fungus that covers 9 km² in Oregon!",
+    textSW: "🍄 Fakta: Kiumbe hai kikubwa zaidi ni uyoga unaofunika km² 9 Oregon!",
+    category: "Nature", duration: 9, askComment: true
+  },
+  {
+    text: "🌪️ Fun fact: There’s a planet where it rains glass sideways!",
+    textSW: "🌪️ Fakta: Kuna sayari ambapo mvua ya kioo hunyesha kwa usawa!",
+    category: "Space", duration: 9, askComment: true
+  },
+  {
+    text: "😲 Fun fact: A sneeze travels faster than a speeding car!",
+    textSW: "😲 Fakta: Chafya husafiri kwa kasi zaidi ya gari lenye mwendo!",
+    category: "Human Body", duration: 8, askComment: true
+  },
+ 
+  {
+    text: "🌙 Fun fact: The Moon is moving away from Earth each year!",
+    textSW: "🌙 Fakta: Mwezi unasogea mbali na Dunia kila mwaka!",
+    category: "Space", duration: 8, askComment: false
+  },
+  {
+    text: "🐛 Fun fact: Some worms have more than 10 hearts!",
+    textSW: "🐛 Fakta: Baadhi ya minyoo ina zaidi ya mioyo 10!",
+    category: "Animals", duration: 9, askComment: true
+  },
+  {
+    text: "🪐 Fun fact: A day on Neptune lasts 16 hours!",
+    textSW: "🪐 Fakta: Siku kwenye Neptune hudumu masaa 16!",
+    category: "Space", duration: 8, askComment: true
+  },
+  {
+    text: "🧴 Fun fact: Human skin renews itself every 27 days!",
+    textSW: "🧴 Fakta: Ngozi ya binadamu hujibadilisha kila siku 27!",
+    category: "Human Body", duration: 9, askComment: true
+  },
+
+
+
+
+
+  {
+    text: "🪄 Math trick: Multiply any number by 9, sum the digits repeatedly, and the result is always 9!",
+    textSW: "🪄 Njia ya Hisabati: Zidisha namba yoyote kwa 9, jumlisha tarakimu mara kwa mara, na matokeo daima ni 9!",
+    category: "Math Tricks", duration: 7, askComment: true
+  },
+  {
+    text: "🌌 Fun fact: Space is completely silent. Imagine a galaxy party you can't hear!",
+    textSW: "🌌 Fakta: Anga ni kimya kabisa. Fikiria sherehe ya galaxy usiyoweza kusikia!",
+    category: "Space", duration: 8, askComment: true
+  },
+  {
+    text: "🥶 Fun fact: The coldest temperature ever recorded on Earth was -128°F!",
+    textSW: "🥶 Fakta: Joto la baridi zaidi lililorekodiwa duniani ni -128°F!",
+    category: "Nature", duration: 8, askComment: true
+  },
+  {
+    text: "💡 Meme fact: Your brain contains 86 billion neurons. Don’t waste them on bad memes!",
+    textSW: "💡 Fakta ya Meme: Ubongo wako una neurons bilioni 86. Usiyapoteze kwenye memes mbaya!",
+    category: "Human Body", duration: 8, askComment: true
+  },
+  {
+    text: "🐊 Fun fact: A crocodile can live for over 100 years!",
+    textSW: "🐊 Fakta: Mnyama wa mto unaweza kuishi zaidi ya miaka 100!",
+    category: "Animals", duration: 8, askComment: true
+  },
+  {
+    text: "🌧️ Fun fact: The fastest recorded raindrop falls at 18 mph!",
+    textSW: "🌧️ Fakta: Tone la mvua lenye mwendo mkubwa zaidi lilirekodiwa likienda 18 mph!",
+    category: "Nature", duration: 8, askComment: true
+  },
+  {
+    text: "🦈 Fun fact: Sharks can detect electrical fields produced by other animals!",
+    textSW: "🦈 Fakta: Papa wanaweza kugundua shamba la umeme linalotengenezwa na wanyama wengine!",
+    category: "Animals", duration: 8, askComment: true
+  },
+ 
+  {
+    text: "🐸 Fun fact: Frogs drink water through their skin!",
+    textSW: "🐸 Fakta: Chura hula maji kupitia ngozi zao!",
+    category: "Animals", duration: 8, askComment: false
+  },
+ 
+  {
+    text: "💧 Science fact: Water can exist in all three states simultaneously at the triple point!",
+    textSW: "💧 Fakta ya Sayansi: Maji yanaweza kuwepo katika hali zote tatu kwa wakati mmoja kwenye triple point!",
+    category: "Science", duration: 8, askComment: true
+  },
+ 
+];
+
+
+
+// animals + birds + butterflies
+const ANIMALS = {
+  dogs: [
+    'https://cdn.pixabay.com/photo/2025/06/20/10/47/dog-9670619_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2018/03/18/18/06/australian-shepherd-3237735_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/09/25/13/12/dog-2785074_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+ 'https://cdn.pixabay.com/photo/2018/04/30/19/16/animal-3363688_640.jpg',
+    'https://cdn.pixabay.com/photo/2014/11/21/15/25/chameleon-540655_1280.jpg',
+    'https://cdn.pixabay.com/photo/2017/05/31/18/38/sea-2361247_640.jpg',
+     'https://cdn.pixabay.com/photo/2019/12/26/02/45/fish-with-lotus-4719551_640.png',
+    'https://cdn.pixabay.com/photo/2013/07/12/18/20/santa-claus-153309_640.png',
+    'https://cdn.pixabay.com/photo/2024/01/24/22/22/knight-8530654_640.jpg',
+   
+    'https://cdn.pixabay.com/photo/2016/05/02/12/58/tiger-1367197_640.jpg',
+    'https://cdn.pixabay.com/photo/2022/03/16/01/52/animal-7071426_640.jpg',
+    'https://cdn.pixabay.com/photo/2021/06/20/15/40/buffalo-6351352_640.jpg',
+    
+  ],
+  cats: [
+    'https://cdn.pixabay.com/photo/2022/03/27/11/23/cat-7094808_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/11/09/21/41/cat-2934720_640.jpg',
+     'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2015/11/15/20/21/cat-1044750_640.jpg',
+   'https://cdn.pixabay.com/photo/2017/04/04/14/23/peafowl-2201428_640.jpg',
+    'https://cdn.pixabay.com/photo/2023/10/23/08/17/asian-giant-hornet-8335577_640.jpg',
+    'https://cdn.pixabay.com/photo/2020/04/10/07/42/wasp-5024465_640.jpg',
+    'https://cdn.pixabay.com/photo/2013/07/12/16/29/hornet-151003_640.png',
+      'https://cdn.pixabay.com/photo/2022/09/28/17/36/puffer-fish-7485602_640.jpg',
+    'https://cdn.pixabay.com/photo/2015/04/07/21/12/lionfish-711799_640.jpg',
+    'https://cdn.pixabay.com/photo/2017/05/31/00/24/aquarium-2358739_640.jpg',
+     'https://cdn.pixabay.com/photo/2023/06/29/16/10/zebra-8096659_640.png',
+    'https://cdn.pixabay.com/photo/2020/05/04/09/09/giraffe-5128394_1280.jpg',
+    'https://cdn.pixabay.com/photo/2016/04/22/21/07/monkey-1346590_640.jpg'
+  ],
+  birds: [
+    'https://cdn.pixabay.com/photo/2023/07/24/22/07/european-herring-gull-8147941_640.jpg',
+    'https://cdn.pixabay.com/photo/2018/06/22/18/30/seagull-3491309_640.jpg',
+    'https://cdn.pixabay.com/photo/2024/11/22/18/18/mute-swan-9217198_640.jpg',
+    'https://cdn.pixabay.com/photo/2022/08/25/20/44/bird-7411270_640.jpg',
+    'https://cdn.pixabay.com/photo/2016/10/19/13/42/eagle-1753002_640.jpg'
+  ],
+  butterflies: [
+    'https://cdn.pixabay.com/photo/2023/05/30/15/12/blue-butterfuly-8028888_640.jpg',
+    'https://cdn.pixabay.com/photo/2018/06/24/18/46/butterfly-3495224_640.jpg',
+    'https://cdn.pixabay.com/photo/2014/08/28/22/41/speckled-wood-430203_640.jpg',
+    'https://cdn.pixabay.com/photo/2024/12/27/10/28/butterfly-clipart-9293644_640.png',
+    'https://cdn.pixabay.com/photo/2023/01/17/18/26/moth-7725205_640.jpg'
+  ],
+
+exotic: [
+    'https://cdn.pixabay.com/photo/2022/08/25/20/44/bird-7411270_640.jpg',
+  ],
+  fish: [
+    'https://cdn.pixabay.com/photo/2016/11/18/17/47/fish-1834823_640.jpg',
+    
+  ],
+  cartoons: [
+    'https://cdn.pixabay.com/photo/2020/06/23/18/10/cartoon-5331106_640.png',
+    
+  ],
+  insects: [
+    'https://cdn.pixabay.com/photo/2017/03/27/13/16/bee-2178341_640.jpg',
+   
+  ],
+  reptiles: [
+    'https://cdn.pixabay.com/photo/2016/11/23/14/45/lizard-1850046_640.jpg',
+
+  ],
+   
+};
+/* ---------- PIXABAY TRACKS (your chosen 4)
+   We use direct mp3 download CDN links (these should stream from Pixabay).
+   If any fail, download them and host them locally and update the URLs.
+*/
+
+const backgroundMusicList = [
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music1.mp3',
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music13.mp3',
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music14.mp3',
+
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music2.mp3',
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music3.mp3',
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music4.mp3',
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music5.mp3',
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music6.mp3',
+ 
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music15.mp3',
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music16.mp3',
+ 
+ 
+ 
+  'https://elimuconnect.github.io/ELIMU-CONNECT-/music7.mp3',
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music8.mp3',
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music9.mp3',
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music10.mp3',
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music11.mp3',
+ 'https://elimuconnect.github.io/ELIMU-CONNECT-/music12.mp3',
+ 
+
+];
+
+  
+/* ---------- Generic shuffler utility (persistent) ---------- */
+/*
+  createShuffler(key, items)
+  - key: unique string to store state in localStorage
+  - items: source array (strings or objects)
+  returns { next(), peek(), reset(), remainingCount() }
+  Behavior:
+  - stores a shuffled list of indices in localStorage and a pointer
+  - if source array length changes, it resets the shuffle
+  - cycles through all items exactly once before reshuffling
+*/
+function createShuffler(key, items) {
+  const storageKey = 'shuffler_' + key;
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) {
+      console.warn('shuffler load failed', e);
+      return null;
+    }
+  }
+  function saveState(state) {
+    try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch (e) { console.warn('shuffler save failed', e); }
+  }
+  function makeOrder(n) {
+    const arr = Array.from({length:n}, (_,i)=>i);
+    // Fisher-Yates shuffle
+    for (let i = arr.length -1; i > 0; i--) {
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  let state = loadState();
+  // if state invalid or length mismatch -> reset
+  if (!state || !Array.isArray(state.order) || state.sourceLength !== items.length) {
+    state = { order: makeOrder(items.length), idx: 0, sourceLength: items.length, createdAt: Date.now() };
+    saveState(state);
+  }
+
+  function ensureFresh() {
+    // if source length changed since creation -> reset
+    if (state.sourceLength !== items.length) {
+      state = { order: makeOrder(items.length), idx: 0, sourceLength: items.length, createdAt: Date.now() };
+      saveState(state);
+    }
+  }
+
+  function next() {
+    ensureFresh();
+    if (state.idx >= state.order.length) {
+      // reshuffle once done
+      state.order = makeOrder(items.length);
+      state.idx = 0;
+      state.sourceLength = items.length;
+    }
+    const resultIndex = state.order[state.idx++];
+    saveState(state);
+    return items[resultIndex];
+  }
+
+  function peek() {
+    ensureFresh();
+    if (state.idx >= state.order.length) return null;
+    return items[state.order[state.idx]];
+  }
+
+  function reset() {
+    state = { order: makeOrder(items.length), idx: 0, sourceLength: items.length, createdAt: Date.now() };
+    saveState(state);
+  }
+
+  function remainingCount() {
+    ensureFresh();
+    return Math.max(0, state.order.length - state.idx);
+  }
+
+  return { next, peek, reset, remainingCount };
+}
+
+/* ---------- Canvas & drawing ---------- */
+const canvas = document.getElementById('canvasPreview');
+const ctx = canvas.getContext('2d', { alpha: false });
+
+
+function getRandomKnowledgeItem() {
+  return knowledgeShuffler.next();
+}
+
+const backgroundsShuffler = createShuffler('backgrounds', BACKGROUNDS);
+const dogsShuffler = createShuffler('dogs', ANIMALS.dogs);
+const catsShuffler = createShuffler('cats', ANIMALS.cats);
+const birdsShuffler = createShuffler('birds', ANIMALS.birds);
+const butterfliesShuffler = createShuffler('butterflies', ANIMALS.butterflies);
+const knowledgeShuffler = createShuffler('knowledge', KNOWLEDGE_ITEMS);
+
+
+// ---------------------
+// Global canvas & scene
+// ---------------------
+canvas.width = CANVAS_W;
+canvas.height = CANVAS_H;
+
+let activeTimer = null;
+let timerValue = 10; 
+let timerProgress = 1;
+
+let scene = {
+  backgroundImg: null,
+  bgName: '',
+  clouds: [
+    {x:-200, y:100, w:200, h:90, speed: 0.2},
+    {x:-350, y:240, w:220, h:100, speed: 0.12}
+  ],
+  animalA: {img:null, x:CANVAS_W*0.12, y:CANVAS_H-320, w:180, h:180, bounceTimer:0},
+  animalB: {img:null, x:CANVAS_W*0.62, y:CANVAS_H-300, w:150, h:150, bounceTimer:0},
+  flying: [],
+  emojis: [],
+  bubble: {text:'Welcome!', x:CANVAS_W*0.5, y:120},
+  subtitle: {text:'', x:CANVAS_W*0.5, y:CANVAS_H - 120}
+};
+
+function drawTimerArc(progress){
+  const cx = CANVAS_W - 150, cy = 220, r = 80;
+  const start = -Math.PI/2;
+  const end = start + progress * 2 * Math.PI;
+
+  // background
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2*Math.PI); 
+  ctx.strokeStyle = "#ddd"; ctx.lineWidth = 10; ctx.stroke();
+
+  // countdown
+  ctx.beginPath(); ctx.arc(cx, cy, r, end, start, true);
+  ctx.strokeStyle = "#1976d2"; ctx.lineWidth = 10; ctx.stroke();
+
+  // text
+  ctx.font = "bold 80px Arial"; ctx.fillStyle = "#FFD700"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(Math.ceil(progress*timerValue), cx, cy);
+}
+
+function animateTimer(duration){
+  const startTime = performance.now();
+  function step(now){
+    const elapsed = (now - startTime)/1000;
+    timerProgress = Math.max(1 - elapsed/duration, 0);
+    drawScene();
+    drawTimerArc(timerProgress);
+
+    if(timerProgress>0) requestAnimationFrame(step);
+    else { playSparkle(); nextKnowledgeItem(); }
+  }
+  requestAnimationFrame(step);
+}
+
+// ---------------------
+// Sparkle Effect
+// ---------------------
+function playSparkle(){
+  try{
+    const ctxAudio = new (window.AudioContext||window.webkitAudioContext)();
+    const osc = ctxAudio.createOscillator();
+    osc.type = "sine"; osc.frequency.value = 880; osc.connect(ctxAudio.destination); osc.start();
+    osc.stop(ctxAudio.currentTime + 0.15);
+
+    const flash = document.createElement("div");
+    flash.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.5);z-index:99999;pointer-events:none";
+    document.body.appendChild(flash);
+    setTimeout(()=>flash.remove(),150);
+  } catch(e){ console.warn("Sparkle skipped:",e); }
+}
+
+
+
+
+
+
+
+
+scene = {
+  backgroundImg: null,
+  bgName: '',
+  clouds: [
+    {x:-200, y:100, w:200, h:90, speed: 0.2},
+    {x:-350, y:240, w:220, h:100, speed: 0.12}
+  ],
+  animalA: {img:null, x:CANVAS_W*0.12, y:CANVAS_H-320, w:180, h:180, bounceTimer:0},
+  animalB: {img:null, x:CANVAS_W*0.62, y:CANVAS_H-300, w:150, h:150, bounceTimer:0},
+  flying: [], // additional flying animals (birds & butterflies)
+  emojis: [], // moving emojis
+  bubble: {text:'Welcome!', x:CANVAS_W*0.5, y:120},
+  subtitle: {text:'', x:CANVAS_W*0.5, y:CANVAS_H - 120}
+};
+
+/* ---------- UI elements ---------- */
+const durationSel = document.getElementById('duration');
+const voiceMethodSel = document.getElementById('voiceMethod');
+const voiceGenderSel = document.getElementById('voiceGender');
+const voiceUploadEl = document.getElementById('voiceUpload');
+const useUploadBtn = document.getElementById('useUploadBtn');
+const genBtn = document.getElementById('genBtn');
+const recordBtn = document.getElementById('recordBtn');
+const statusEl = document.getElementById('status');
+const downloadLink = document.getElementById('downloadLink');
+
+let currentTopic = null;
+let uploadedAudioBuffer = null;
+
+/* ---------- WebAudio: master mix & music loader ---------- */
+const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function ensureAudioCtx(){
+  if(!audioCtx){
+    audioCtx = new AudioContextClass();
+    audioCtx.masterGain = audioCtx.createGain();
+    audioCtx.masterGain.gain.value = 1;
+    audioCtx.masterDest = audioCtx.createMediaStreamDestination();
+    audioCtx.masterGain.connect(audioCtx.masterDest);
+    audioCtx.masterGain.connect(audioCtx.destination);
+  }
+  return audioCtx;
+}
+
+// unlock audio on first gesture and also ensure background music can start
+function unlockAudioOnGesture(){
+  const init = async ()=>{
+    ensureAudioCtx();
+    if(audioCtx.state === 'suspended') try{ await audioCtx.resume(); }catch(e){}
+    document.body.removeEventListener('click', init);
+    document.body.removeEventListener('keydown', init);
+    statusEl.textContent = 'Audio unlocked — ready.';
+  };
+  document.body.addEventListener('click', init);
+  document.body.addEventListener('keydown', init);
+}
+unlockAudioOnGesture();
+
+// BG track handling - load as AudioBuffer for recording capture
+let currentBgSource = null;
+let currentBgGain = null;
+
+
+async function playRandomBackgroundTrack(){
+  const ctx = ensureAudioCtx();
+  // stop previous
+  if(currentBgSource){
+    try{ currentBgSource.stop(); }catch(e){}
+    try{ currentBgSource.disconnect(); }catch(e){}
+    currentBgSource = null;
+  }
+  if(currentBgGain){ try{ currentBgGain.disconnect(); }catch(e){} currentBgGain=null; }
+
+  const url = backgroundMusicList[Math.floor(Math.random()*backgroundMusicList.length)];
+  try{
+    const resp = await fetch(url);
+    const ab = await resp.arrayBuffer();
+    const buf = await ctx.decodeAudioData(ab);
+    const src = ctx.createBufferSource();
+    const gain = ctx.createGain();
+    src.buffer = buf;
+    src.loop = true;
+    gain.gain.value = 0.8;
+    src.connect(gain); gain.connect(ctx.masterGain);
+    try{ src.start(); }catch(err){
+      try{ await ctx.resume(); src.start(); }catch(err){ console.warn('bg start error', err); }
+    }
+    currentBgSource = src; currentBgGain = gain;
+    return {src, gain};
+  }catch(err){
+    console.warn('Failed to load bg track', err);
+    statusEl.textContent = 'Could not load background track (no fallback audio).';
+    return null;
+  }
+}
+
+function stopCurrentBgTrack(){
+  try{ if(currentBgSource){ currentBgSource.stop(); currentBgSource.disconnect(); currentBgSource=null; } }catch(e){}
+  if(currentBgGain){ try{ currentBgGain.disconnect(); }catch(e){} currentBgGain=null; }
+}
+
+/* ---------- Simple synth fallback patterns (kept) ---------- */
+let bgPatternInterval = null, bgOscs = [];
+function startBgPattern(idx){
+  stopBgPattern();
+  const ctx = ensureAudioCtx();
+  if(idx === 0){
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    bgOscs = notes.map(n => {
+      const o = ctx.createOscillator(); const g = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = n; g.gain.value = 0;
+      o.connect(g); g.connect(ctx.masterGain); o.start();
+      return {o,g};
+    });
+    bgPatternInterval = setInterval(()=>{
+      const t = ctx.currentTime;
+      bgOscs.forEach((og,i)=>{
+        og.g.gain.cancelScheduledValues(t);
+        og.g.gain.linearRampToValueAtTime(0.07, t+0.01);
+        og.g.gain.linearRampToValueAtTime(0, t+0.45);
+      });
+    }, 520);
+  } else if(idx === 1){
+    const notes = [392, 523.25, 659.25, 784];
+    bgOscs = notes.map(n => {
+      const o = ctx.createOscillator(); const g = ctx.createGain();
+      o.type = 'square'; o.frequency.value = n; g.gain.value = 0;
+      o.connect(g); g.connect(ctx.masterGain); o.start();
+      return {o,g};
+    });
+    bgPatternInterval = setInterval(()=>{
+      const t = ctx.currentTime;
+      bgOscs.forEach((og,i)=>{
+        og.g.gain.cancelScheduledValues(t);
+        og.g.gain.linearRampToValueAtTime(0.07, t+0.01);
+        og.g.gain.linearRampToValueAtTime(0, t+0.5);
+      });
+    }, 480);
+  } else {
+    bgPatternInterval = setInterval(()=>{
+      const o = ctx.createOscillator(); const g = ctx.createGain();
+      o.type = 'triangle'; o.frequency.value = 600;
+      o.connect(g); g.connect(ctx.masterGain);
+      const t = ctx.currentTime;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.14, t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.001, t+0.5);
+      o.start(); o.stop(t+0.55);
+    }, 700);
+  }
+}
+function stopBgPattern(){ if(bgPatternInterval) { clearInterval(bgPatternInterval); bgPatternInterval = null; } if(bgOscs){ bgOscs.forEach(x=>{ try{x.o.stop()}catch(e){} }); bgOscs = []; } }
+
+/* ---------- Simple SFX (kept) ---------- */
+function playBoing(){ const ctx = ensureAudioCtx(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.type = 'triangle'; o.frequency.value = 520; o.connect(g); g.connect(ctx.masterGain); const t = ctx.currentTime; g.gain.linearRampToValueAtTime(0.12, t+0.01); g.gain.exponentialRampToValueAtTime(0.0001, t+0.6); o.start(); o.stop(t+0.8); }
+function playSparkle(){ const ctx = ensureAudioCtx(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.type = 'sine'; o.frequency.value = 1200; o.connect(g); g.connect(ctx.masterGain); const t = ctx.currentTime; g.gain.linearRampToValueAtTime(0.08, t+0.01); g.gain.exponentialRampToValueAtTime(0.001, t+0.4); o.start(); o.stop(t+0.6); }
+
+/* ---------- Load images helper ---------- */
+function loadImg(url){ return new Promise((res,rej)=>{ const i=new Image(); i.crossOrigin='anonymous'; i.onload=()=>res(i); i.onerror=()=>rej(new Error('Image load error '+url)); i.src=url; }); }
+
+/* ---------- Floating emojis setup ---------- */
+const EMOJIS = [
+  '📚','🧮','🎨','✏️','💡','🔢','🧑‍🏫','🌈',
+  '🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮',
+  '🐷','🐸','🐵','🦄','🐝','🦋','🐌','🐞','🦗','🐢','🐍','🐠','🐟','🐡','🦑','🦐',
+  '🦖','🦕','🐙','🐚','🦜','🐊','🦎','🐉','🐲','🐳','🐋','🦈',
+  '🌟','✨','🎵','🎶','🏫','📝','📖','📎','✂️','🖍️','🖌️','🧪','🔬','🧫',
+  '🌍','🌏','🪐','☀️','🌙','⚡','🔥','💧','🌊','🌳','🎯','🏆','🏅','🎁','🎉','🎈',
+  '🪁','🚀','🚲','🛶'
+];
+
+function spawnEmojis(count = 20) { // more emojis at once
+  scene.emojis = [];
+  for (let i = 0; i < count; i++) {
+    scene.emojis.push({
+      ch: EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
+      x: Math.random() * CANVAS_W,
+      y: Math.random() * CANVAS_H,
+      vx: (Math.random() * 2 - 1) * 0.6,
+      vy: -(0.3 + Math.random() * 0.9),
+      size: 20 + Math.random() * 36,
+      rot: Math.random() * Math.PI * 2,
+      rotV: (Math.random() * 2 - 1) * 0.03
+    });
+  }
+}
+
+
+/* ---------- Flying animals (all visible) ---------- */
+function spawnFlyingAnimals() {
+  scene.flying = [];
+
+  // spawn all birds
+  for (const url of ANIMALS.birds) {
+    scene.flying.push({
+      type: 'bird',
+      imgUrl: url,
+      x: -50 - Math.random() * 300, // start offscreen left
+      y: 50 + Math.random() * (CANVAS_H / 2),
+      vx: 0.5 + Math.random() * 1.5,
+      vy: Math.sin(Math.random() * 2 * Math.PI) * 0.4,
+      size: 50 + Math.random() * 50,
+      img: null
+    });
+  }
+
+  // spawn all butterflies
+  for (const url of ANIMALS.butterflies) {
+    scene.flying.push({
+      type: 'butterfly',
+      imgUrl: url,
+      x: CANVAS_W + 50 + Math.random() * 300, // start offscreen right
+      y: 100 + Math.random() * (CANVAS_H / 2),
+      vx: - (0.4 + Math.random() * 1.2),
+      vy: Math.sin(Math.random() * 2 * Math.PI) * 0.3,
+      size: 40 + Math.random() * 50,
+      img: null
+    });
+  }
+
+  // spawn exotic flying animals (parrots, etc.)
+  for (const url of ANIMALS.exotic) {
+    scene.flying.push({
+      type: 'exotic',
+      imgUrl: url,
+      x: Math.random() > 0.5 ? -50 - Math.random() * 300 : CANVAS_W + 50 + Math.random() * 300,
+      y: 50 + Math.random() * (CANVAS_H / 2),
+      vx: (Math.random() > 0.5 ? 0.5 : -0.5) + Math.random() * 1.5,
+      vy: Math.sin(Math.random() * 2 * Math.PI) * 0.3,
+      size: 50 + Math.random() * 50,
+      img: null
+    });
+  }
+}
+
+/* ---------- Get random knowledge item ---------- */
+function getRandomKnowledgeItem() {
+  return knowledgeShuffler.next();
+}
+
+/* ---------- Global flags ---------- */
+let assetsLoaded = false;
+async function prepareScene() {
+  statusEl.textContent = 'Preparing scene and assets...';
+  scene = scene || {};
+  scene.animalA = scene.animalA || {};
+  scene.animalB = scene.animalB || {};
+  scene.flying = scene.flying || [];
+  scene.clouds = scene.clouds || [];
+  scene.emojis = scene.emojis || [];
+  scene.subtitle = scene.subtitle || {};
+  scene.bubble = scene.bubble || {};
+
+  assetsLoaded = false;
+
+  try {
+    // --- Background ---
+    const bg = (backgroundsShuffler?.next() || { name: "Default", url: null });
+    scene.bgName = bg.name;
+
+    if (bg.url && bg.url.endsWith('.mp4')) {
+      scene.backgroundVideo = await loadVideo(bg.url).catch(() => null);
+      scene.backgroundImg = null;
+    } else if (bg.url) {
+      scene.backgroundImg = await loadImg(bg.url).catch(() => null);
+      scene.backgroundVideo = null;
+    } else {
+      scene.backgroundImg = null;
+      scene.backgroundVideo = null;
+    }
+
+    // --- Animals ---
+    const dogUrl = dogsShuffler?.next() || null;
+    const catUrl = catsShuffler?.next() || null;
+    scene.animalA.img = dogUrl ? await loadImg(dogUrl).catch(() => null) : null;
+    scene.animalB.img = catUrl ? await loadImg(catUrl).catch(() => null) : null;
+
+    // --- Flying animals ---
+    spawnFlyingAnimals();
+    for (const f of scene.flying) {
+      f.img = f.imgUrl ? await loadImg(f.imgUrl).catch(() => null) : null;
+    }
+
+    // --- Clouds & Emojis ---
+    scene.clouds = [];
+    const NUM_CLOUDS = 6;
+    for (let i = 0; i < NUM_CLOUDS; i++) {
+      scene.clouds.push({
+        x: Math.random() * CANVAS_W,
+        y: Math.random() * (CANVAS_H / 2),
+        w: 100 + Math.random() * 150,
+        h: 40 + Math.random() * 30,
+        speed: 0.2 + Math.random() * 0.3
+      });
+    }
+    spawnEmojis(16);
+
+    // --- Knowledge item ---
+    const firstItem = getRandomKnowledgeItem() || { text: "No knowledge item", askComment: false };
+    scene.subtitle.item = firstItem;
+    scene.bubble.item = firstItem;
+    scene.subtitle.text = firstItem.askComment ? "💬 What do you think?" : firstItem.text;
+    scene.bubble.text = firstItem.text;
+
+    // --- Audio ---
+    ensureAudioCtx();
+    try { await playRandomBackgroundTrack(); } catch (e) { console.warn("Audio failed:", e); }
+
+    // --- Emoji burst ---
+    for (let e of scene.emojis) e.vy -= Math.random() * 4 + 2;
+    playSparkle();
+
+    assetsLoaded = true;
+
+    // Flash effect
+    if (canvas) {
+      canvas.style.animation = 'flash 0.6s ease-out';
+      setTimeout(() => canvas.style.animation = '', 600);
+    }
+
+    statusEl.textContent = `Prepared: ${scene.bgName}`;
+  } catch (err) {
+    console.error("Scene preparation failed:", err);
+    statusEl.textContent = "Error preparing scene. Using fallback visuals.";
+
+    scene.bgName = "Fallback";
+    scene.backgroundImg = null;
+    scene.backgroundVideo = null;
+    scene.animalA.img = null;
+    scene.animalB.img = null;
+    scene.flying = [];
+    scene.clouds = [];
+    scene.emojis = [];
+    scene.subtitle.text = "Something went wrong 😅";
+    scene.bubble.text = "Try refreshing!";
+    assetsLoaded = true;
+  }
+}
+
+
+
+
+
+
+
+async function playPreHook() {
+  return new Promise(resolve => {
+    const start = performance.now();
+    const duration = 3000; // 3 seconds
+    const fadeDuration = 500; // last 0.5s fade out
+
+    const word = RETENTION_WORDS[Math.floor(Math.random() * RETENTION_WORDS.length)];
+    const phrase = RETENTION_PHRASES[Math.floor(Math.random() * RETENTION_PHRASES.length)];
+    const emoji = RETENTION_EMOJIS[Math.floor(Math.random() * RETENTION_EMOJIS.length)];
+
+    function draw(now) {
+      const t = now - start;
+      ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+
+      // Calculate alpha for fade-out
+      let alpha = 1;
+      if (t > duration - fadeDuration) {
+        alpha = 1 - (t - (duration - fadeDuration)) / fadeDuration;
+      }
+
+      // Dark background
+      ctx.fillStyle = `rgba(0,0,0,${alpha})`;
+      ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+      // Pulsing scale for word
+      const scale = 1 + Math.sin(t / 150) * 0.08;
+
+      ctx.save();
+      ctx.translate(CANVAS_W / 2, CANVAS_H / 2);
+
+      // Slide-in from top for word
+      const wordY = -80 - 50 * Math.exp(-t / 500);
+      ctx.save();
+      ctx.scale(scale, scale);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      // 🔹 Word font reduced by 30%
+      ctx.font = 'bold 77px Arial'; // 110px → 77px
+      ctx.fillStyle = `rgba(255,215,0,${alpha})`; 
+      ctx.fillText(word, 0, wordY);
+      ctx.restore();
+
+      // Emoji bouncing (unchanged)
+      const emojiY = 10 + Math.sin(t / 200) * 20;
+      ctx.font = '80px Arial';
+      ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+      ctx.fillText(emoji, 0, emojiY);
+
+      // Phrase sliding from bottom (unchanged)
+      const phraseY = 120 + 60 * Math.exp(-t / 600);
+      ctx.font = 'bold 42px Arial';
+      ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+      ctx.fillText(phrase, 0, phraseY);
+
+      ctx.restore();
+
+      if (t < duration) {
+        requestAnimationFrame(draw);
+      } else {
+        resolve(); // Move on to startAnimation
+      }
+    }
+
+    requestAnimationFrame(draw);
+  });
+}
+
+
+
+
+
+
+
+
+
+
+/* ---------- Drawing helpers ---------- */
+function drawRoundRect(x, y, width, height, radius, fillColor, strokeColor, lineWidth) {
+  if (!ctx) return;
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+  if (fillColor) { ctx.fillStyle = fillColor; ctx.fill(); }
+  if (strokeColor) { ctx.strokeStyle = strokeColor; ctx.lineWidth = lineWidth || 1; ctx.stroke(); }
+  ctx.restore();
+}
+
+
+
+/* ---------- Draw Scene ---------- */
+function drawScene(t) {
+  ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+
+  // --- Background (image or video) ---
+  if (scene.backgroundVideo) ctx.drawImage(scene.backgroundVideo, 0, 0, CANVAS_W, CANVAS_H);
+  else if (scene.backgroundImg) ctx.drawImage(scene.backgroundImg, 0, 0, CANVAS_W, CANVAS_H);
+  else { ctx.fillStyle = '#88d'; ctx.fillRect(0, 0, CANVAS_W, CANVAS_H); }
+
+  // --- Clouds ---
+  for (const c of scene.clouds) {
+    c.x += c.speed * (1 + Math.sin(t / 200));
+    if (c.x > CANVAS_W + 200) c.x = -250;
+    ctx.save();
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    ctx.beginPath();
+    ctx.ellipse(c.x, c.y, c.w*0.6, c.h*0.6, 0,0,2*Math.PI);
+    ctx.ellipse(c.x + c.w*0.4, c.y - 10, c.w*0.5, c.h*0.45, 0,0,2*Math.PI);
+    ctx.ellipse(c.x + c.w*0.7, c.y + 6, c.w*0.35, c.h*0.33, 0,0,2*Math.PI);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // --- Flying animals ---
+  for (const f of scene.flying) {
+    f.x += f.vx*(1 + Math.sin((performance.now() + f.y*0.01)/600));
+    f.y += Math.sin((performance.now()/500 + f.x*0.01))*0.5 + f.vy*0.5;
+    if(f.vx>0 && f.x>CANVAS_W+150){ f.x=-150; f.y=50+Math.random()*(CANVAS_H/2);}
+    if(f.vx<0 && f.x<-150){ f.x=CANVAS_W+150; f.y=50+Math.random()*(CANVAS_H/2);}
+    if(f.y<30) f.y=30; if(f.y>CANVAS_H/2) f.y=CANVAS_H/2;
+    if(f.img){ ctx.save(); ctx.translate(f.x+f.size/2,f.y+f.size/2); ctx.rotate(Math.sin(f.x/50)*0.15); ctx.drawImage(f.img,-f.size/2,-f.size/2,f.size,f.size); ctx.restore(); }
+  }
+
+  // --- Animals ---
+  function drawAnimal(a){
+    const bounce=Math.sin((t+(a.bounceTimer||0))/300)*12;
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(a.x + a.w/2, a.y+bounce + a.h - 20, a.w*0.3, 12, 0,0,2*Math.PI);
+    ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.fill();
+    if(a.img) ctx.drawImage(a.img, a.x, a.y+bounce, a.w, a.h);
+    ctx.restore();
+  }
+  scene.animalA.x=CANVAS_W*0.12; scene.animalB.x=CANVAS_W*0.62;
+  drawAnimal(scene.animalA); drawAnimal(scene.animalB);
+
+  // --- Emojis ---
+  for (const e of scene.emojis){
+    e.x+=e.vx; e.y+=e.vy; e.vy+=0.01; e.rot+=e.rotV;
+    if(e.y<-120||e.y>CANVAS_H+120||e.x<-80||e.x>CANVAS_W+80){
+      e.y=Math.random()*CANVAS_H; e.x=Math.random()*CANVAS_W; e.vy=-0.3-Math.random()*0.9; e.vx=(Math.random()*2-1)*0.6;
+    }
+    ctx.save(); ctx.translate(e.x,e.y); ctx.rotate(e.rot); ctx.font=`${e.size}px "Patrick Hand", Arial`; ctx.fillText(e.ch,0,0); ctx.restore();
+  }
+
+  // --- Top text ---
+  ctx.fillStyle='rgba(255,255,255,0.9)'; 
+  ctx.font='bold 60px "Patrick Hand", Arial'; 
+  ctx.textAlign='center'; 
+  ctx.textBaseline='top';
+  ctx.fillText("Facts,Fun, memes, laughs", CANVAS_W/2,40);
+
+  // --- Swahili bubble ---
+  drawSwahiliBubble();
+
+ // --- Subtitle / bubble text (center) ---
+const subtitleText = (scene.subtitle.item && scene.subtitle.item.text) || '';
+ctx.font = '"Patrick Hand", Arial, cursive';
+ctx.fillStyle = 'yellow';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+
+// Wrap text
+const wrapped = splitText(ctx, subtitleText, CANVAS_W - 60);
+const lineH = 60;
+const totalH = wrapped.length * lineH;
+let startY = CANVAS_H * 0.5 - totalH / 2 + 30;
+
+// Draw black background rectangle
+const paddingX = 40; // horizontal padding
+const paddingY = 20; // vertical padding per line
+const rectWidth = CANVAS_W - 60; 
+const rectHeight = totalH + paddingY * 2;
+ctx.fillStyle = 'rgba(0,0,0,0.7)'; // semi-transparent black
+ctx.fillRect(CANVAS_W/2 - rectWidth/2, startY - paddingY, rectWidth, rectHeight);
+
+// Draw text over black rectangle
+ctx.fillStyle = 'yellow';
+for (let i = 0; i < wrapped.length; i++) {
+  ctx.fillText(wrapped[i], CANVAS_W / 2, startY + i * lineH);
+}
+
+// --- Sliding logo ---
+drawSlidingLogo(t);
+}
+
+
+/* ---------- Sliding logo helper ---------- */
+let logoX = 0, logoPauseTimer = 0, isPaused = false;
+
+function drawSlidingLogo(time, deltaTime = 16) {
+  const logoText = '🎓 Online Tuition: @Sh500 P.M (Kenya) | Elimu Connect app / $4 P.M (Global) | SmartLearn: IGCSE IB CBSE ICSE on Play Store! 💻 Need a Website from Sh10,000? WhatsApp +254769255782! Sell your plot faster |Find your dream home or land in minutes! at realplot connect  🏡 ';
+
+  ctx.font = '28px "Patrick Hand", Arial';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'left';
+
+  const textWidth = ctx.measureText(logoText).width;
+  const rectH = 70, rectY = CANVAS_H - rectH - 150, rectW = CANVAS_W;
+
+  // ✅ Match same speed as second version (2.5 pixels/frame)
+  const speed = 2.0;
+
+  if (isPaused) {
+    logoPauseTimer += deltaTime;
+    if (logoPauseTimer >= 1000) { // pause for 1s
+      isPaused = false;
+      logoPauseTimer = 0;
+      logoX = 0; // reset position
+    }
+  } else {
+    logoX -= speed;
+    if (logoX <= -textWidth) {
+      isPaused = true;
+    }
+  }
+
+  // 🟦 Background bar
+  drawRoundRect(0, rectY, rectW, rectH, 20, 'rgba(255,255,255,0.95)', 'rgba(0,0,0,0.08)', 2);
+
+  // 🌈 Gradient text
+  const gradient = ctx.createLinearGradient(0, rectY, rectW, rectY + rectH);
+  gradient.addColorStop(0, '#ff8c00');
+  gradient.addColorStop(1, '#1976d2');
+  ctx.fillStyle = gradient;
+
+  // ✨ Draw seamless text
+  ctx.fillText(logoText, logoX, rectY + rectH / 2);
+  ctx.fillText(logoText, logoX + textWidth, rectY + rectH / 2);
+}
+
+  
+function drawSwahiliBubble() {
+  if (!scene.bubble || !scene.bubble.item) return;
+
+  const text = scene.bubble.item.textSW || scene.bubble.item.text || '';
+  if (!text) return;
+
+  ctx.save();
+
+  const t = performance.now();
+
+  // --- Sliding effect from right to left ---
+  ctx.font = 'bold 64px "Gloria Hallelujah", cursive';
+  const textWidth = ctx.measureText(text).width;
+  const padding = 20;
+
+  // Right-to-left sliding
+  const slideX = CANVAS_W - ((t / 5) % (CANVAS_W + textWidth));
+  ctx.translate(slideX, 120);
+
+  // --- Draw translucent background ---
+  ctx.globalAlpha = 0.5; // translucent
+  ctx.fillStyle = '#000'; // black background
+  ctx.fillRect(
+    -padding / 2,
+    -64 / 2 - padding / 2,
+    textWidth + padding,
+    64 + padding
+  );
+
+  // --- Draw text ---
+  ctx.globalAlpha = 1; // fully visible
+  ctx.fillStyle = '#ffb74d';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = '#000';
+  ctx.shadowBlur = 10;
+
+  ctx.fillText(text, 0, 0);
+
+  ctx.restore();
+}
+
+
+
+
+genBtn.addEventListener('click', async ()=> {
+  statusEl.textContent = 'Preparing scene...';
+  ensureAudioCtx();
+  try {
+    await prepareScene();           // Load assets
+    drawScene(performance.now());   // Draw first frame immediately
+    statusEl.textContent = 'Preview ready: ' + scene.bgName;
+  } catch(e){
+    statusEl.textContent = 'Prepare failed: ' + e.message;
+    console.error(e);
+  }
+});
+
+
+
+
+
+
+
+
+
+function previewLoop() {
+  if (!assetsLoaded) return;
+  drawScene(performance.now());
+  requestAnimationFrame(previewLoop);
+}
+
+genBtn.addEventListener('click', async () => {
+  statusEl.textContent = 'Preparing scene...';
+  ensureAudioCtx();
+  try {
+    await prepareScene();
+    statusEl.textContent = 'Preview ready: ' + scene.bgName;
+
+    // Start looping preview
+    previewLoop();
+  } catch (e) {
+    statusEl.textContent = 'Prepare failed: ' + e.message;
+    console.error(e);
+  }
+});
+
+
+
+
+
+
+
+
+
+
+/* ---------- Voice upload handling (left intact) ---------- */
+voiceUploadEl.addEventListener('change', async (e)=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  statusEl.textContent = 'Decoding uploaded audio...';
+  const ab = await f.arrayBuffer();
+  ensureAudioCtx();
+  uploadedAudioBuffer = await audioCtx.decodeAudioData(ab);
+  statusEl.textContent = 'Uploaded voice ready (will be embedded).';
+});
+useUploadBtn.addEventListener('click', ()=> {
+  if(!uploadedAudioBuffer){ statusEl.textContent = 'No uploaded file. Choose an audio file first.'; return; }
+  voiceMethodSel.value = 'upload';
+  statusEl.textContent = 'Upload selected as narration method.';
+});
+
+/* ---------- Removed speech-synthesis narration entirely ----------
+   (No TTS calls; only background music will play.)
+*/
+
+
+
+
+
+function loadImg(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";  // ✅ critical
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('Image failed: ' + url));
+    img.src = url;
+  });
+}
+
+
+
+function loadVideo(url) {
+  return new Promise((resolve, reject) => {
+    const vid = document.createElement('video');
+    vid.crossOrigin = "anonymous";  
+    vid.src = url;
+    vid.loop = true;
+    vid.muted = true;
+    vid.playsInline = true;
+    vid.onloadedmetadata = async () => {
+      try { await vid.play(); } catch(e){ console.warn('Video play failed:', e); }
+      resolve(vid);
+    };
+    vid.onerror = () => reject(new Error('Video failed: ' + url));
+  });
+}
+
+
+
+
+
+
+/* ---------- TikTok + YouTube Shorts Optimized Recorder ---------- */
+async function startRecordingAuto() {
+  ensureAudioCtx();
+  if (audioCtx.state === 'suspended') {
+    try { await audioCtx.resume(); } catch (e) {}
+  }
+
+  const subtitleText = scene?.subtitle?.text || document.getElementById('subtitleText')?.textContent || '';
+  if (!subtitleText.trim()) {
+    statusEl.textContent = 'Generate preview first.';
+    return;
+  }
+
+  // 🎵 ensure background track
+  if (!currentBgSource) await playRandomBackgroundTrack().catch(() => {});
+
+// ✅ Fixed allowed durations: 10, 15, 20, 30, 45, 60
+let dur = parseInt(durationSel.value, 10);
+
+// Force allowed values only
+if (![10, 15, 20, 30, 45, 60].includes(dur)) {
+  dur = 30; // fallback default
+}
+
+
+
+  statusEl.textContent = `Recording ${dur}s — preparing streams...`;
+  await new Promise(r => setTimeout(r, 350));
+
+  // 🎥 capture canvas
+  let videoStream;
+  try {
+    videoStream = canvas.captureStream(30);
+  } catch (err) {
+    statusEl.textContent = 'Canvas capture not supported: ' + err.message;
+    return;
+  }
+
+  const combined = new MediaStream();
+  videoStream.getVideoTracks().forEach(t => combined.addTrack(t));
+
+  // 🎙️ optional mic
+  let liveMicStream = null;
+  if (voiceMethodSel.value === 'mic') {
+    try {
+      liveMicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      liveMicStream.getAudioTracks().forEach(t => combined.addTrack(t));
+      statusEl.textContent = '🎤 Live mic connected — speak now!';
+    } catch (err) {
+      console.warn('Mic error', err);
+    }
+  }
+
+  // uploaded narration
+  if (voiceMethodSel.value === 'upload' && uploadedAudioBuffer) {
+    const src = audioCtx.createBufferSource();
+    src.buffer = uploadedAudioBuffer;
+    src.connect(audioCtx.masterGain || audioCtx.destination);
+    src.start();
+  }
+
+  // background + sfx
+  if (audioCtx.masterDest && audioCtx.masterDest.stream) {
+    audioCtx.masterDest.stream.getAudioTracks().forEach(t => combined.addTrack(t));
+  }
+
+  // 🎬 set recording options
+  let options = { mimeType: 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"' };
+  if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+    console.warn('H.264 MP4 not supported, fallback to WebM.');
+    options = { mimeType: 'video/webm;codecs=vp8,opus' };
+  }
+
+  recordedChunks = [];
+  let mediaRecorder;
+  try {
+    mediaRecorder = new MediaRecorder(combined, options);
+  } catch (err) {
+    statusEl.textContent = 'MediaRecorder failed: ' + err.message;
+    return;
+  }
+
+  mediaRecorder.ondataavailable = e => {
+    if (e.data && e.data.size) recordedChunks.push(e.data);
+  };
+  mediaRecorder.onstart = () => {
+    statusEl.textContent = 'Recording... (auto stops after ' + dur + 's)';
+  };
+  mediaRecorder.onerror = e => {
+    statusEl.textContent = 'Recording error: ' + e.message;
+  };
+
+  mediaRecorder.onstop = async () => {
+    if (liveMicStream) liveMicStream.getTracks().forEach(t => t.stop());
+    stopCurrentBgTrack();
+
+    const mime = options.mimeType.includes('mp4') ? 'video/mp4' : 'video/webm';
+    let blob = new Blob(recordedChunks, { type: mime });
+
+    // ✅ Convert to TikTok MP4 if needed
+    if (mime === 'video/webm') {
+      statusEl.textContent = 'Converting WebM → MP4 for TikTok...';
+      blob = await convertToMp4(blob);
+    }
+
+    const url = URL.createObjectURL(blob);
+    const fileName = `elimu_short_${dur}s_${Date.now()}.mp4`;
+    downloadLink.href = url;
+    downloadLink.download = fileName;
+    downloadLink.textContent = '⬇️ Download TikTok & YouTube-Ready MP4';
+    downloadLink.classList.remove('hidden');
+    statusEl.textContent = '✅ Recording complete — ready to upload!';
+    setTimeout(() => { try { downloadLink.click(); } catch (e) {} }, 300);
+  };
+
+  mediaRecorder.start(1000);
+
+  // 🗨️ subtitles + sfx timing
+  const parts = splitText(subtitleText, 3);
+  parts.forEach((p, i) => {
+    setTimeout(() => {
+      if (scene?.subtitle) scene.subtitle.text = p;
+      playBoing();
+    }, Math.floor((i + 0.5) * (dur / parts.length) * 1000));
+  });
+
+  // ⏱ auto stop
+  setTimeout(() => {
+    try {
+      if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+    } catch (e) {}
+  }, dur * 1000 + 500);
+}
+
+<!-- ✅ Add this near the end of your HTML file -->
+
+
+
+async function convertToMp4(webmBlob) {
+  try {
+    statusEl.textContent = "⏳ Converting to TikTok-friendly MP4...";
+    const { createFFmpeg, fetchFile } = FFmpeg;
+    const ffmpeg = createFFmpeg({ log: false });
+    await ffmpeg.load();
+
+    ffmpeg.FS('writeFile', 'input.webm', await fetchFile(webmBlob));
+    await ffmpeg.run('-i', 'input.webm', '-c:v', 'libx264', '-c:a', 'aac', '-b:a', '192k', 'output.mp4');
+
+    const data = ffmpeg.FS('readFile', 'output.mp4');
+    const mp4Blob = new Blob([data.buffer], { type: 'video/mp4' });
+
+    statusEl.textContent = "✅ Conversion complete — ready to download!";
+    return mp4Blob;
+  } catch (err) {
+    console.error("FFmpeg conversion failed:", err);
+    statusEl.textContent = "⚠️ Conversion failed — WebM used instead.";
+    return webmBlob;
+  }
+}
+
+
+
+
+
+  
+
+function splitText(ctx, text, maxWidth) {
+  if (!text || typeof text !== "string") return [];
+  const words = text.trim().split(/\s+/);
+  const lines = [];
+  let line = "";
+
+  for (let i = 0; i < words.length; i++) {
+    const testLine = line ? line + " " + words[i] : words[i];
+    const testWidth = ctx.measureText(testLine).width;
+
+    // if the line would exceed max width, push the old one
+    if (testWidth > maxWidth && line !== "") {
+      lines.push(line);
+      line = words[i]; // start a new line
+    } else {
+      line = testLine;
+    }
+  }
+
+  // push any remaining text
+  if (line) lines.push(line);
+
+  return lines;
+}
+
+// ---------- Knowledge items counter ----------
+let knowledgeIndex = 0; // starts at 0
+let showingKnowledge = false; // ensures nothing shows before clicking
+
+function nextKnowledgeItem() {
+  if (!showingKnowledge) return;
+
+  if (usedFacts.length >= KNOWLEDGE_ITEMS.length) {
+    statusEl.textContent = 'All items completed!';
+    return;
+  }
+
+  // Pick random unused item
+  const unused = KNOWLEDGE_ITEMS.filter((_, i) => !usedFacts.includes(i));
+  const idx = Math.floor(Math.random() * unused.length);
+  const item = unused[idx];
+  const realIndex = KNOWLEDGE_ITEMS.indexOf(item);
+  usedFacts.push(realIndex);
+
+  // Show numbering (optional)
+  const counterText = `${usedFacts.length}/6`;
+
+  showKnowledgeItem({
+    ...item,
+    text: `${counterText} • ${item.text}`
+  });
+
+ 
+}
+
+
+
+async function startWithPreHook() {
+  if (animRunning) return;
+
+  // Pick first hook item
+  const hookItem = getRandomKnowledgeItem();
+  showKnowledgeItem(hookItem);
+
+  // Run hook animation
+  await playPreHook();
+
+  // Continue main loop
+  startAnimation();
+}
+
+
+
+recordBtn.addEventListener('click', async () => {
+  ensureAudioCtx();
+  if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+  if (!assetsLoaded) {
+    statusEl.textContent = 'Scene not ready. Preparing...';
+    try {
+      await prepareScene(); // Ensure assets are loaded
+    } catch (e) {
+      statusEl.textContent = 'Failed to prepare scene: ' + e.message;
+      console.error(e);
+      return;
+    }
+  }
+
+  // ✅ Start showing knowledge items
+  showingKnowledge = true;
+  usedFacts = [];
+  nextKnowledgeItem();
+
+  try {
+    // Start recording first
+    await startRecordingAuto(); // recording is now active
+
+    // Then run pre-hook + main animation
+    await startWithPreHook();  // this will show hook AND start main animation
+  } catch (err) {
+    statusEl.textContent = 'Recording failed: ' + err.message;
+    console.error(err);
+  }
+});
+
+
+
+
+
+
+
+
+
+function getRandomKnowledgeItem() {
+  if (usedFacts.length >= KNOWLEDGE_ITEMS.length) {
+    usedFacts = []; // Reset when all have been used
+  }
+
+  // Pick only unused items
+  const unused = KNOWLEDGE_ITEMS.filter((_, i) => !usedFacts.includes(i));
+  const idx = Math.floor(Math.random() * unused.length);
+  const item = unused[idx];
+
+  // Mark it as used
+  const realIndex = KNOWLEDGE_ITEMS.indexOf(item);
+  usedFacts.push(realIndex);
+
+  return item;
+}
+
+
+
+
+window.addEventListener('load', ()=> {
+  // Warm audio context/voices (no TTS used)
+  try { speechSynthesis.getVoices(); } catch(e){}
+
+  // Only update status — don't start scene yet
+  statusEl.textContent = 'Ready. Click Generate Preview and then Start & Record.';
+});
+
+
+
+// Now it's safe to use
+function getRandomKnowledgeItem() {
+  return knowledgeShuffler.next();
+}
+
+
+
+
+function startAnimation() {
+  if (animRunning) return;
+  animRunning = true;
+  let start = performance.now();
+
+  // Pick initial item immediately
+  currentItem = getRandomKnowledgeItem();
+  lastItemTime = start;
+
+  function loop(now) {
+    const t = now - start;
+
+    // Animate animals
+    scene.animalA.bounceTimer = t;
+    scene.animalB.bounceTimer = t + 70;
+    drawScene(t);
+
+    // Update knowledge item every ITEM_INTERVAL
+    if (now - lastItemTime > ITEM_INTERVAL) {
+      currentItem = getRandomKnowledgeItem();
+      lastItemTime = now;
+    }
+
+    
+
+    if (animRunning) requestAnimationFrame(loop);
+  }
+
+  requestAnimationFrame(loop);
+}
+
+function stopAnimation() {
+  animRunning = false;
+}
+
+
+
+function showKnowledgeItem(item) {
+  if (!item) return;
+
+  if (activeTimer) cancelAnimationFrame(activeTimer);
+
+  // Assign current item to scene
+  scene.subtitle.item = item;
+  scene.bubble.item = item;
+
+  // Always show the main item text only
+  scene.subtitle.text = item.text;
+  scene.bubble.text = item.text;
+
+  // Start time for animations
+  scene.subtitle.startTime = performance.now(); 
+  timerValue = item.duration || 10;
+  const startTime = performance.now();
+
+  function step(now) {
+    const elapsed = (now - startTime) / 1000;
+    timerProgress = Math.max(1 - elapsed / timerValue, 0);
+
+    // Draw the main scene (knowledge text)
+    drawScene(now);            
+
+    // Draw timer arc
+    drawTimerArc(timerProgress); 
+
+    // Draw Swahili bubble
+    drawSwahiliBubble();
+
+    if (timerProgress > 0) {
+      activeTimer = requestAnimationFrame(step);
+    } else {
+      playSparkle();
+      nextKnowledgeItem();
+    }
+  }
+
+  activeTimer = requestAnimationFrame(step);
+}
+
+
+
+
+</script>
+</body> 
+</html>
+
+

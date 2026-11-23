@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elimu Connect Referrals and payments</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    input, button {
+      padding: 10px;
+      margin: 8px 0;
+      width: 100%;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .link-btn {
+      background-color: #007bff;
+    }
+    #payment-form {
+      display: none;
+      width: 100%;
+    }
+    #payment-image {
+      margin-top: 30px;
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    h2 {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h2>🎉 Elimu Connect Referrals and payments</h2>
+  <p>You’ve been invited! Install the app and pay via MPesa below:</p>
+<p> please when you install and you want to subscribe, come back to this page and subscribe then click I've paid to fill the form. Please dont use the subscribe button in the app.</p>
+  <a href="https://play.google.com/store/apps/details?id=elimuconnect.tuitioncentre" target="_blank">
+    <button class="link-btn">📲 Install Elimu Connect: learn and Tutor App</button>
+  </a>
+
+  <button onclick="showPaymentForm()">✅ I’ve Paid(Fill the form only after paying)</button>
+
+  <!-- Payment Form -->
+  <form id="payment-form">
+    <input type="text" id="name" placeholder="Your Name" required />
+    <input type="text" id="phone" placeholder="Phone Number" required />
+    <input type="text" id="mpesa" placeholder="MPesa Transaction Code" required />
+    <button type="button" onclick="submitPaymentProof()">Submit Payment</button>
+  </form>
+
+  <!-- Static MPesa Image -->
+  <img
+    id="payment-image"
+    src="https://res.cloudinary.com/dwvt4e9o2/image/upload/v1753469056/ChatGPT_Image_Jul_25_2025_08_38_48_PM_dehdsv.png"
+    alt="MPesa Payment Instructions"
+  />
+
+
+<script>
+  // Step 1: Save referral code if present in URL
+  window.addEventListener("DOMContentLoaded", function () {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+
+    if (ref) {
+      localStorage.setItem("referral_code", ref);
+
+      // Log referral visit in Firebase
+      fetch("https://tutor-students-mapping-default-rtdb.firebaseio.com/visits.json", {
+        method: "POST",
+        body: JSON.stringify({
+          referral: ref,
+          timestamp: new Date().toISOString()
+        })
+      }).then(() => {
+        console.log("Referral visit logged:", ref);
+      });
+    }
+  });
+
+  // Step 2: Show payment form when button is clicked
+  function showPaymentForm() {
+    document.getElementById("payment-form").style.display = "block";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // Step 3: Submit payment info and include referral
+  function submitPaymentProof() {
+    const name = document.getElementById("name").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const mpesaCode = document.getElementById("mpesa").value.trim();
+    const referral = localStorage.getItem("referral_code") || "none";
+
+    if (!mpesaCode || !name || !phone) {
+      alert("Please enter your name, phone number, and MPesa code.");
+      return;
+    }
+
+    const data = {
+      name,
+      phone,
+      mpesaCode,
+      referral,
+      timestamp: new Date().toISOString()
+    };
+
+    // Save to Firebase
+    fetch("https://tutor-students-mapping-default-rtdb.firebaseio.com/referrals.json", {
+      method: "POST",
+      body: JSON.stringify(data)
+    })
+    .then(() => {
+      // Compose WhatsApp message
+      const message = `NEW SUBSCRIPTION 🚀\nName: ${name}\nPhone: ${phone}\nMPesa Code: ${mpesaCode}\nReferral: ${referral}`;
+      const encoded = encodeURIComponent(message);
+      const yourWhatsApp = "254769255782";
+      window.location.href = `https://wa.me/${yourWhatsApp}?text=${encoded}`;
+
+      document.getElementById("payment-form").reset();
+      document.getElementById("payment-form").style.display = "none";
+    })
+    .catch((err) => {
+      alert("❌ Failed to submit. Please try again later.");
+      console.error(err);
+    });
+  }
+</script>

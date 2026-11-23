@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>STEMLang Hub | Next-Gen Learning Platform</title>
+  
+  <!-- Google Fonts & FontAwesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      --card-bg: rgba(255, 255, 255, 0.05);
+      --card-hover: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      
+      --color-math: #38bdf8;
+      --color-chem: #34d399;
+      --color-bio: #f43f5e;
+      --color-gen: #a855f7;
+      --color-ext: #fbbf24;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.5;
+      padding-bottom: 60px;
+    }
+
+    /* Top Navigation */
+    header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    flex-wrap:wrap;
+      padding: 1.25rem 2rem;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--glass-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 1.4rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .logo span {
+      background: linear-gradient(135deg, var(--color-math), var(--color-chem));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Navigation Tabs */
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 0.8rem;
+    }
+
+    nav button {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-sub);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    nav button:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    nav button.nav-active {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--glass-border);
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 3rem 1.5rem 1.5rem;
+      max-width: 850px;
+      margin: 0 auto;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 800;
+      margin-bottom: 1rem;
+      letter-spacing: -0.5px;
+    }
+
+    .hero p {
+      color: var(--text-sub);
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+
+    /* Search Bar */
+    .search-box {
+      position: relative;
+      max-width: 600px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .search-box i {
+      position: absolute;
+      left: 1.25rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-sub);
+      font-size: 1.1rem;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 1rem 1.25rem 1rem 3.2rem;
+      border-radius: 14px;
+      border: 1px solid var(--glass-border);
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .search-box input:focus {
+      border-color: var(--color-math);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Category Sections */
+    .category-section {
+      margin-bottom: 3.5rem;
+      display: none; /* Default hidden; controlled via JavaScript */
+    }
+
+    .category-section.active-section {
+      display: block; /* Display active category */
+    }
+
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    /* Card Grids */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .tool-card {
+      background: var(--card-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 1.25rem;
+      text-decoration: none;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s, background 0.2s, border-color 0.2s;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .tool-card:hover {
+      transform: translateY(-4px);
+      background: var(--card-hover);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .card-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .math .card-icon { color: var(--color-math); }
+    .chem .card-icon { color: var(--color-chem); }
+    .bio .card-icon { color: var(--color-bio); }
+    .general .card-icon { color: var(--color-gen); }
+    .ext .card-icon { color: var(--color-ext); }
+
+    .card-arrow {
+      color: var(--text-sub);
+      font-size: 0.85rem;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+
+    .tool-card:hover .card-arrow {
+      opacity: 1;
+      color: #fff;
+    }
+
+    .tool-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+
+    .tool-desc {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      line-height: 1.4;
+    }
+
+    /* Tabbed Section for Resources */
+    .resource-tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .tab-btn {
+      padding: 0.6rem 1.25rem;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      background: var(--card-bg);
+      color: var(--text-sub);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--text-main);
+      color: #0f172a;
+      border-color: var(--text-main);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 2.5rem 1rem 1rem;
+      color: var(--text-sub);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--glass-border);
+      margin-top: 4rem;
+    }
+
+    
+
+
+
+	 /*==============================
+MENU BUTTON
+==============================*/
+
+.menu-toggle{
+
+display:none;
+
+background:none;
+
+border:none;
+
+color:white;
+
+font-size:28px;
+
+cursor:pointer;
+
+}
+
+
+/*==============================
+TABLETS
+==============================*/
+
+@media(max-width:900px){
+
+header{
+
+padding:15px;
+
+}
+
+.container{
+
+padding:0 15px;
+
+}
+
+.tools-grid{
+
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+
+}
+
+}
+
+
+/*==============================
+PHONES
+==============================*/
+
+@media(max-width:768px){
+
+header{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+padding:15px;
+
+position:relative;
+
+}
+
+.logo{
+
+font-size:1.2rem;
+
+}
+
+.menu-toggle{
+
+display:block;
+
+}
+
+nav{
+
+display:none;
+
+position:absolute;
+
+top:70px;
+
+right:15px;
+
+width:230px;
+
+background:#0f172a;
+
+border:1px solid rgba(255,255,255,.15);
+
+border-radius:12px;
+
+padding:10px;
+
+box-shadow:0 15px 35px rgba(0,0,0,.4);
+
+z-index:999;
+
+}
+
+nav.show{
+
+display:block;
+
+}
+
+nav ul{
+
+display:flex;
+
+flex-direction:column;
+
+gap:8px;
+
+}
+
+nav button{
+
+width:100%;
+
+padding:12px;
+
+font-size:14px;
+
+text-align:left;
+
+}
+
+.hero{
+
+padding:25px 15px;
+
+}
+
+.hero h1{
+
+font-size:2rem;
+
+}
+
+.hero p{
+
+font-size:15px;
+
+}
+
+.category-header{
+
+font-size:20px;
+
+}
+
+/* THREE CARDS PER ROW */
+
+.tools-grid{
+
+grid-template-columns:repeat(3,1fr);
+
+gap:10px;
+
+}
+
+.tool-card{
+
+padding:10px;
+
+min-height:170px;
+
+}
+
+.card-icon{
+
+width:32px;
+
+height:32px;
+
+font-size:14px;
+
+}
+
+.tool-title{
+
+font-size:13px;
+
+}
+
+.tool-desc{
+
+font-size:11px;
+
+}
+
+}
+
+
+/*==============================
+VERY SMALL PHONES
+==============================*/
+
+@media(max-width:480px){
+
+.tools-grid{
+
+grid-template-columns:repeat(3,1fr);
+
+}
+
+.logo{
+
+font-size:1.05rem;
+
+}
+
+.hero h1{
+
+font-size:1.6rem;
+
+}
+
+.hero p{
+
+font-size:13px;
+
+}
+
+.tool-title{
+
+font-size:12px;
+
+}
+
+.tool-desc{
+
+display:none;
+
+}
+
+.card-icon{
+
+width:30px;
+
+height:30px;
+
+}
+
+} 
+	
+	
+	
+	
+	/* ===============================
+   ACCESS COUNTDOWN
+=================================*/
+#accessCountdown{
+    max-width:420px;
+    margin:20px auto;
+    padding:14px 22px;
+    text-align:center;
+    font-size:18px;
+    font-weight:700;
+    color:#fff;
+
+    background:linear-gradient(135deg,#06b6d4,#2563eb);
+    border-radius:14px;
+
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+
+    animation:pulse 2s infinite;
+}
+
+@keyframes pulse{
+    0%{transform:scale(1);}
+    50%{transform:scale(1.03);}
+    100%{transform:scale(1);}
+}
+
+/* ===============================
+   LOCK OVERLAY
+=================================*/
+#lockOverlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.75);
+    backdrop-filter:blur(8px);
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    z-index:99999;
+}
+
+#lockOverlay>div{
+
+    width:92%;
+    max-width:470px;
+
+    padding:35px;
+
+    border-radius:22px;
+
+    background:rgba(15,23,42,.92);
+
+    border:1px solid rgba(255,255,255,.12);
+
+    text-align:center;
+
+    box-shadow:
+    0 20px 60px rgba(0,0,0,.45);
+
+}
+
+/* ===============================
+   MESSAGE
+=================================*/
+#lockMsg{
+
+    font-size:20px;
+    line-height:1.7;
+
+    color:#f8fafc;
+
+    margin-bottom:30px;
+
+    font-weight:600;
+
+}
+
+/* ===============================
+   BUTTON
+=================================*/
+#unlockBtn{
+
+    width:100%;
+
+    padding:18px;
+
+    border:none;
+
+    border-radius:14px;
+
+    cursor:pointer;
+
+    font-size:18px;
+
+    font-weight:800;
+
+    color:white;
+
+    background:linear-gradient(135deg,#10b981,#059669);
+
+    transition:.3s;
+
+    box-shadow:
+    0 10px 25px rgba(16,185,129,.35);
+
+}
+
+#unlockBtn:hover{
+
+    transform:translateY(-3px);
+
+    background:linear-gradient(135deg,#22c55e,#16a34a);
+
+    box-shadow:
+    0 15px 35px rgba(16,185,129,.45);
+
+}
+
+#unlockBtn:active{
+
+    transform:scale(.97);
+
+}
+
+
+	
+	
+  </style>
+</head>
+<body>
+<header>
+
+    <div class="logo" onclick="showCategory('3d', event)">
+        <i class="fa-solid fa-graduation-cap"></i>
+        <span>STEMLang Hub</span>
+    </div>
+
+    <button class="menu-toggle" onclick="toggleMenu()">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <nav id="mainNav">
+        <ul>
+            <li><button class="nav-btn" onclick="showCategory('3d', event)">3D</button></li>
+            <li><button class="nav-btn" onclick="showCategory('math', event)">MathX</button></li>
+            <li><button class="nav-btn" onclick="showCategory('chem', event)">ChemX</button></li>
+            <li><button class="nav-btn" onclick="showCategory('bio', event)">Science</button></li>
+            <li><button class="nav-btn" onclick="showCategory('general', event)">Learning Hub</button></li>
+            <li><button class="nav-btn" onclick="showCategory('external', event)">External</button></li>
+        </ul>
+    </nav>
+
+</header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>Welcome to Your <span>Learning Workspace</span></h1>
+	  <h3>Kenyans <span>And International students</span></h>
+	  
+    <p>Explore tools, calculators, AI tutors, interactive labs, and academic resources in one place.</p>
+
+  </section>
+
+  
+<div id="accessCountdown">
+    ⏳ Free Access Remaining: <strong>04:59</strong>
+</div>
+
+<div id="lockOverlay">
+
+    <div>
+
+        <h2 style="color:#fff;font-size:28px;margin-bottom:15px;">
+            🔒 Premium Content
+        </h2>
+
+        <p id="lockMsg">
+            Your free preview has ended.
+            Unlock unlimited access for the next <b>30 Days</b>.
+        </p>
+
+        <button id="unlockBtn">
+            🚀 Unlock Daily Pass • $1.99 / KES 260
+        </button>
+
+        <p style="margin-top:18px;color:#94a3b8;font-size:14px;">
+            ✔ Instant Access<br>
+            ✔ Secure Payment<br>
+            ✔ Unlimited Usage for 30 DAYS
+        </p>
+
+    </div>
+
+</div>
+
+  
+<!-- YOUR ACTUAL WEBSITE CONTENT -->
+<div id="content">
+  
+  
+  <main class="container">
+
+   
+   
+   <div class="category-section active-section" id="3d">
+
+    <div class="category-header">
+        <i class="fa-solid fa-cube" style="color:#06b6d4;"></i>
+        3D Interactive Human Body Systems
+    </div>
+
+    <div class="tools-grid">
+
+        <!-- Respiratory System -->
+        <a href="https://elimuconnect.github.io/designcharts/2"
+           target="_blank"
+           class="tool-card bio"
+           title="Explore the human respiratory system in interactive 3D. Rotate, zoom, and examine each organ in detail.">
+
+            <div class="card-top">
+                <div class="card-icon">
+                    <i class="fa-solid fa-lungs"></i>
+                </div>
+                <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+            </div>
+
+            <div class="tool-title">
+                Respiratory System (3D)
+            </div>
+
+            <div class="tool-desc">
+                Explore the lungs, trachea, bronchi, diaphragm and breathing process in a fully interactive 3D model.
+            </div>
+
+        </a>
+
+        <!-- Digestive System -->
+        <a href="https://elimuconnect.github.io/designcharts/1"
+           target="_blank"
+           class="tool-card bio"
+           title="Explore the human digestive system in interactive 3D.">
+
+            <div class="card-top">
+                <div class="card-icon">
+                    <i class="fa-solid fa-stomach"></i>
+                </div>
+                <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+            </div>
+
+            <div class="tool-title">
+                Digestive System (3D)
+            </div>
+
+            <div class="tool-desc">
+                Learn how food moves through the digestive system by rotating, zooming and exploring every organ in 3D.
+            </div>
+
+        </a>
+
+    </div>
+
+</div>
+   
+   
+
+
+  <!-- MathX Tools -->
+    <div class="category-section" id="math">
+      <div class="category-header">
+        <i class="fa-solid fa-calculator" style="color: var(--color-math);"></i> MathX Tools
+      </div>
+      <div class="tools-grid">
+        <a href="https://elimuconnect.github.io/smartelimuconnect/scientific-calculator" target="_blank" class="tool-card math" title="Online scientific calculator for complex calculations">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-calculator"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Scientific Calculator</div>
+          <div class="tool-desc">Complex calculations, trigonometry, and logarithms.</div>
+        </a>
+
+        <a href="./mathformulars.html" target="_blank" class="tool-card math" title="Access common mathematics formulas">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-square-root-variable"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Math Formulas</div>
+          <div class="tool-desc">Essential formulas for reference and quick calculations.</div>
+        </a>
+
+        <a href="./mathgraphs.html" target="_blank" class="tool-card math" title="Plot and analyze graphs">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-chart-line"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Math Graphs</div>
+          <div class="tool-desc">Plot and analyze linear, quadratic, and function graphs.</div>
+        </a>
+
+        <a href="./transformation.html" target="_blank" class="tool-card math" title="Explore geometric transformations">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-shapes"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Transformations</div>
+          <div class="tool-desc">Translation, rotation, reflection, and scale factors.</div>
+        </a>
+
+        <a href="./tables.html" target="_blank" class="tool-card math" title="View mathematical tables">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-table"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Math Tables</div>
+          <div class="tool-desc">Multiplication, division, and other mathematical tables.</div>
+        </a>
+
+        <a href="./trigonometry.html" target="_blank" class="tool-card math" title="Understand trigonometry using unit circle">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-circle-notch"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Trigonometry (Unit Circle)</div>
+          <div class="tool-desc">Interactive unit circle and trigonometric ratios.</div>
+        </a>
+
+        <a href="./sohcahtoa.html" target="_blank" class="tool-card math" title="Use SOHCAHTOA to solve right-angle triangle problems">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-draw-polygon"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Trigonometry (SOHCAHTOA)</div>
+          <div class="tool-desc">Solve right-angle triangle problems with ratios.</div>
+        </a>
+
+        <a href="./areas.html" target="_blank" class="tool-card math" title="Calculate areas of geometric shapes">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-vector-square"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Area Calculator</div>
+          <div class="tool-desc">Calculate areas of various geometric shapes easily.</div>
+        </a>
+
+        <a href="./volumes.html" target="_blank" class="tool-card math" title="Calculate volumes of 3D objects">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-cube"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Volume Calculator</div>
+          <div class="tool-desc">Calculate volumes of 3D objects and solids.</div>
+        </a>
+
+        <a href="./quadraticsolver.html" target="_blank" class="tool-card math" title="Solve quadratic equations">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-xmark"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Quadratic Solver</div>
+          <div class="tool-desc">Solve quadratic equations with step-by-step solutions.</div>
+        </a>
+
+        <a href="./statistics.html" target="_blank" class="tool-card math" title="Perform statistical calculations">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-chart-simple"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Statistics</div>
+          <div class="tool-desc">Perform statistical calculations and analyze data sets.</div>
+        </a>
+
+        <a href="./vectors.html" target="_blank" class="tool-card math" title="Solve vector problems">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-location-arrow"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Vectors</div>
+          <div class="tool-desc">Solve vector-related problems in math and physics.</div>
+        </a>
+
+        <a href="./matrix1.html" target="_blank" class="tool-card math" title="Basic matrix operations">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-border-all"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Matrix 1</div>
+          <div class="tool-desc">Perform basic matrix addition, subtraction, and multiplication.</div>
+        </a>
+
+        <a href="./matrix2.html" target="_blank" class="tool-card math" title="Advanced matrix operations">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-table-cells"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Matrix 2</div>
+          <div class="tool-desc">Work with inverses, determinants, and transformations.</div>
+        </a>
+
+        <a href="./long&lat.html" target="_blank" class="tool-card math" title="Longitude and latitude calculations">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-globe"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Longitude & Latitude</div>
+          <div class="tool-desc">Calculate coordinates, distances, and earth geometry.</div>
+        </a>
+
+        <a href="./differentiate&integrate.html" target="_blank" class="tool-card math" title="Perform calculus differentiation and integration">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-wave-square"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Calculus Suite</div>
+          <div class="tool-desc">Differentiation, integration, and calculus solvers.</div>
+        </a>
+
+        <a href="./area approximation.html" target="_blank" class="tool-card math" title="Mid-ordinate and trapezium methods">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-chart-area"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Mid-ordinate & Trapezium</div>
+          <div class="tool-desc">Use numerical methods to approximate area under curves.</div>
+        </a>
+
+        <a href="./integrationarea.html" target="_blank" class="tool-card math" title="Integration Area Approx">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-square-root-variable"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Integration Area Approx.</div>
+          <div class="tool-desc">Calculate exact and approximate areas using integration.</div>
+        </a>
+
+        <a href="./error.html" target="_blank" class="tool-card math" title="Error calculation and propagation">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Error Analysis</div>
+          <div class="tool-desc">Understand absolute, relative, and percentage errors.</div>
+        </a>
+
+        <a href="./logs.html" target="_blank" class="tool-card math" title="Logarithmic calculations">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-superscript"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Logarithms</div>
+          <div class="tool-desc">Work with logarithmic functions and algebraic laws.</div>
+        </a>
+
+        <a href="./commercial1.html" target="_blank" class="tool-card math" title="Financial mathematics and interest">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-coins"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Interest (Simple & Compound)</div>
+          <div class="tool-desc">Calculate simple, compound interest, and appreciation.</div>
+        </a>
+
+        <a href="./incometax.html" target="_blank" class="tool-card math" title="Calculate income tax">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-receipt"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Income Tax Calculator</div>
+          <div class="tool-desc">Understand and calculate income tax brackets and relief.</div>
+        </a>
+
+        <a href="./variations.html" target="_blank" class="tool-card math" title="Direct and inverse variations">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-arrows-split-up-and-left"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Variations</div>
+          <div class="tool-desc">Learn direct, inverse, joint, and partial variations.</div>
+        </a>
+
+        <a href="./binomial.html" target="_blank" class="tool-card math" title="Binomial expansion">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-layer-group"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Binomial Expansion</div>
+          <div class="tool-desc">Use binomial theorem to expand algebraic expressions.</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ChemX Tools -->
+    <div class="category-section" id="chem">
+	
+      <div class="category-header">
+        <i class="fa-solid fa-flask" style="color: var(--color-chem);"></i> ChemX Tools
+      </div>
+      <div class="tools-grid">
+        <a href="./periodictable.html" target="_blank" class="tool-card chem" title="Interactive periodic table">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-table-columns"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Periodic Table</div>
+          <div class="tool-desc">View element properties, electron configurations, and groups.</div>
+        </a>
+
+        <a href="./chemreactions.html" target="_blank" class="tool-card chem" title="Explore chemical reactions">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-vial-circle-check"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Chem Reactions</div>
+          <div class="tool-desc">Balance equations and explore chemical reaction types.</div>
+        </a>
+
+        <a href="./moleconcept.html" target="_blank" class="tool-card chem" title="Mole concept calculations">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Mole Concept</div>
+          <div class="tool-desc">Calculations involving Avogadro's number and mass.</div>
+        </a>
+
+        <a href="./organicchem.html" target="_blank" class="tool-card chem" title="Organic Chemistry">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-atom"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Organic Chemistry</div>
+          <div class="tool-desc">Study hydrocarbons, isomerism, and functional groups.</div>
+        </a>
+
+        <a href="./commongases.html" target="_blank" class="tool-card chem" title="Common Gases">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-wind"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Common Gases</div>
+          <div class="tool-desc">Learn about preparation and properties of gases.</div>
+        </a>
+
+        <a href="./chemgraphs.html" target="_blank" class="tool-card chem" title="Chemical Graphs">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-chart-line"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Chem Graphs</div>
+          <div class="tool-desc">Analyze concentration curves and reaction rates.</div>
+        </a>
+
+        <a href="./chemformulars.html" target="_blank" class="tool-card chem" title="Chemistry Formulas">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-flask-vial"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Chem Formulas</div>
+          <div class="tool-desc">Access essential chemistry formulas for quick reference.</div>
+        </a>
+
+        <a href="./chemicalformula&quations.html" target="_blank" class="tool-card chem" title="Chemical Formulas & Equations">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-equals"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Chemical Formulas & Equations</div>
+          <div class="tool-desc">Learn to write and balance chemical formulas.</div>
+        </a>
+
+        <a href="./gaslaws.html" target="_blank" class="tool-card chem" title="Gas Laws">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-gauge-high"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Gas Laws</div>
+          <div class="tool-desc">Study Boyle's, Charles', and Avogadro's gas laws.</div>
+        </a>
+
+        <a href="./diffusionlaw.html" target="_blank" class="tool-card chem" title="Diffusion Law">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-smog"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Diffusion Law</div>
+          <div class="tool-desc">Understand Graham's law of diffusion in fluids.</div>
+        </a>
+
+        <a href="./ram.html" target="_blank" class="tool-card chem" title="Relative Atomic Mass">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-weight-hanging"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">R.A.M Calculator</div>
+          <div class="tool-desc">Calculate relative atomic and molecular masses.</div>
+        </a>
+
+        <a href="./empiricalmolecular.html" target="_blank" class="tool-card chem" title="Empirical & Molecular Formula">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-dna"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Empirical & Molecular</div>
+          <div class="tool-desc">Determine formulas from composition percentages.</div>
+        </a>
+
+        <a href="./titrations.html" target="_blank" class="tool-card chem" title="Titrations">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-filter"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Titrations</div>
+          <div class="tool-desc">Perform and understand titration calculations.</div>
+        </a>
+
+        <a href="./radioactivity.html" target="_blank" class="tool-card chem" title="Radioactivity">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-radiation"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Radioactivity</div>
+          <div class="tool-desc">Study half-life, nuclear decay, and isotopes.</div>
+        </a>
+
+        <a href="./solubility.html" target="_blank" class="tool-card chem" title="Solubility">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-glass-water-droplet"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Solubility</div>
+          <div class="tool-desc">Understand solubility curves and saturation.</div>
+        </a>
+
+        <a href="./bondenergies.html" target="_blank" class="tool-card chem" title="Bond Energies">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-fire-flame-simple"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Bond Energies</div>
+          <div class="tool-desc">Calculate reaction energy from chemical bond breaking.</div>
+        </a>
+
+        <a href="./thermochemistry.html" target="_blank" class="tool-card chem" title="Thermochemistry">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-temperature-high"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Thermochemistry</div>
+          <div class="tool-desc">Explore enthalpy changes and heat energy.</div>
+        </a>
+
+        <a href="./hesslaw.html" target="_blank" class="tool-card chem" title="Hess's Law">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-diagram-project"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Hess's Law</div>
+          <div class="tool-desc">Calculate enthalpy changes using energy cycles.</div>
+        </a>
+
+        <a href="https://elimuconnect.github.io/smartelimuconnect/adirecttitrationssimulator" target="_blank" class="tool-card chem" title="Direct Titrations Simulator">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-vial"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Direct Titration Lab</div>
+          <div class="tool-desc">Interactive virtual lab simulator for acid-base titrations.</div>
+        </a>
+
+        <a href="./backtitsimulator.html" target="_blank" class="tool-card chem" title="Back Titrations Simulator">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Back Titration Simulator</div>
+          <div class="tool-desc">Virtual simulation for complex back titration labs.</div>
+        </a>
+
+        <a href="./redoxtitration.html" target="_blank" class="tool-card chem" title="Redox Titrations Simulator">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-bolt-lightning"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Redox Titration Simulator</div>
+          <div class="tool-desc">Simulate oxidation-reduction titration experiments.</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- BioX, PhysicsX & Languages -->
+    <div class="category-section" id="bio">
+      <div class="category-header">
+        <i class="fa-solid fa-microscope" style="color: var(--color-bio);"></i> Biology, Physics & Languages
+      </div>
+      <div class="tools-grid">
+        <!-- Biology Tools -->
+        <a href="./bones.html" target="_blank" class="tool-card bio" title="Learn about human and animal bones">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-bone"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Skeletal Anatomy</div>
+          <div class="tool-desc">Human and animal bone structures and functions.</div>
+        </a>
+
+        <a href="./humanandfishanatomy.html" target="_blank" class="tool-card bio" title="Human and Fish Anatomy">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-fish"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Human & Fish Anatomy</div>
+          <div class="tool-desc">Anatomy comparisons and systemic structures.</div>
+        </a>
+
+        <a href="./plantantomy.html" target="_blank" class="tool-card bio" title="Plant Anatomy">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-seedling"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Plant Anatomy</div>
+          <div class="tool-desc">Structure of leaves, stems, roots, and flowers.</div>
+        </a>
+
+        <!-- Physics Tools -->
+        <a href="./physicsformulars.html" target="_blank" class="tool-card bio" title="Physics formulas">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-bolt"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Physics Formulas</div>
+          <div class="tool-desc">Formulas for mechanics, electricity, waves, and energy.</div>
+        </a>
+
+        <a href="./physicsprinciplesexplorer.html" target="_blank" class="tool-card bio" title="Principles Explorer">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-magnet"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Principles Explorer</div>
+          <div class="tool-desc">Interactive physics principles and experiment guide.</div>
+        </a>
+
+        <a href="./unitconverter.html" target="_blank" class="tool-card bio" title="Unit Converter">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-arrows-repeat"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Unit Converter</div>
+          <div class="tool-desc">Convert units across physics and scientific scales.</div>
+        </a>
+
+        <!-- Kiswahili Tools -->
+        <a href="./kamusi.html" target="_blank" class="tool-card bio" title="Swahili Dictionary">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-book"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Kamusi</div>
+          <div class="tool-desc">Swahili dictionary for word meanings and definitions.</div>
+        </a>
+
+        <a href="./methali.html" target="_blank" class="tool-card bio" title="Swahili Proverbs">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-quote-left"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Methali za Kiswahili</div>
+          <div class="tool-desc">Learn Swahili proverbs and their meanings.</div>
+        </a>
+
+        <a href="./nahaunamisema.html" target="_blank" class="tool-card bio" title="Nahau na Misemo">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-comments"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Nahau na Misemo</div>
+          <div class="tool-desc">Swahili sayings and idioms with explanations.</div>
+        </a>
+
+        <!-- English Tools -->
+        <a href="./dictionary.html" target="_blank" class="tool-card bio" title="English Dictionary">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-spell-check"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">English Dictionary</div>
+          <div class="tool-desc">Dictionary for English meanings and pronunciations.</div>
+        </a>
+
+        <a href="./ideoms.html" target="_blank" class="tool-card bio" title="English Idioms">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-lightbulb"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Idioms Library</div>
+          <div class="tool-desc">English idioms with explanations and examples.</div>
+        </a>
+
+        <a href="./proverbs.html" target="_blank" class="tool-card bio" title="English Proverbs">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-book-open"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">English Proverbs</div>
+          <div class="tool-desc">Popular English proverbs and interpretations.</div>
+        </a>
+
+        <a href="./similiesandmetaphors.html" target="_blank" class="tool-card bio" title="Similes and Metaphors">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-feather"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Similes & Metaphors</div>
+          <div class="tool-desc">Examples of figurative speech for language learning.</div>
+        </a>
+
+      
+      </div>
+    </div>
+
+    <!-- General Tools -->
+    <div class="category-section" id="general">
+      <div class="category-header">
+        <i class="fa-solid fa-robot" style="color: var(--color-gen);"></i> Platform & AI Tools
+      </div>
+      <div class="tools-grid">
+       
+
+        <a href="https://www.socialcreator.com/pastpapersandquizes" target="_blank" class="tool-card general" title="All Resources">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-folder-open"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">All Resources</div>
+          <div class="tool-desc">Past papers, quizzes, and practice resources for students.</div>
+        </a>
+
+        <a href="./avideolessonsbest.html" target="_blank" class="tool-card general" title="J.S.S Video Lessons">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-video"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Video Lessons</div>
+          <div class="tool-desc">Junior Secondary School video lessons and tutorials.</div>
+        </a>
+
+        <a href="https://elimuconnect.github.io/smartelimuconnect/quizbest" target="_blank" class="tool-card general" title="Junior Sec Quizzes">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-pen-to-square"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Practice Quizzes</div>
+          <div class="tool-desc">Interactive quizzes for Junior Secondary subjects.</div>
+        </a>
+
+        <a href="https://sobentonlineschool-157865.learnyst.com/learn" target="_blank" class="tool-card general" title="Junior & Senior Sec Video Lessons">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-display"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">All Levels Video Lessons</div>
+          <div class="tool-desc">Comprehensive online video lessons for Sec education.</div>
+        </a>
+
+        <a href="https://www.appcreator24.com/app3121564-ql67ih" target="_blank" class="tool-card general" title="Senior Secondary Quizzes">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-file-pen"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Advanced Quizzes</div>
+          <div class="tool-desc">Practice assessment tests for Senior Secondary students.</div>
+        </a>
+
+      
+        <a href="./notebook.html" target="_blank" class="tool-card general" title="Digital Notebook">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-note-sticky"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Digital Notebook</div>
+          <div class="tool-desc">Write and save your notes in one central workspace.</div>
+        </a>
+
+        
+        <a href="https://elimuconnect.github.io/smartelimuconnect/quizresults" target="_blank" class="tool-card general" title="Quizzes Results">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-square-poll-vertical"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Quiz Results</div>
+          <div class="tool-desc">Track and view student quiz results by name.</div>
+        </a>
+
+        <a href="./mappingstudents.html" target="_blank" class="tool-card general" title="Teacher-student Physical Mapping">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">students Locator</div>
+          <div class="tool-desc">Map teacher-student physical locations for planning.</div>
+        </a>
+		
+		
+		<a href="https://wisdomappweb.site/mappingteachers" target="_blank" class="tool-card general" title="Teacher-student Physical Mapping">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Physical Mapping(For tutors)</div>
+          <div class="tool-desc">Map teacher-student physical locations for planning.</div>
+        </a>
+		
+
+        <a href="https://elimuconnect.github.io/smartelimuconnect/coding" target="_blank" class="tool-card general" title="Learn to code">
+          <div class="card-top">
+            <div class="card-icon"><i class="fa-solid fa-code"></i></div>
+            <i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i>
+          </div>
+          <div class="tool-title">Learn to Code</div>
+          <div class="tool-desc">Interactive programming lessons and projects.</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- External Tools -->
+    <div class="category-section" id="external">
+      <div class="category-header">
+        <i class="fa-solid fa-globe" style="color: var(--color-gen);"></i> External Educational Tools
+      </div>
+      <p style="margin-bottom: 15px; opacity: 0.8; font-size: 0.9rem;">
+        Trusted external resources to help teachers, students, and educators improve learning, teaching, and exam preparation.
+      </p>
+      <div class="tools-grid">
+        
+
+        <a href="https://www.savemyexams.com/igcse/past-papers/" target="_blank" class="tool-card general" title="Save My Exams">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-file-pen"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">Save My Exams</div>
+          <div class="tool-desc">IGCSE past papers and study resources.</div>
+        </a>
+
+        <a href="https://pastpapers.co/caie/igcse" target="_blank" class="tool-card general" title="PastPapers.co">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-book"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">PastPapers.co</div>
+          <div class="tool-desc">GCSE, IGCSE, AS, A Level, IB & O Level exams.</div>
+        </a>
+
+        <a href="https://revisiontown.com/cambridge-igcse-past-papers/" target="_blank" class="tool-card general" title="Revision Town">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-city"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">Revision Town</div>
+          <div class="tool-desc">Cambridge IGCSE past papers database.</div>
+        </a>
+
+        <a href="https://igcseexamguru.com/pastpapers/" target="_blank" class="tool-card general" title="IGCSE Exam Guru">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-user-ninja"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">IGCSE Exam Guru</div>
+          <div class="tool-desc">IGCSE past papers for all major subjects.</div>
+        </a>
+
+        <a href="https://mixtacademy.com/past-papers/cie/igcse/" target="_blank" class="tool-card general" title="Mixt Academy">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-school"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">Mixt Academy</div>
+          <div class="tool-desc">CIE IGCSE past papers and resources.</div>
+        </a>
+
+        <a href="https://gemini.google.com/app" target="_blank" class="tool-card general" title="Google Gemini">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-sparkles"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">Google Gemini</div>
+          <div class="tool-desc">AI assistant for generating ideas and summaries.</div>
+        </a>
+
+        <a href="https://chatgpt.com/" target="_blank" class="tool-card general" title="ChatGPT">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-robot"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">ChatGPT</div>
+          <div class="tool-desc">AI chatbot for explanations, tutoring, and lesson ideas.</div>
+        </a>
+
+        <a href="https://copilot.microsoft.com/" target="_blank" class="tool-card general" title="Microsoft Copilot">
+          <div class="card-top"><div class="card-icon"><i class="fa-brands fa-microsoft"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">Microsoft Copilot</div>
+          <div class="tool-desc">AI assistant integrated for productivity.</div>
+        </a>
+
+        <a href="https://worksheetzone.org" target="_blank" class="tool-card general" title="Worksheet Zone">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-file-arrow-down"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">Worksheet Zone</div>
+          <div class="tool-desc">Downloadable worksheets across grades and subjects.</div>
+        </a>
+
+        <a href="https://webflow-dev.quizizz.com/homepage-au?lng=en" target="_blank" class="tool-card general" title="Quizizz">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-gamepad"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">Quizizz</div>
+          <div class="tool-desc">Interactive quizzes and real-time assessments.</div>
+        </a>
+
+        <a href="https://www.labxchange.org/" target="_blank" class="tool-card general" title="LabXchange">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-flask-vial"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">LabXchange</div>
+          <div class="tool-desc">Virtual lab simulations and science resources.</div>
+        </a>
+
+        <a href="https://phet.colorado.edu/" target="_blank" class="tool-card general" title="PhET Simulations">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-atom"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">PhET Simulations</div>
+          <div class="tool-desc">Interactive STEM simulations for physics, chem, and math.</div>
+        </a>
+
+        <a href="https://kahoot.it/" target="_blank" class="tool-card general" title="Kahoot!">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-trophy"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">Kahoot!</div>
+          <div class="tool-desc">Game-based learning quizzes and competitions.</div>
+        </a>
+
+        <a href="https://quizlet.com/" target="_blank" class="tool-card general" title="Quizlet">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-layer-group"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">Quizlet</div>
+          <div class="tool-desc">Flashcards, games, and study sets to reinforce learning.</div>
+        </a>
+
+        <a href="https://trello.com/" target="_blank" class="tool-card general" title="Trello">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-kanban"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">Trello</div>
+          <div class="tool-desc">Project management to organize tasks and lesson plans.</div>
+        </a>
+
+        <a href="https://ed.ted.com/" target="_blank" class="tool-card general" title="TED-Ed">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-lightbulb"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">TED-Ed</div>
+          <div class="tool-desc">Curated educational videos with interactive questions.</div>
+        </a>
+
+        <a href="https://www.khanacademy.org/" target="_blank" class="tool-card general" title="Khan Academy">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-graduation-cap"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">Khan Academy</div>
+          <div class="tool-desc">Free practice and lessons for math, science, and computing.</div>
+        </a>
+
+        <a href="https://www.ck12.org/" target="_blank" class="tool-card general" title="CK-12">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-book-open-reader"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">CK-12</div>
+          <div class="tool-desc">Free interactive STEM lessons, flexbooks, and practice.</div>
+        </a>
+
+        <a href="https://www.bbc.co.uk/bitesize" target="_blank" class="tool-card general" title="BBC Bitesize">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-apple-whole"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">BBC Bitesize</div>
+          <div class="tool-desc">Curriculum-aligned revision content and quizzes.</div>
+        </a>
+
+        <a href="https://openstax.org/" target="_blank" class="tool-card general" title="OpenStax">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-book-journal-whills"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">OpenStax</div>
+          <div class="tool-desc">Free peer-reviewed college and high school textbooks.</div>
+        </a>
+
+        <a href="https://code.org/" target="_blank" class="tool-card general" title="Code.org">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-laptop-code"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">Code.org</div>
+          <div class="tool-desc">Free coding lessons and computer science activities.</div>
+        </a>
+
+        <a href="https://scratch.mit.edu/" target="_blank" class="tool-card general" title="Scratch (MIT)">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-cat"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">Scratch (MIT)</div>
+          <div class="tool-desc">Visual block coding platform for interactive projects.</div>
+        </a>
+
+        <a href="https://www.freecodecamp.org/" target="_blank" class="tool-card general" title="FreeCodeCamp">
+          <div class="card-top"><div class="card-icon"><i class="fa-brands fa-free-code-camp"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">FreeCodeCamp</div>
+          <div class="tool-desc">Free programming and web development certifications.</div>
+        </a>
+
+        <a href="https://thecrashcourse.com/" target="_blank" class="tool-card general" title="CrashCourse">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-bolt-lightning"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">CrashCourse</div>
+          <div class="tool-desc">Short animated educational videos across many subjects.</div>
+        </a>
+
+        <a href="https://kids.nationalgeographic.com/" target="_blank" class="tool-card general" title="National Geographic Kids">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-earth-americas"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">Nat Geo Kids</div>
+          <div class="tool-desc">Educational content on science, animals, and geography.</div>
+        </a>
+
+        <a href="https://www.gutenberg.org/" target="_blank" class="tool-card general" title="Project Gutenberg">
+          <div class="card-top"><div class="card-icon"><i class="fa-solid fa-vault"></i></div><i class="fa-solid fa-arrow-up-right-from-square card-arrow"></i></div>
+          <div class="tool-title">Project Gutenberg</div>
+          <div class="tool-desc">Free repository of classic digital books and literature.</div>
+        </a>
+      </div>
+    </div>
+
+  </main>
+  
+    
+</div>
+    </div>
+  
+</div>
+
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2026 <strong>Smart Elimu Connect</strong>. Built for desktop, tablet, and mobile browsers.</p>
+  </footer>
+
+  <!-- Interactive JavaScript -->
+  <script>
+    // Category Section View Switching
+    
+	// Category Section View Switching
+function showCategory(categoryId, event) {
+
+    const sections = document.querySelectorAll('.category-section');
+    const navButtons = document.querySelectorAll('.nav-btn');
+
+    // Remove active button
+    navButtons.forEach(btn => btn.classList.remove('nav-active'));
+
+    // Highlight clicked button
+    if (event && event.target.classList.contains('nav-btn')) {
+        event.target.classList.add('nav-active');
+    }
+
+    // Show only the selected section
+    sections.forEach(section => {
+        section.classList.toggle(
+            'active-section',
+            section.id === categoryId
+        );
+    });
+
+}
+	
+	
+	
+    // Live Search Filter (searches across all visible cards or enables matching sections automatically)
+    function filterTools() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const cards = document.querySelectorAll('.tool-card');
+      const sections = document.querySelectorAll('.category-section');
+
+      if (query !== '') {
+        // Automatically make all sections visible while searching
+        sections.forEach(s => s.classList.add('active-section'));
+        
+        cards.forEach(card => {
+          const text = card.textContent.toLowerCase();
+          card.style.display = text.includes(query) ? 'flex' : 'none';
+        });
+      } else {
+        // Reset card visibility
+        cards.forEach(card => card.style.display = 'flex');
+      }
+    }
+
+    // Resource Tab Switching
+    function switchResourceTab(tabName, event) {
+      const buttons = document.querySelectorAll('.tab-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      if (tabName === 'kenya') {
+        document.getElementById('tab-kenya').style.display = 'grid';
+        document.getElementById('tab-international').style.display = 'none';
+      } else {
+        document.getElementById('tab-kenya').style.display = 'none';
+        document.getElementById('tab-international').style.display = 'grid';
+      }
+    }
+	
+	
+/* ---------------- CONFIG ---------------- */
+const PAYMENT_LINK = "https://paystack.shop/pay/b-u--ljf-d";
+
+// --- Timing Controls (all at top)
+const FIRST_TRIAL_MS = 24 * 60 * 60 * 1000    
+const DAILY_FREE_MS = 10 * 60 * 1000     
+const DAILY_INTERVAL = 24 * 60 * 60 * 1000;
+const PAID_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
+
+const KEY = "elimu_student_";
+
+/* --------------- STORAGE ---------------- */
+let paidUntil = parseInt(localStorage.getItem(KEY+"paidUntil")) || 0;
+let paidRef = localStorage.getItem(KEY+"paidReference") || "";
+let firstTrialEnd = parseInt(localStorage.getItem(KEY+"firstTrialEnd")) || 0;
+let dailyFreeEnd = parseInt(localStorage.getItem(KEY+"dailyFreeEnd")) || 0;
+let trialUsed = localStorage.getItem(KEY+"trialUsed") === "true";
+
+/* --------------- ELEMENTS --------------- */
+const countdownEl = document.getElementById("accessCountdown");
+const overlay = document.getElementById("lockOverlay");
+const lockMsg = document.getElementById("lockMsg");
+const unlockBtn = document.getElementById("unlockBtn");
+const content = document.getElementById("content");
+
+/* ------------- HELPERS ------------------ */
+function now() {
+  return Date.now();
+}
+
+function format(ms) {
+  if (ms <= 0) return "00:00:00";
+
+  let s = Math.floor(ms / 1000);
+  let d = Math.floor(s / 86400);
+  s %= 86400;
+  let h = Math.floor(s / 3600);
+  s %= 3600;
+  let m = Math.floor(s / 60);
+  s %= 60;
+
+  if (d > 0) {
+    return `${d}d ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+/* --------- HANDLE RETURN FROM PAYMENT --------- */
+const ref = new URLSearchParams(location.search).get("reference");
+if(ref && ref !== paidRef){
+  paidRef = ref;
+  paidUntil = now() + PAID_DURATION_MS;
+  localStorage.setItem(KEY+"paidReference", paidRef);
+  localStorage.setItem(KEY+"paidUntil", paidUntil);
+
+  // mark trial as used after payment
+  trialUsed = true;
+  localStorage.setItem(KEY+"trialUsed", "true");
+
+  // remove trial/free timers after payment
+  localStorage.removeItem(KEY+"firstTrialEnd");
+  localStorage.removeItem(KEY+"dailyFreeEnd");
+  localStorage.removeItem(KEY+"dailyFreeStart");
+  firstTrialEnd = 0;
+  dailyFreeEnd = 0;
+}
+
+/* --------- START TRIAL ONLY IF NEVER USED -------- */
+if(!trialUsed && !firstTrialEnd){
+  firstTrialEnd = now() + FIRST_TRIAL_MS;
+  localStorage.setItem(KEY+"firstTrialEnd", firstTrialEnd);
+}
+
+/* --------- DAILY FREE ACCESS -------- */
+let lastDailyStart = parseInt(localStorage.getItem(KEY+"dailyFreeStart")) || 0;
+const tNow = now();
+
+// Only give daily free if trial is over and interval passed, and no paid access
+if(tNow > firstTrialEnd && tNow - lastDailyStart >= DAILY_INTERVAL && tNow > paidUntil){
+  dailyFreeEnd = tNow + DAILY_FREE_MS;
+  localStorage.setItem(KEY+"dailyFreeEnd", dailyFreeEnd);
+  localStorage.setItem(KEY+"dailyFreeStart", tNow);
+}
+
+/* ---------------- ENGINE ---------------- */
+function updateAccess(){
+  const t = now();
+  countdownEl.style.display = "block";
+
+  // PAID first
+  if(t < paidUntil){
+    countdownEl.textContent = "Paid access remaining: " + format(paidUntil - t);
+    content.style.filter="none";
+    content.style.pointerEvents="auto";
+    overlay.style.display="none";
+    return;
+  }
+
+  // TRIAL (only if never used before)
+  if(t < firstTrialEnd){
+    countdownEl.textContent = "Free trial remaining: " + format(firstTrialEnd - t);
+    content.style.filter="none";
+    content.style.pointerEvents="auto";
+    overlay.style.display="none";
+    return;
+  }
+
+  // DAILY FREE
+  if(t < dailyFreeEnd){
+    countdownEl.textContent = "Daily free access remaining: " + format(dailyFreeEnd - t);
+    content.style.filter="none";
+    content.style.pointerEvents="auto";
+    overlay.style.display="none";
+    return;
+  }
+
+  // LOCKED
+  countdownEl.style.display = "none";
+  overlay.style.display = "flex";
+  content.style.filter = "blur(6px)";
+  content.style.pointerEvents = "none";
+
+  lockMsg.innerHTML =
+   lockMsg.innerHTML =
+"Unlock <b>30 Days Premium</b> and enjoy AI Tutor, 3D Anatomy, STEM Tools, Virtual Labs, Quizzes, Video Lessons & much more for only <b>$1.99 (KES 260)</b>.";
+  unlockBtn.onclick = () => location.href = PAYMENT_LINK;
+}
+
+setInterval(updateAccess, 700);
+updateAccess();
+	
+	
+	window.addEventListener("DOMContentLoaded", () => {
+    showCategory("3d");
+});
+
+
+
+
+function toggleMenu(){
+
+document.getElementById("mainNav").classList.toggle("show");
+
+}
+
+// Close menu after selecting a category
+document.querySelectorAll(".nav-btn").forEach(btn=>{
+
+btn.addEventListener("click",()=>{
+
+document.getElementById("mainNav").classList.remove("show");
+
+});
+
+});
+	  
+  </script>
+</body>
+</html>
