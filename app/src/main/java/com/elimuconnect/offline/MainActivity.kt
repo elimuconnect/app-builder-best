@@ -18,8 +18,8 @@ import androidx.activity.OnBackPressedCallback
 import androidx.webkit.WebViewAssetLoader
 
 /**
- * Elimu Connect Offline - first Android shell.
- * All bundled web content is served from the APK using WebViewAssetLoader.
+ * Elimu Connect Offline
+ * Website content is served locally from the APK.
  */
 class MainActivity : ComponentActivity() {
 
@@ -45,15 +45,13 @@ class MainActivity : ComponentActivity() {
             setBackgroundColor(Color.WHITE)
         }
 
-        // Initialize progress before WebView callbacks can use it.
         progress = ProgressBar(
             this,
             null,
             android.R.attr.progressBarStyleHorizontal
-        ).apply {
-            isIndeterminate = true
-            visibility = View.VISIBLE
-        }
+        )
+        progress.isIndeterminate = true
+        progress.visibility = View.VISIBLE
 
         webView = WebView(this).apply {
             setBackgroundColor(Color.WHITE)
@@ -88,7 +86,6 @@ class MainActivity : ComponentActivity() {
                         return false
                     }
 
-                    // External websites and services remain online-only.
                     return try {
                         startActivity(Intent(Intent.ACTION_VIEW, uri))
                         true
@@ -106,7 +103,7 @@ class MainActivity : ComponentActivity() {
                     view: WebView,
                     url: String?
                 ) {
-                    progress.setVisibility(View.GONE)
+                    progress.visibility = View.GONE
                 }
             }
         }
