@@ -98,7 +98,7 @@
 <body>
 <h1>Titration Simulator</h1>
   <h3> NOTE: Base used is sodium hydroxide, copy the values used and obtained to be used in calculations</h3>
-<a href="./titrations.html"
+<a href="https://elimuconnect.github.io/ELIMU-CONNECT-/titrations"
    id="proceedCalcBtn"
    style="display:none; position:fixed; top:10px; left:50%; transform:translateX(-50%);
           background:#0078D7; color:#fff; padding:10px 20px; border-radius:6px;
@@ -145,131 +145,7 @@
 
 
 
-
-
-
-
-
-<!-- Payment Access Modal -->
-<div id="accessModal" style="
-    position: fixed; top:0; left:0; width:100%; height:100%;
-    background: rgba(0,0,0,0.6); display:flex; justify-content:center; align-items:center;
-    z-index:9999; display:none;
-">
-  <div style="
-      background:#fff; padding:25px 30px; border-radius:12px; max-width:400px;
-      text-align:center; font-family:Segoe UI, sans-serif; color:#033a63;
-      box-shadow:0 6px 20px rgba(0,0,0,0.2);
-  ">
-    <p id="accessMessage" style="font-size:1rem; margin-bottom:20px;"></p>
-    <button id="accessBtn" style="
-        background:#0078D7; color:#fff; border:none; padding:10px 18px;
-        border-radius:8px; font-weight:600; cursor:pointer;
-        transition:0.2s;
-    ">OK</button>
-  </div>
-</div>
-
-<!-- Countdown Display -->
-<div id="accessCountdown" style="
-    position: fixed; top: 100px; left: 10px; 
-    background: #0078D7; color: #fff; padding: 12px 16px; 
-    border-radius: 8px; font-family: 'Segoe UI', sans-serif; 
-    font-weight:600; box-shadow: 2px 2px 12px rgba(0,0,0,0.2);
-    z-index:999; text-align:center; display:none;
-">
-    Loading access info...
-</div>
-
 <script>
-const PAYMENT_LINK = "https://paystack.shop/pay/7qvwvfr9sb";
-const FIRST_ACCESS_MINUTES = 10; // free trial
-const ACCESS_DURATION = 24*60*60*1000; // 24 hours paid
-const STORAGE_PREFIX = "directTitration_"; // unique for this site
-
-function getQueryParam(param) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(param);
-}
-
-function formatTime(ms){
-    if(ms <= 0) return "00:00";
-    let totalSec = Math.floor(ms/1000);
-    let h = Math.floor(totalSec / 3600);
-    let m = Math.floor((totalSec % 3600) / 60);
-    let s = totalSec % 60;
-    if(h > 0) return `${h}h ${m}m ${s}s`;
-    return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-}
-
-// Access tracking
-let lastPaid = parseInt(localStorage.getItem(STORAGE_PREFIX + 'lastPaidTime')) || 0;
-let paidReference = localStorage.getItem(STORAGE_PREFIX + 'paidReference') || "";
-let freeEnd = parseInt(localStorage.getItem(STORAGE_PREFIX + 'firstAccessEnd')) || 0;
-
-const now = Date.now();
-const reference = getQueryParam('reference');
-
-// Only store new payment if reference is new
-if(reference && reference !== paidReference){
-    lastPaid = now;
-    paidReference = reference;
-    localStorage.setItem(STORAGE_PREFIX + 'lastPaidTime', lastPaid);
-    localStorage.setItem(STORAGE_PREFIX + 'paidReference', paidReference);
-}
-
-// Only set free trial if not already set
-if(!freeEnd){
-    freeEnd = now + FIRST_ACCESS_MINUTES*60*1000;
-    localStorage.setItem(STORAGE_PREFIX + 'firstAccessEnd', freeEnd);
-}
-
-// Countdown element
-const countdownEl = document.getElementById('accessCountdown');
-
-function showAccessModal(message, btnText="OK", callback=null){
-    const modal = document.getElementById('accessModal');
-    const msgEl = document.getElementById('accessMessage');
-    const btn = document.getElementById('accessBtn');
-    msgEl.innerHTML = message;
-    btn.textContent = btnText;
-    modal.style.display = "flex";
-    btn.onclick = ()=> {
-        modal.style.display = "none";
-        if(callback) callback();
-    };
-}
-
-function startCountdown(){
-    countdownEl.style.display = "block";
-    function updateCountdown(){
-        const now = Date.now();
-        if(lastPaid && now - lastPaid < ACCESS_DURATION){
-            const remaining = ACCESS_DURATION - (now - lastPaid);
-            countdownEl.textContent = `Paid access: ${formatTime(remaining)}`;
-        } else if(freeEnd && now < freeEnd){
-            const remaining = freeEnd - now;
-            countdownEl.textContent = `Free trial: ${formatTime(remaining)}`;
-        } else {
-            countdownEl.textContent = `Access expired.`;
-            showAccessModal(
-                "Your access has expired. Please pay KSh 5/$0.04 to continue using the Smart Elimu Connect tool.",
-                "Pay Now",
-                ()=>{ window.location.href = PAYMENT_LINK; }
-            );
-        }
-    }
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
-}
-
-// Start countdown
-startCountdown();
-
-
-
-
-
 
   
 // Responsive canvas handling
