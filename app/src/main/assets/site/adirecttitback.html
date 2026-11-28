@@ -71,7 +71,7 @@
 
 <h1>Titration Simulator (Sodium hydroxide in burette, Acid in flask)</h1>
 <h3>Use the New molarity of the acid obtained from first reaction</h3>
-<a href="./titrations.html"
+<a href="https://elimuconnect.github.io/smartelimuconnect/titrations"
    id="proceedCalcBtn"
    style="display:none; position:fixed; top:10px; left:50%; transform:translateX(-50%);
           background:#0078D7; color:#fff; padding:10px 20px; border-radius:6px;
@@ -113,53 +113,6 @@
 
 
 <script>
-const MAIN_LINK = "https://elimuconnect.github.io/ELIMU-CONNECT-/backtitsimulator";
-const PAYMENT_LINK = "https://paystack.shop/pay/57-iapq34s";
-
-// Number of free loads allowed from any other source
-const MAX_FREE_LOADS = 2;
-
-// Track free loads
-let freeLoadCount = parseInt(localStorage.getItem('freeLoadCount')) || 0;
-
-// Helper: get base URL without query string
-function getBaseURL(url){
-    return url.split('?')[0];
-}
-
-// Check if this is main link access (ignore query parameters)
-const isMainLink = getBaseURL(window.location.href) === MAIN_LINK;
-
-// Check if we came from main link redirect (ignore query)
-const fromMainLink = getBaseURL(document.referrer) === MAIN_LINK;
-
-if(isMainLink || fromMainLink){
-    // Reset free load count when opened via main link
-    localStorage.setItem('freeLoadCount', MAX_FREE_LOADS);
-} else {
-    if(freeLoadCount < MAX_FREE_LOADS){
-        // Allow free load
-        freeLoadCount++;
-        localStorage.setItem('freeLoadCount', freeLoadCount);
-        alert(`You have ${MAX_FREE_LOADS - freeLoadCount} free loads remaining for this tool.`);
-    } else {
-        // Block access
-        document.body.innerHTML = `
-            <div style="text-align:center; padding:50px; font-family:sans-serif;">
-                <h2>Access Restricted</h2>
-                <p>You have used your free loads. To continue, please open the simulator from the main link:</p>
-                <a href="${MAIN_LINK}" style="font-size:1.2rem; color:#0078D7;">Open Main Simulator</a>
-                <p>Or pay KSh 5/$0.04 to get access:</p>
-                <a href="${PAYMENT_LINK}" style="font-size:1.2rem; color:#fff; background:#0078D7; padding:10px 20px; border-radius:6px; display:inline-block;">Pay Now</a>
-            </div>
-        `;
-        throw new Error("Access blocked until main link or payment.");
-    }
-}
-
-
-
- 
 
 
  
